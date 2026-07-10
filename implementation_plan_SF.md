@@ -215,7 +215,7 @@ requirement):
 
 ## 13. Build Checklist (update as you go)
 
-- [ ] Phase 1: Project scaffold (stack decision, Tailwind config with brand
+- [x] Phase 1: Project scaffold (stack decision, Tailwind config with brand
       tokens, fonts, layout shell, deploy pipeline test with "hello world")
 - [ ] Phase 2: Hero (copy, CTA, load animation, ambient glow)
 - [ ] Phase 3: Proof marquee + Services cards (spotlight hover)
