@@ -16,6 +16,20 @@ body {
   color: var(--color-foreground);
 }
 
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.06;
+  }
+  50% {
+    opacity: 0.12;
+  }
+}
+
+.ambient-glow {
+  animation: pulse-glow 9s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

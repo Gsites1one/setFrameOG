@@ -217,7 +217,7 @@ requirement):
 
 - [x] Phase 1: Project scaffold (stack decision, Tailwind config with brand
       tokens, fonts, layout shell, deploy pipeline test with "hello world")
-- [ ] Phase 2: Hero (copy, CTA, load animation, ambient glow)
+- [x] Phase 2: Hero (copy, CTA, load animation, ambient glow)
 - [ ] Phase 3: Proof marquee + Services cards (spotlight hover)
 - [ ] Phase 4: How we work + FAQ (AEO structure)
 - [ ] Phase 5: Selected work + About
