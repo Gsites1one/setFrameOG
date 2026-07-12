@@ -14,11 +14,19 @@
   speak to any business owner who lands on it. Do not write copy that excludes
   non-financial visitors.
 - **Scope:** Front-end only prototype. No backend, no database, no integrations.
-- **Contact:** mailto link only (no contact form, no booking widget) — decided
-  in plan review. Email: hello@setframe.net (placeholder until mailbox is
-  live — mark with TODO comment in code).
-- **Single CTA:** "Start a conversation" (mailto). Appears in hero and final
-  section only.
+- **Contact:** dedicated /contact page — REVISED after Phase 2 (supersedes the
+  earlier mailto-only decision). The page contains:
+  1. A short "why SetFrame" trust block above the form (3 bracket-numbered
+     reasons, concise, no hype).
+  2. A form: name, email, preferred contact method, message. Submissions go
+     through Formspree (free tier, no backend code, no API keys in repo).
+     Deliver to owner's current email until hello@setframe.net is live
+     (TODO marker).
+  3. A short privacy line under the form (what happens with submitted data).
+     A full privacy policy page stays out of scope for v1 but is a fast
+     follow once KVK/domain formalities land.
+- **Single CTA:** "[ Start a conversation ]" — now links to /contact (not
+  mailto). Appears in hero, floating nav (small variant), and final section.
 - **Language of the site:** English.
 
 ## 1. Tech Stack
@@ -30,6 +38,9 @@
   structure).
 - Tailwind CSS
 - Framer Motion (preferred) or GSAP for animation
+- Formspree for contact form submissions (no backend of our own)
+- Page transitions: subtle 200-300ms fade between / and /contact (Next.js
+  View Transitions) — no hard page loads
 - Deployed via GitHub → Vercel auto-deploy
 - Target domain: setframe.net
 - Component size limit: max 400-600 lines per component file
@@ -64,22 +75,34 @@
 ## 4. Site Structure (single page + minimal footer pages)
 
 1. **Hero**
-   - H1 names the buyer + outcome (see Copy Rules). Example direction:
-     "Websites and systems that run your business while you run it."
-   - One sentence subline: who SetFrame is, what it builds, where it is based.
-   - Primary CTA button (mailto).
-   - Visual proof above the fold: framed mockup of a real project. Use a
-     placeholder frame until final mockup assets are supplied (separate
-     projects, not ready yet — do not block on them).
-   - Deliberate load animation (staggered text reveal or bracket-draw animation
-     around the wordmark).
+   - H1 (locked copy): "Websites and systems that quietly run your business."
+   - Subline (locked): "SetFrame is a one-person studio in Tilburg building
+     websites, content systems and automation for businesses that want things
+     done properly."
+   - Primary CTA button → /contact. Label: [ Start a conversation ].
+     Font: Syne semibold (REVISED — was IBM Plex Mono, rejected in review).
+   - Visual proof above the fold: **corner-fold project showcase** (REVISED —
+     replaces static placeholder). Browser-chrome frame with bracket corner
+     details cycling through real portfolio screenshots:
+     * Each project holds ~10s, then the four bracket corners fold inward
+       (frame "closes"), content swaps, corners fold back out (~2s total
+       transition), revealing the next project. Loops continuously.
+     * Real portfolio sites to feature (screenshots to capture):
+       - Aura Capital — https://auracapitalv1.vercel.app
+       - Financial advisor site — https://bolt-tryouts-finacial-advisor-v2.vercel.app
+     * Driven by the same data array as the work strip (add once, appears
+       everywhere).
+     * Paused when prefers-reduced-motion is set (show first project static).
+   - Deliberate load animation: bracket-draw (~500ms) → staggered H1 line
+     reveal (~400ms) → subline + CTA fade (implemented in Phase 2).
 
 2. **Proof / Work strip**
-   - Marquee or carousel with project mockups. Real project assets (Aura
-     Capital, JPTRANSPORT74) belong to separate projects and are not ready —
-     build this strip against placeholder mockups for now, driven by a
-     data array so real assets can be dropped in later without touching
-     component code.
+   - Marquee or carousel with project mockups, driven by a data array
+     (shared with the hero showcase).
+   - Real portfolio assets now available (REVISED — no longer blocked):
+     * Aura Capital — https://auracapitalv1.vercel.app
+     * Financial advisor site — https://bolt-tryouts-finacial-advisor-v2.vercel.app
+     * JPTRANSPORT74 and future work can be appended to the array later.
    - Each item: project name, one-line outcome, hover preview effect.
 
 3. **Services** ([ 01 ] [ 02 ] [ 03 ] numbering)
@@ -115,6 +138,16 @@
      hello@setframe.net, Tilburg / Noord-Brabant, NL, copyright line.
    - No social icons until profiles exist (TODO markers).
 
+10. **/contact page** (ADDED after Phase 2)
+   - "Why SetFrame" trust block: 3 bracket-numbered reasons ([ 01 ]-[ 03 ]),
+     each 1-2 sentences, outcome-focused, before the form.
+   - Form fields: name, email, preferred contact method (email / phone /
+     video call), message. Formspree submission, client-side validation,
+     clear success and error states.
+   - Short privacy line under the form.
+   - Same background treatment and motion language as the homepage.
+   - Reached via fade page transition from any CTA.
+
 ## 5. Motion & Animation Requirements (mandatory, not optional)
 
 - Fade-in on scroll for every major section (trigger once, ~400-600ms, subtle
@@ -145,10 +178,24 @@ Implement these patterns, adapted to the SetFrame palette. All must be CSS/JS
 based (no WebGL, no heavy canvas — Lighthouse Performance > 90 is a hard
 requirement):
 
+- **Background "life" package (ADDED after Phase 2 review — the graphite base
+  read as too flat/dead):** three site-wide layers, all transform/opacity
+  based, tuned subtle:
+  1. Cursor-following ambient glow: the copper glow drifts slowly toward the
+     cursor position (single element, GPU-cheap).
+  2. Cursor-reactive dot grid: barely-visible dot pattern over the graphite
+     that brightens in a radius around the cursor (CSS mask technique,
+     GitHub-style).
+  3. Grain overlay: low-opacity SVG noise so the graphite reads as material,
+     not void.
+  Touch devices fall back to the static pulsing glow (no cursor to track).
+  All three respect prefers-reduced-motion.
 - **Spotlight hover on cards:** radial gradient that follows the cursor on
   service/portfolio cards (copper glow at low opacity on graphite).
 - **Ambient glow:** one or two large, blurred copper radial gradients behind
-  the hero and final CTA section, subtle, low opacity, static or slow pulse.
+  the hero and final CTA section, subtle, low opacity, slow pulse (8-10s,
+  opacity 0.06-0.12) — implemented in Phase 2, becomes cursor-following as
+  part of the life package.
 - **Scroll-driven reveal storytelling:** sections reveal progressively on
   scroll (already covered in Motion Requirements — GitHub-style stagger).
 - **Marquee strip:** continuous horizontal marquee for project logos/mockups.
@@ -176,9 +223,14 @@ requirement):
 
 ## 9. Conversion / CTA Rules
 
-- Single primary CTA across the entire site (mailto: "Start a conversation").
-- Primary CTA repeated in hero and in final closing section only. No competing
-  or secondary CTAs pulling attention away from the primary action.
+- Single primary CTA across the entire site: "[ Start a conversation ]"
+  linking to /contact (REVISED — was mailto).
+- CTA styling: Syne semibold label inside bracket motif (REVISED — was
+  IBM Plex Mono, rejected in review as wrong for buttons).
+- Primary CTA appears in hero, floating nav (small variant), and final
+  closing section. No competing or secondary CTAs pulling attention away
+  from the primary action.
+- On /contact, the form's submit button is the primary action of that page.
 - Portfolio "view live" links open in new tabs and do not use button styling
   (they are secondary by design, visually quiet).
 
@@ -206,6 +258,7 @@ requirement):
 - [ ] Lighthouse Performance score > 90
 - [ ] Lighthouse SEO score > 90
 - [ ] Fully responsive and tested on mobile viewport
+- [ ] Contact form verified end-to-end (a real test submission arrives)
 - [ ] All sections from the site structure spec are present and populated with
       real copy (no lorem ipsum placeholders left in final build)
 - [ ] prefers-reduced-motion respected
@@ -218,9 +271,16 @@ requirement):
 - [x] Phase 1: Project scaffold (stack decision, Tailwind config with brand
       tokens, fonts, layout shell, deploy pipeline test with "hello world")
 - [x] Phase 2: Hero (copy, CTA, load animation, ambient glow)
+- [ ] Phase 2.5: "Alive" rework (ADDED after Phase 2 review):
+      * CTA font → Syne semibold, CTA target → /contact
+      * Background life package (cursor glow + reactive dot grid + grain)
+      * Hero corner-fold showcase with real portfolio screenshots
+      * /contact page: why-SetFrame block + Formspree form + privacy line
+      * Fade page transition between / and /contact
 - [ ] Phase 3: Proof marquee + Services cards (spotlight hover)
 - [ ] Phase 4: How we work + FAQ (AEO structure)
 - [ ] Phase 5: Selected work + About
 - [ ] Phase 6: Final CTA + Footer (compliance elements)
 - [ ] Phase 7: SEO/OG/favicon/sitemap + Lighthouse pass + mobile QA
+      (includes /contact page meta + form E2E test)
 - [ ] Phase 8: Final deploy to setframe.net + metatags.io verification
