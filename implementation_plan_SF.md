@@ -290,7 +290,7 @@ requirement):
       * Hero corner-fold showcase with real portfolio screenshots
       * /contact page: why-SetFrame block + Formspree form + privacy line
       * Fade page transition between / and /contact
-- [ ] Phase 3: Proof marquee + Services cards (spotlight hover)
+- [x] Phase 3: Proof marquee + Services cards (spotlight hover)
 - [ ] Phase 4: How we work + FAQ (AEO structure)
 - [ ] Phase 5: Selected work + About
 - [ ] Phase 6: Final CTA + Footer (compliance elements)

@@ -30,6 +30,31 @@ body {
   animation: pulse-glow 9s ease-in-out infinite;
 }
 
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee-scroll 40s linear infinite;
+}
+
+.marquee:hover .marquee-track,
+.marquee:focus-visible .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
 /* Custom bracket cursor hides the native one on fine pointers,
    except over text fields where the caret matters. */
 @media (pointer: fine) {
