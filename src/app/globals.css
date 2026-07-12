@@ -30,6 +30,21 @@ body {
   animation: pulse-glow 9s ease-in-out infinite;
 }
 
+/* Custom bracket cursor hides the native one on fine pointers,
+   except over text fields where the caret matters. */
+@media (pointer: fine) {
+  body.bracket-cursor-active,
+  body.bracket-cursor-active a,
+  body.bracket-cursor-active button,
+  body.bracket-cursor-active [role="button"],
+  body.bracket-cursor-active summary {
+    cursor: none;
+  }
+  body.bracket-cursor-active :is(input, textarea, select, label) {
+    cursor: auto;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

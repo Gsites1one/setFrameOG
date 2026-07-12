@@ -74,19 +74,27 @@
 
 ## 4. Site Structure (single page + minimal footer pages)
 
-1. **Hero**
-   - H1 (locked copy): "Websites and systems that quietly run your business."
-   - Subline (locked): "SetFrame is a one-person studio in Tilburg building
-     websites, content systems and automation for businesses that want things
-     done properly."
+1. **Hero** (REVISED again after review: loss-led messaging, sell movement
+   not technology; never mention team size or city in the hero)
+   - Wordmark kicker: [SetFrame] wordmark above the H1, first element to fade in.
+   - H1 (locked copy): "Your business is losing money in places you never look."
+   - Subline (locked): "SetFrame builds websites and systems that catch what
+     quietly slips away and turn it into movement."
+   - Right of the showcase: three bracket-numbered keyword lines on why
+     websites matter now (kept at keyword level on purpose, the full
+     reasoning stays private).
    - Primary CTA button → /contact. Label: [ Start a conversation ].
      Font: Syne semibold (REVISED — was IBM Plex Mono, rejected in review).
    - Visual proof above the fold: **corner-fold project showcase** (REVISED —
      replaces static placeholder). Browser-chrome frame with bracket corner
      details cycling through real portfolio screenshots:
-     * Each project holds ~10s, then the four bracket corners fold inward
-       (frame "closes"), content swaps, corners fold back out (~2s total
-       transition), revealing the next project. Loops continuously.
+     * Each project holds ~6s, then the four bracket corners fold inward
+       (frame "closes"), content swaps, corners fold back out (~0.45s per
+       direction), revealing the next project. Loops continuously.
+     * Address bar shows example-style display domains (auracapital.com,
+       projectaura.net), not the real deployment URLs. Layout: showcase
+       sits left, why-websites keyword list sits right (two columns on
+       desktop).
      * Real portfolio sites to feature (screenshots to capture):
        - Aura Capital — https://auracapitalv1.vercel.app
        - Financial advisor site — https://bolt-tryouts-finacial-advisor-v2.vercel.app
@@ -190,6 +198,11 @@ requirement):
      not void.
   Touch devices fall back to the static pulsing glow (no cursor to track).
   All three respect prefers-reduced-motion.
+- **Micro-interaction set (ADDED in hero rework 2):** magnetic CTA button
+  (pulls toward cursor, springs back), custom bracket cursor (copper [ ]
+  pair trailing the pointer, expands over interactive elements, hidden over
+  text fields, fine-pointer only), CountUp kinetic numbers component for
+  proof stats. Lighthouse Performance >= 90 stays a hard guarantee.
 - **Spotlight hover on cards:** radial gradient that follows the cursor on
   service/portfolio cards (copper glow at low opacity on graphite).
 - **Ambient glow:** one or two large, blurred copper radial gradients behind

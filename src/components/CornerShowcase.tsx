@@ -5,8 +5,8 @@ import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PROJECTS } from "@/lib/projects";
 
-const HOLD_MS = 10000; // how long each project stays visible
-const FOLD_MS = 700; // one direction of the corner fold
+const HOLD_MS = 6000; // how long each project stays visible
+const FOLD_MS = 450; // one direction of the corner fold
 
 const CORNERS = [
   { pos: "-left-2 -top-2", border: "border-l-2 border-t-2", fold: { x: 20, y: 20 } },
@@ -70,7 +70,7 @@ export function CornerShowcase() {
               exit={shouldReduceMotion ? undefined : { opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {project.url.replace("https://", "")}
+              {project.displayUrl}
             </motion.span>
           </AnimatePresence>
         </div>
