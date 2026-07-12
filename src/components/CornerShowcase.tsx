@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PROJECTS } from "@/lib/projects";
+import { FlowDiagram } from "./FlowDiagram";
 
 const HOLD_MS = 6000; // how long each project stays visible
 const FOLD_MS = 450; // one direction of the corner fold
@@ -77,9 +78,13 @@ export function CornerShowcase() {
 
         <a
           href={project.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`Open the live ${project.name} website in a new tab`}
+          target={project.kind === "site" ? "_blank" : undefined}
+          rel={project.kind === "site" ? "noopener noreferrer" : undefined}
+          aria-label={
+            project.kind === "site"
+              ? `Open the live ${project.name} website in a new tab`
+              : `Learn more about ${project.name} on the contact page`
+          }
           className="block"
         >
           <AnimatePresence mode="wait">
@@ -91,14 +96,18 @@ export function CornerShowcase() {
               exit={shouldReduceMotion ? undefined : { opacity: 0, scale: 0.98 }}
               transition={{ duration: FOLD_MS / 1000, ease: "easeInOut" }}
             >
-              <Image
-                src={project.image}
-                alt={project.alt}
-                fill
-                sizes="(max-width: 768px) 100vw, 768px"
-                className="object-cover object-top"
-                priority={index === 0}
-              />
+              {project.kind === "site" && project.image ? (
+                <Image
+                  src={project.image}
+                  alt={project.alt ?? project.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 768px"
+                  className="object-cover object-top"
+                  priority={index === 0}
+                />
+              ) : (
+                <FlowDiagram />
+              )}
             </motion.div>
           </AnimatePresence>
         </a>

@@ -2,12 +2,15 @@ export type Project = {
   slug: string;
   name: string;
   outcome: string;
+  // "site" renders a screenshot; "system" renders the animated flow diagram.
+  kind: "site" | "system";
+  // Live demo for sites, /contact for systems (nothing public to open).
   url: string;
   // Shown in the mockup address bar instead of the real deployment URL:
   // example-style domains read as shipped client work, not demos.
   displayUrl: string;
-  image: string;
-  alt: string;
+  image?: string;
+  alt?: string;
 };
 
 // Shared by the hero showcase and the work strip. Append new projects here,
@@ -17,15 +20,25 @@ export const PROJECTS: Project[] = [
     slug: "aura-capital",
     name: "Aura Capital",
     outcome: "Independent financial planning, positioned to book consultations.",
+    kind: "site",
     url: "https://auracapitalv1.vercel.app",
     displayUrl: "auracapital.com",
     image: "/work/aura-capital.webp",
     alt: "Homepage of the Aura Capital financial planning website, headline Wealth with intention",
   },
   {
+    slug: "response-system",
+    name: "Client Response System",
+    outcome: "Every inquiry answered in seconds, every lead followed up. Nothing goes cold.",
+    kind: "system",
+    url: "/contact",
+    displayUrl: "runs 24/7 behind the scenes",
+  },
+  {
     slug: "project-aura",
     name: "Project Aura",
     outcome: "A dark, modern advisory experience with live portfolio storytelling.",
+    kind: "site",
     url: "https://bolt-tryouts-finacial-advisor-v2.vercel.app",
     displayUrl: "projectaura.net",
     image: "/work/financial-advisor.webp",

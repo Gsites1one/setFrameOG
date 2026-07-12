@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Syne, Inter, IBM_Plex_Mono } from "next/font/google";
-import { BracketCursor } from "@/components/BracketCursor";
 import { LifeBackground } from "@/components/LifeBackground";
 import "./globals.css";
 
@@ -39,7 +38,6 @@ export default function RootLayout({
     >
       <body className="font-sans bg-background text-foreground antialiased">
         <LifeBackground />
-        <BracketCursor />
         {children}
       </body>
     </html>

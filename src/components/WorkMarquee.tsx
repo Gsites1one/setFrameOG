@@ -1,23 +1,28 @@
 import Image from "next/image";
 import { PROJECTS, type Project } from "@/lib/projects";
+import { FlowDiagram } from "./FlowDiagram";
 import { Reveal } from "./Reveal";
 
 function MarqueeCard({ project }: { project: Project }) {
   return (
     <a
       href={project.url}
-      target="_blank"
-      rel="noopener noreferrer"
+      target={project.kind === "site" ? "_blank" : undefined}
+      rel={project.kind === "site" ? "noopener noreferrer" : undefined}
       className="group mx-4 block w-72 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-surface transition-colors hover:border-accent/50"
     >
       <div className="relative aspect-video overflow-hidden">
-        <Image
-          src={project.image}
-          alt={project.alt}
-          fill
-          sizes="288px"
-          className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-        />
+        {project.kind === "site" && project.image ? (
+          <Image
+            src={project.image}
+            alt={project.alt ?? project.name}
+            fill
+            sizes="288px"
+            className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <FlowDiagram />
+        )}
       </div>
       <div className="px-4 py-3">
         <p className="font-display text-sm font-semibold">{project.name}</p>
