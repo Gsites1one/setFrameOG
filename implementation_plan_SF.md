@@ -291,7 +291,7 @@ requirement):
       * /contact page: why-SetFrame block + Formspree form + privacy line
       * Fade page transition between / and /contact
 - [x] Phase 3: Proof marquee + Services cards (spotlight hover)
-- [ ] Phase 4: How we work + FAQ (AEO structure)
+- [x] Phase 4: How we work + FAQ (AEO structure, FAQPage JSON-LD)
 - [ ] Phase 5: Selected work + About
 - [ ] Phase 6: Final CTA + Footer (compliance elements)
 - [ ] Phase 7: SEO/OG/favicon/sitemap + Lighthouse pass + mobile QA
