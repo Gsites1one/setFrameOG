@@ -271,7 +271,7 @@ requirement):
 - [x] Phase 1: Project scaffold (stack decision, Tailwind config with brand
       tokens, fonts, layout shell, deploy pipeline test with "hello world")
 - [x] Phase 2: Hero (copy, CTA, load animation, ambient glow)
-- [ ] Phase 2.5: "Alive" rework (ADDED after Phase 2 review):
+- [x] Phase 2.5: "Alive" rework (ADDED after Phase 2 review):
       * CTA font → Syne semibold, CTA target → /contact
       * Background life package (cursor glow + reactive dot grid + grain)
       * Hero corner-fold showcase with real portfolio screenshots

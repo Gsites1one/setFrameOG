@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { CONTACT_EMAIL } from "@/lib/constants";
+import Link from "next/link";
 
 const NAV_LINKS = [
   { href: "#work", label: "Work" },
@@ -53,12 +53,12 @@ export function FloatingNav() {
             </li>
           ))}
         </ul>
-        <a
-          href={`mailto:${CONTACT_EMAIL}`}
-          className="font-mono text-xs text-accent transition-opacity hover:opacity-80"
+        <Link
+          href="/contact"
+          className="font-display text-xs font-semibold text-accent transition-opacity hover:opacity-80"
         >
           [ Start a conversation ]
-        </a>
+        </Link>
       </div>
     </nav>
   );

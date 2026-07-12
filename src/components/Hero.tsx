@@ -2,8 +2,8 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { BracketMark } from "./BracketMark";
+import { CornerShowcase } from "./CornerShowcase";
 import { CtaButton } from "./CtaButton";
-import { HeroMockup } from "./HeroMockup";
 
 const H1_LINES = ["Websites and systems", "that quietly run your business."];
 const BRACKET_DURATION = 0.5;
@@ -99,7 +99,7 @@ export function Hero() {
             : { duration: 0.5, delay: SUBLINE_DELAY + 0.2, ease: "easeOut" }
         }
       >
-        <HeroMockup />
+        <CornerShowcase />
       </motion.div>
     </section>
   );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Syne, Inter, IBM_Plex_Mono } from "next/font/google";
+import { LifeBackground } from "@/components/LifeBackground";
 import "./globals.css";
 
 const syne = Syne({
@@ -36,6 +37,7 @@ export default function RootLayout({
       className={`${syne.variable} ${inter.variable} ${ibmPlexMono.variable}`}
     >
       <body className="font-sans bg-background text-foreground antialiased">
+        <LifeBackground />
         {children}
       </body>
     </html>
