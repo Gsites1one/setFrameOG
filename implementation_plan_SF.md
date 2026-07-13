@@ -64,6 +64,10 @@
 - Text/foreground: #F5F5F4
 - Accent: #C77B3F (copper)
 - Optional supporting surface tone: #1A1A1D for cards/elevated surfaces
+- Secondary cool glow: #4FB3C9 (teal) — REVISED, approved in review. Restricted
+  to service/system GRAPHICS only, never UI chrome, buttons, or text. This
+  intentionally overrides the "single copper, no new colors" line from the
+  UX-upgrade brief (user chose to keep teal when the conflict was surfaced).
 - WCAG rule: accent (#C77B3F) on background (#121214) passes contrast for
   large text, buttons, and UI elements only. NEVER use accent for body text
   or small paragraph copy. Body/paragraph text is always #F5F5F4.

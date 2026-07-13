@@ -3,7 +3,7 @@ import { FloatingNav } from "@/components/FloatingNav";
 import { Hero } from "@/components/Hero";
 import { HowWeWork } from "@/components/HowWeWork";
 import { Services } from "@/components/Services";
-import { WorkMarquee } from "@/components/WorkMarquee";
+import { Work } from "@/components/Work";
 import { FAQ_ITEMS } from "@/lib/faq";
 
 // FAQPage structured data so answer engines can cite the FAQ directly.
@@ -23,7 +23,7 @@ export default function Home() {
       <FloatingNav />
       <main>
         <Hero />
-        <WorkMarquee />
+        <Work />
         <Services />
         <HowWeWork />
         <Faq />

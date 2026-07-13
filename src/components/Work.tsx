@@ -1,7 +1,15 @@
 import Image from "next/image";
 import { PROJECTS, type Project } from "@/lib/projects";
+import { CornerShowcase } from "./CornerShowcase";
 import { FlowDiagram } from "./FlowDiagram";
 import { Reveal } from "./Reveal";
+
+// Keyword-level only: signals insight without giving away the method.
+const WHY_WEBSITES = [
+  { number: "[ 01 ]", text: "Search engines answer first now. Visitors arrive half-decided." },
+  { number: "[ 02 ]", text: "Your website has one job: turn that trust into action." },
+  { number: "[ 03 ]", text: "Growing businesses run systems of pages, not a brochure." },
+];
 
 function MarqueeCard({ project }: { project: Project }) {
   return (
@@ -34,23 +42,41 @@ function MarqueeCard({ project }: { project: Project }) {
   );
 }
 
-export function WorkMarquee() {
-  // Track is duplicated for a seamless loop; the copy is aria-hidden so
-  // screen readers hear each project once.
+export function Work() {
   return (
     <section id="work" className="overflow-hidden py-24" aria-label="Selected client work">
-      <Reveal>
-        <div className="mx-auto mb-10 flex max-w-5xl items-baseline gap-4 px-6">
-          <span className="font-mono text-sm text-accent">[ 01 ]</span>
-          <h2 className="font-display text-2xl font-bold sm:text-3xl">
-            Work that moves businesses forward.
-          </h2>
-        </div>
+      <div className="mx-auto max-w-5xl px-6">
+        <Reveal>
+          <div className="mb-10 flex items-baseline gap-4">
+            <span className="font-mono text-sm text-accent">[ 01 ]</span>
+            <h2 className="font-display text-2xl font-bold sm:text-3xl">
+              Work that moves businesses forward.
+            </h2>
+          </div>
+        </Reveal>
 
-        <div className="marquee" tabIndex={0}>
+        <Reveal delay={0.1}>
+          <div className="grid items-center gap-10 lg:grid-cols-[3fr_2fr]">
+            <CornerShowcase />
+            <ul className="space-y-6" aria-label="Why your website matters now">
+              {WHY_WEBSITES.map((item) => (
+                <li key={item.number} className="flex gap-4">
+                  <span className="shrink-0 font-mono text-sm text-accent">
+                    {item.number}
+                  </span>
+                  <p className="text-sm leading-relaxed text-foreground/80">
+                    {item.text}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+      </div>
+
+      <Reveal delay={0.15}>
+        <div className="marquee mt-16" tabIndex={0}>
           <div className="marquee-track flex w-max">
-            {/* Each half repeats the set 3x so the loop stays wider than any
-                viewport; only the first set is exposed to screen readers. */}
             {[0, 1].map((half) => (
               <div key={half} className="flex" aria-hidden={half === 1}>
                 {[0, 1, 2].map((repeat) => (
