@@ -32,6 +32,20 @@ body {
   animation: pulse-glow 9s ease-in-out infinite;
 }
 
+@keyframes nav-pulse {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.nav-pulse {
+  animation: nav-pulse 6s ease-in-out infinite;
+}
+
 /* System flow diagram: copper pulses traveling along connector paths */
 @keyframes flow-dash-move {
   from {

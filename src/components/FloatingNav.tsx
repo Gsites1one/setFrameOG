@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import { NavWordmark } from "./NavWordmark";
 
 const NAV_LINKS = [
   { href: "#work", label: "Work" },
@@ -35,12 +35,7 @@ export function FloatingNav() {
       }`}
     >
       <div className="flex items-center gap-5 rounded-full border border-white/10 bg-surface/80 px-4 py-2 backdrop-blur-md">
-        <Image
-          src="/brand/icon-mark-white.png"
-          alt="SetFrame"
-          width={20}
-          height={20}
-        />
+        <NavWordmark />
         <ul className="flex items-center gap-4 font-mono text-xs tracking-wide text-foreground/80">
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
