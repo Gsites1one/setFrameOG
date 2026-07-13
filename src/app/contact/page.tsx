@@ -33,10 +33,12 @@ export default function ContactPage() {
       <div className="mb-12 flex items-center justify-between">
         <Link href="/" aria-label="Back to the SetFrame homepage">
           <Image
-            src="/brand/icon-mark-white.png"
-            alt="SetFrame logo"
-            width={28}
-            height={28}
+            src="/brand/wordmark-white.png"
+            alt="SetFrame"
+            width={150}
+            height={100}
+            priority
+            className="h-auto w-36 transition-opacity hover:opacity-80"
           />
         </Link>
         <Link

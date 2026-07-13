@@ -1,21 +1,29 @@
 import { Reveal } from "./Reveal";
 import { SpotlightCard } from "./SpotlightCard";
+import {
+  GraphicChatbots,
+  GraphicDocuments,
+  GraphicWebsites,
+} from "./ServiceGraphics";
 
 const SERVICES = [
   {
     number: "[ 01 ]",
     title: "Websites that turn visitors into booked calls",
     body: "People land on your site already comparing. A credible, fast site makes the next step obvious and easy to take.",
+    Graphic: GraphicWebsites,
   },
   {
     number: "[ 02 ]",
-    title: "Content that keeps working after you post it",
-    body: "Structured pages and publishing flows that compound over time. One offer, one page, one clear action.",
+    title: "Answers the moment someone asks",
+    body: "Questions get answered instantly, day or night, with prices and a booking link included. Warm conversations reach you, cold ones stop costing time.",
+    Graphic: GraphicChatbots,
   },
   {
     number: "[ 03 ]",
-    title: "Follow-up that never forgets",
-    body: "Quiet systems that reply, remind and book while you work. The leads you already pay for stop slipping away.",
+    title: "Paperwork that reads itself",
+    body: "Invoices, forms and documents get read, checked and filed the moment they arrive. The information shows up where you need it.",
+    Graphic: GraphicDocuments,
   },
 ];
 
@@ -35,16 +43,21 @@ export function Services() {
         {SERVICES.map((service, i) => (
           <Reveal key={service.number} delay={i * 0.12}>
             <SpotlightCard className="h-full">
-              <div className="flex h-full flex-col p-6">
-                <span className="font-mono text-sm text-accent">
-                  {service.number}
-                </span>
-                <h3 className="mt-4 font-display text-lg font-semibold leading-snug">
-                  {service.title}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-foreground/70">
-                  {service.body}
-                </p>
+              <div className="flex h-full flex-col">
+                <div className="aspect-[16/10] border-b border-white/10">
+                  <service.Graphic />
+                </div>
+                <div className="flex flex-1 flex-col p-6">
+                  <span className="font-mono text-sm text-accent">
+                    {service.number}
+                  </span>
+                  <h3 className="mt-4 font-display text-lg font-semibold leading-snug">
+                    {service.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-foreground/70">
+                    {service.body}
+                  </p>
+                </div>
               </div>
             </SpotlightCard>
           </Reveal>
