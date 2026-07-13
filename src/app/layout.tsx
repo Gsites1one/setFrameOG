@@ -21,10 +21,40 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: ["400", "500"],
 });
 
+// Absolute URLs for OG/structured data. TODO: confirmed target domain.
+const SITE_URL = "https://setframe.net";
+
 export const metadata: Metadata = {
-  title: "SetFrame — Websites, content systems, and business automation",
+  metadataBase: new URL(SITE_URL),
+  title: "SetFrame — Websites and systems that quietly run your business",
   description:
-    "SetFrame builds websites and systems that run your business while you run it.",
+    "SetFrame builds websites and systems that catch what your business quietly loses and turn it into movement.",
+  openGraph: {
+    title: "SetFrame — Websites and systems that quietly run your business",
+    description:
+      "SetFrame builds websites and systems that catch what your business quietly loses and turn it into movement.",
+    url: SITE_URL,
+    siteName: "SetFrame",
+    type: "website",
+  },
+};
+
+// Site-wide Organization structured data for search and answer engines.
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "SetFrame",
+  url: SITE_URL,
+  logo: `${SITE_URL}/brand/wordmark-white.png`,
+  email: "hello@setframe.net",
+  description:
+    "Founder-operated studio building websites and business systems for companies that run on inquiries, appointments and follow-up.",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Tilburg",
+    addressRegion: "Noord-Brabant",
+    addressCountry: "NL",
+  },
 };
 
 export default function RootLayout({
@@ -41,6 +71,12 @@ export default function RootLayout({
         <LifeBackground />
         <IntroCurtain />
         {children}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
       </body>
     </html>
   );

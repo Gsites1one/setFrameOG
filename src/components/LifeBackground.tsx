@@ -55,6 +55,16 @@ export function LifeBackground() {
 
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
+      {/* static mesh depth: two faint off-center glows so the graphite never
+          reads as flat void, even on touch with no cursor tracking */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(60% 50% at 15% 0%, rgba(199,123,63,0.05), transparent 70%), radial-gradient(55% 45% at 100% 100%, rgba(79,179,201,0.04), transparent 70%)",
+        }}
+      />
+
       {/* cursor-following copper glow; stays invisible on touch / reduced motion */}
       <div
         ref={glowRef}

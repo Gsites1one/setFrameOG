@@ -57,7 +57,7 @@ export function Footer() {
       </div>
 
       <div className="mx-auto mt-10 max-w-5xl border-t border-white/5 pt-6">
-        <p className="font-mono text-xs text-foreground/40">
+        <p className="font-mono text-xs text-foreground/60">
           © {year} SetFrame. All rights reserved.
         </p>
       </div>

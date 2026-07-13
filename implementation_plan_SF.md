@@ -296,8 +296,15 @@ requirement):
       * Fade page transition between / and /contact
 - [x] Phase 3: Proof marquee + Services cards (spotlight hover)
 - [x] Phase 4: How we work + FAQ (AEO structure, FAQPage JSON-LD)
-- [ ] Phase 5: Selected work + About
-- [ ] Phase 6: Final CTA + Footer (compliance elements)
-- [ ] Phase 7: SEO/OG/favicon/sitemap + Lighthouse pass + mobile QA
-      (includes /contact page meta + form E2E test)
+- [x] Phase 5: Selected work (Work section) + About (faceless, first-person)
+- [x] Phase 6: Final CTA + Footer (compliance placeholders: KVK, privacy [[TO FILL]])
+- [~] Phase 7: SEO/OG/favicon/sitemap + Lighthouse pass + mobile QA
+      (done so far: FAQPage + Organization JSON-LD, metadataBase + OG tags,
+      focus states, AA contrast fixes, single-H1 hierarchy, mobile no-overflow
+      + stacked fallbacks verified, reduced-motion parity. STILL TODO:
+      real og:image asset, favicon from [S] mark, sitemap.xml, robots.txt,
+      real Lighthouse run, contact form E2E submission test)
+      Also from UX brief: intro curtain, breathing nav, hero signature visual,
+      signature spotlight, sticky process narrative, proof block, grain/mesh
+      depth all shipped.
 - [ ] Phase 8: Final deploy to setframe.net + metatags.io verification
