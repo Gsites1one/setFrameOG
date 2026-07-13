@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PROJECTS } from "@/lib/projects";
@@ -20,6 +20,18 @@ export function CornerShowcase() {
   const shouldReduceMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [folding, setFolding] = useState(false);
+  const frameRef = useRef<HTMLDivElement>(null);
+
+  // Signature interaction: a copper spotlight follows the cursor across the
+  // showcase, brightening whatever it passes over (screenshots and the flow
+  // diagram's copper pulses read stronger under it). Fine pointer only; the
+  // overlay simply never appears on touch, leaving a clean static frame.
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse" || !frameRef.current) return;
+    const rect = frameRef.current.getBoundingClientRect();
+    frameRef.current.style.setProperty("--sx", `${e.clientX - rect.left}px`);
+    frameRef.current.style.setProperty("--sy", `${e.clientY - rect.top}px`);
+  };
 
   useEffect(() => {
     if (shouldReduceMotion || PROJECTS.length < 2) return;
@@ -57,7 +69,21 @@ export function CornerShowcase() {
         />
       ))}
 
-      <div className="overflow-hidden rounded-xl border border-white/10 bg-surface shadow-2xl">
+      <div
+        ref={frameRef}
+        onPointerMove={onPointerMove}
+        className="group/frame relative overflow-hidden rounded-xl border border-white/10 bg-surface shadow-2xl"
+        style={{ "--sx": "-300px", "--sy": "-300px" } as React.CSSProperties}
+      >
+        {/* signature copper spotlight, revealed on hover with a fine pointer */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-20 opacity-0 mix-blend-screen transition-opacity duration-300 group-hover/frame:opacity-100"
+          style={{
+            background:
+              "radial-gradient(260px circle at var(--sx) var(--sy), rgba(199,123,63,0.22), transparent 70%)",
+          }}
+        />
         <div className="flex items-center gap-2 border-b border-white/10 bg-surface px-4 py-3">
           <span className="h-2.5 w-2.5 rounded-full bg-foreground/20" />
           <span className="h-2.5 w-2.5 rounded-full bg-foreground/20" />

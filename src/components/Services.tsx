@@ -1,5 +1,4 @@
 import { Reveal } from "./Reveal";
-import { SpotlightCard } from "./SpotlightCard";
 import {
   GraphicChatbots,
   GraphicDocuments,
@@ -42,24 +41,22 @@ export function Services() {
       <div className="grid gap-6 md:grid-cols-3">
         {SERVICES.map((service, i) => (
           <Reveal key={service.number} delay={i * 0.12}>
-            <SpotlightCard className="h-full">
-              <div className="flex h-full flex-col">
-                <div className="aspect-[16/10] border-b border-white/10">
-                  <service.Graphic />
-                </div>
-                <div className="flex flex-1 flex-col p-6">
-                  <span className="font-mono text-sm text-accent">
-                    {service.number}
-                  </span>
-                  <h3 className="mt-4 font-display text-lg font-semibold leading-snug">
-                    {service.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-foreground/70">
-                    {service.body}
-                  </p>
-                </div>
+            <div className="flex h-full flex-col overflow-hidden rounded-xl border border-white/10 bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-accent/40">
+              <div className="aspect-[16/10] border-b border-white/10">
+                <service.Graphic />
               </div>
-            </SpotlightCard>
+              <div className="flex flex-1 flex-col p-6">
+                <span className="font-mono text-sm text-accent">
+                  {service.number}
+                </span>
+                <h3 className="mt-4 font-display text-lg font-semibold leading-snug">
+                  {service.title}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-foreground/70">
+                  {service.body}
+                </p>
+              </div>
+            </div>
           </Reveal>
         ))}
       </div>
