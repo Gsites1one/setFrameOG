@@ -1,7 +1,11 @@
+import { About } from "@/components/About";
 import { Faq } from "@/components/Faq";
+import { FinalCta } from "@/components/FinalCta";
 import { FloatingNav } from "@/components/FloatingNav";
+import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
 import { HowWeWork } from "@/components/HowWeWork";
+import { ProofBlock } from "@/components/ProofBlock";
 import { Services } from "@/components/Services";
 import { Work } from "@/components/Work";
 import { FAQ_ITEMS } from "@/lib/faq";
@@ -25,9 +29,13 @@ export default function Home() {
         <Hero />
         <Work />
         <Services />
+        <ProofBlock />
         <HowWeWork />
+        <About />
         <Faq />
+        <FinalCta />
       </main>
+      <Footer />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}

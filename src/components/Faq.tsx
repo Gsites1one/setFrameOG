@@ -6,7 +6,7 @@ export function Faq() {
     <section id="faq" className="mx-auto max-w-3xl px-6 py-24">
       <Reveal>
         <div className="mb-10 flex items-baseline gap-4">
-          <span className="font-mono text-sm text-accent">[ 04 ]</span>
+          <span className="font-mono text-sm text-accent">[ 05 ]</span>
           <h2 className="font-display text-2xl font-bold sm:text-3xl">
             Questions, answered directly.
           </h2>
