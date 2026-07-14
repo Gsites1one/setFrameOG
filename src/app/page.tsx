@@ -5,7 +5,6 @@ import { FloatingNav } from "@/components/FloatingNav";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
 import { HowWeWork } from "@/components/HowWeWork";
-import { ProofBlock } from "@/components/ProofBlock";
 import { Services } from "@/components/Services";
 import { Work } from "@/components/Work";
 import { FAQ_ITEMS } from "@/lib/faq";
@@ -29,7 +28,7 @@ export default function Home() {
         <Hero />
         <Work />
         <Services />
-        <ProofBlock />
+        {/* Proof block deferred: no real metric yet, no fabricated quote. */}
         <HowWeWork />
         <About />
         <Faq />

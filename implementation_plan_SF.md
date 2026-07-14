@@ -108,14 +108,12 @@
    - Deliberate load animation: bracket-draw (~500ms) → staggered H1 line
      reveal (~400ms) → subline + CTA fade (implemented in Phase 2).
 
-2. **Proof / Work strip**
-   - Marquee or carousel with project mockups, driven by a data array
-     (shared with the hero showcase).
-   - Real portfolio assets now available (REVISED — no longer blocked):
-     * Aura Capital — https://auracapitalv1.vercel.app
-     * Financial advisor site — https://bolt-tryouts-finacial-advisor-v2.vercel.app
-     * JPTRANSPORT74 and future work can be appended to the array later.
-   - Each item: project name, one-line outcome, hover preview effect.
+2. **Systems strip** (REVISED — split by content type, owner decision)
+   - The scrolling marquee is now SYSTEMS-ONLY: the Client Response System
+     flow diagram and any future automation / system graphics or animated
+     diagrams. No website screenshots here.
+   - Driven by the shared data array filtered to `type: "system"`.
+   - Website screenshots moved out to their own section (see 5, Selected work).
 
 3. **Services** ([ 01 ] [ 02 ] [ 03 ] numbering)
    - Three cards: Websites / Content Systems / Business Automation.
@@ -128,14 +126,22 @@
      (e.g. "How does a project start?").
    - Step numbering with bracket motif.
 
-5. **Selected work** (expanded portfolio)
-   - Larger mockups with short case framing: context → what was built → result.
-   - Hover preview, click opens live demo links in new tab.
+5. **Selected work — website portfolio** (REVISED — split by content type)
+   - Dedicated, NON-scrolling section: a simple two-up grid of the website
+     projects (Aura Capital, Project Aura). Too few items to marquee
+     convincingly, so shown statically.
+   - Driven by the shared data array filtered to `type: "website"`.
+   - Each card: browser-chrome frame + screenshot, hover-preview effect,
+     name, one-line outcome, and a quiet "view live" link (opens in a new
+     tab, not button-styled, per section 9). Carries the signature copper
+     cursor-spotlight.
 
-6. **About**
-   - Short personal section: founder-operated studio, based in Tilburg (NL),
-     working with Dutch and international businesses. Photo placeholder.
-   - Human trust section: keep it 3-4 sentences max.
+6. **About** (REVISED — impersonal, owner decision)
+   - No founder-personal framing: no bio, no location-as-personal-detail,
+     no photo or photo placeholder.
+   - Impersonal studio description: what SetFrame is, what it specializes in,
+     how it helps the visitor's business. 3-4 sentences, outcome-first
+     (section 6 copy rules).
 
 7. **FAQ** (objection handling, AEO-friendly)
    - 4-6 questions structured as direct question → concise answer:
@@ -299,12 +305,28 @@ requirement):
 - [x] Phase 5: Selected work (Work section) + About (faceless, first-person)
 - [x] Phase 6: Final CTA + Footer (compliance placeholders: KVK, privacy [[TO FILL]])
 - [~] Phase 7: SEO/OG/favicon/sitemap + Lighthouse pass + mobile QA
-      (done so far: FAQPage + Organization JSON-LD, metadataBase + OG tags,
-      focus states, AA contrast fixes, single-H1 hierarchy, mobile no-overflow
-      + stacked fallbacks verified, reduced-motion parity. STILL TODO:
-      real og:image asset, favicon from [S] mark, sitemap.xml, robots.txt,
-      real Lighthouse run, contact form E2E submission test)
-      Also from UX brief: intro curtain, breathing nav, hero signature visual,
-      signature spotlight, sticky process narrative, proof block, grain/mesh
-      depth all shipped.
+      DONE: FAQPage + Organization JSON-LD, metadataBase + OG tags, focus
+      states, AA contrast fixes, single-H1 hierarchy, mobile no-overflow +
+      stacked fallbacks, reduced-motion parity. Intro curtain, breathing nav,
+      hero signature, signature spotlight, sticky process, grain/mesh depth.
+      Content-structure decisions (owner):
+        * Systems strip is now systems-only (type: "system").
+        * Website portfolio split into its own two-up non-scrolling grid
+          (type: "website").
+        * Proof block DEFERRED entirely (no real metric yet, no fabricated
+          quote). Rebuild when a real metric + Aura Capital result exist.
+        * About rewritten impersonal (no founder/location/photo).
+      Lighthouse hardening (baseline mobile Perf 90 / A11y 92, treat as
+      required, need real margin > 90):
+        * LazyMotion to shrink the Framer Motion bundle (unused JS).
+        * Modern browserslist targets (drop legacy JS/polyfills).
+        * Font display swap; confirm no render-blocking head resources.
+        * Off-screen animation pausing (content-visibility) for heavy SVG
+          graphics; confirm transform/opacity-only where composited.
+        * Fix aria-hidden focusable descendants (marquee duplicate links).
+        * Cache getBoundingClientRect off the pointer loop (forced reflow).
+      STILL TODO before Phase 8: real og:image, favicon from [S] mark,
+      sitemap.xml, robots.txt, contact form E2E test, and a clean Lighthouse
+      re-run showing REAL margin above 90 on mobile (not exactly 90).
 - [ ] Phase 8: Final deploy to setframe.net + metatags.io verification
+      (only after the Phase 7 "still TODO" items and a clean Lighthouse re-run)

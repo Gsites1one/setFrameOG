@@ -1,7 +1,8 @@
 import { Reveal } from "./Reveal";
 
-// Faceless for now (decided in review): a short first-person studio statement,
-// no photo. The human trust edge without exposing identity yet.
+// Impersonal studio description (owner decision): no founder framing, no
+// location-as-personal-detail, no photo. What SetFrame is, what it
+// specializes in, how it helps the visitor's business. Outcome-first.
 export function About() {
   return (
     <section id="about" className="mx-auto max-w-3xl px-6 py-24">
@@ -9,7 +10,7 @@ export function About() {
         <div className="mb-8 flex items-baseline gap-4">
           <span className="font-mono text-sm text-accent">[ 04 ]</span>
           <h2 className="font-display text-2xl font-bold sm:text-3xl">
-            Who is behind this.
+            What SetFrame is.
           </h2>
         </div>
       </Reveal>
@@ -17,19 +18,18 @@ export function About() {
       <Reveal delay={0.1}>
         <div className="space-y-4 text-lg leading-relaxed text-foreground/80">
           <p>
-            SetFrame is a founder-operated studio based in Tilburg, working with
-            businesses across the Netherlands and beyond.
+            SetFrame is a studio that builds websites and the systems behind
+            them for businesses that run on inquiries, appointments and
+            follow-up.
           </p>
           <p>
-            I build systems, not just pages, because a website that only looks
-            good still lets leads slip through. Financial and advisory firms are
-            where this started, since trust and follow-up decide everything, but
-            the same thinking fits any business that runs on inquiries and
-            appointments.
+            The focus is simple: turn the trust a business already earns into
+            booked calls, and stop the leads, replies and paperwork that
+            quietly slip through the cracks.
           </p>
           <p>
-            You work directly with the person who designs and builds your
-            project. No handoffs, no lost context, no one to hide behind.
+            Every project is built to keep working after launch, fast,
+            accessible and fully owned by the business it serves.
           </p>
         </div>
       </Reveal>
