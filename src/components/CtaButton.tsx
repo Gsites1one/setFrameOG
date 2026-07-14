@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { motion, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
+import { m, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
 
 type CtaButtonProps = {
   size?: "sm" | "lg";
@@ -18,6 +18,7 @@ const MAGNET_STRENGTH = 0.3; // fraction of cursor offset the button follows
 
 export function CtaButton({ size = "lg", className = "" }: CtaButtonProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
   const x = useMotionValue(0);
@@ -25,9 +26,14 @@ export function CtaButton({ size = "lg", className = "" }: CtaButtonProps) {
   const springX = useSpring(x, { stiffness: 250, damping: 18 });
   const springY = useSpring(y, { stiffness: 250, damping: 18 });
 
+  // Cache the rect on enter so the magnet handler never reads layout per move.
+  const onPointerEnter = () => {
+    if (ref.current) rectRef.current = ref.current.getBoundingClientRect();
+  };
+
   const onPointerMove = (e: React.PointerEvent) => {
-    if (shouldReduceMotion || e.pointerType !== "mouse" || !ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
+    if (shouldReduceMotion || e.pointerType !== "mouse" || !rectRef.current) return;
+    const rect = rectRef.current;
     x.set((e.clientX - rect.left - rect.width / 2) * MAGNET_STRENGTH);
     y.set((e.clientY - rect.top - rect.height / 2) * MAGNET_STRENGTH);
   };
@@ -38,8 +44,9 @@ export function CtaButton({ size = "lg", className = "" }: CtaButtonProps) {
   };
 
   return (
-    <motion.div
+    <m.div
       ref={ref}
+      onPointerEnter={onPointerEnter}
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       style={{ x: springX, y: springY }}
@@ -51,6 +58,6 @@ export function CtaButton({ size = "lg", className = "" }: CtaButtonProps) {
       >
         [ Start a conversation ]
       </Link>
-    </motion.div>
+    </m.div>
   );
 }

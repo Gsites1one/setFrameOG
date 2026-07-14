@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // SetFrame's own signature visual for the hero background: a bracket-framed
 // core with copper/teal nodes and pulsing connections radiating out. Pure
@@ -30,24 +30,46 @@ const LINKS = [
 
 export function SystemSignature() {
   const ref = useRef<HTMLDivElement>(null);
+  // Hold the continuous CSS pulses until after first paint so they never
+  // compete with the headline for the LCP/Speed Index window.
+  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
+    const start = () => setAnimate(true);
+    const ric = window.requestIdleCallback;
+    const idleId = ric
+      ? ric(start, { timeout: 1200 })
+      : window.setTimeout(start, 800);
+    const cancelIdle = () => {
+      if (window.cancelIdleCallback) window.cancelIdleCallback(idleId);
+      else clearTimeout(idleId);
+    };
+
     const el = ref.current;
-    if (!el) return;
     const finePointer = window.matchMedia("(pointer: fine)").matches;
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    if (!finePointer || reducedMotion) return;
+    if (!el || !finePointer || reducedMotion) {
+      return cancelIdle;
+    }
 
     let raf = 0;
+    // Cache viewport size (updated on resize) so the pointer handler never
+    // reads layout in the hot path.
+    let vw = window.innerWidth;
+    let vh = window.innerHeight;
+    const onResize = () => {
+      vw = window.innerWidth;
+      vh = window.innerHeight;
+    };
     const target = { x: 0, y: 0 };
     const current = { x: 0, y: 0 };
 
     const onMove = (e: PointerEvent) => {
       // max 12px offset, mapped from cursor position across the viewport
-      target.x = (e.clientX / window.innerWidth - 0.5) * 24;
-      target.y = (e.clientY / window.innerHeight - 0.5) * 24;
+      target.x = (e.clientX / vw - 0.5) * 24;
+      target.y = (e.clientY / vh - 0.5) * 24;
     };
 
     const tick = () => {
@@ -58,10 +80,13 @@ export function SystemSignature() {
     };
 
     window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
     raf = requestAnimationFrame(tick);
     return () => {
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("resize", onResize);
       cancelAnimationFrame(raf);
+      cancelIdle();
     };
   }, []);
 
@@ -69,7 +94,8 @@ export function SystemSignature() {
     <div
       ref={ref}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 flex items-center justify-center"
+      data-animate={animate ? "on" : "off"}
+      className="anim-gate pointer-events-none absolute inset-0 flex items-center justify-center"
     >
       <svg
         viewBox="0 0 768 460"

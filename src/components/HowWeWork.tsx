@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { Reveal } from "./Reveal";
 
 // Buyer-perspective steps, framed as question -> answer for AEO.
@@ -97,7 +97,7 @@ export function HowWeWork() {
                   : "flex flex-col justify-center border-t border-accent/30 pt-5 lg:min-h-[62vh] lg:border-t-0 lg:pt-0"
               }
             >
-              <motion.div
+              <m.div
                 initial={shouldReduceMotion ? false : { opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: false, margin: "-30% 0px -30% 0px" }}
@@ -120,7 +120,7 @@ export function HowWeWork() {
                   {step.question}
                 </h3>
                 <p className="mt-3 max-w-lg text-foreground/70">{step.answer}</p>
-              </motion.div>
+              </m.div>
             </li>
           ))}
         </ol>

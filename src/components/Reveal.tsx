@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 
 type RevealProps = {
   children: React.ReactNode;
@@ -13,7 +13,7 @@ export function Reveal({ children, className = "", delay = 0 }: RevealProps) {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <motion.div
+    <m.div
       className={className}
       initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -25,6 +25,6 @@ export function Reveal({ children, className = "", delay = 0 }: RevealProps) {
       }
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }

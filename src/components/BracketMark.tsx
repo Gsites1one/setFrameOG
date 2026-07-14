@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 
 type BracketMarkProps = {
   side: "left" | "right";
@@ -29,7 +29,7 @@ export function BracketMark({
       className={className}
       aria-hidden="true"
     >
-      <motion.path
+      <m.path
         d={PATHS[side]}
         fill="none"
         stroke="currentColor"

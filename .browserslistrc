@@ -1,0 +1,6 @@
+# Modern targets so Next.js/SWC ships less legacy JS and fewer polyfills.
+# Covers browsers from ~2023 on (ES2020+), ~95%+ of real traffic for a 2026 launch.
+chrome >= 111
+edge >= 111
+firefox >= 111
+safari >= 16.4

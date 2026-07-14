@@ -2,23 +2,27 @@ import type { Metadata } from "next";
 import { Syne, Inter, IBM_Plex_Mono } from "next/font/google";
 import { IntroCurtain } from "@/components/IntroCurtain";
 import { LifeBackground } from "@/components/LifeBackground";
+import { MotionProvider } from "@/components/MotionProvider";
 import "./globals.css";
 
 const syne = Syne({
   subsets: ["latin"],
   variable: "--font-syne",
   weight: ["600", "700", "800"],
+  display: "swap",
 });
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   variable: "--font-ibm-plex-mono",
   weight: ["400", "500"],
+  display: "swap",
 });
 
 // Absolute URLs for OG/structured data. TODO: confirmed target domain.
@@ -68,9 +72,11 @@ export default function RootLayout({
       className={`${syne.variable} ${inter.variable} ${ibmPlexMono.variable}`}
     >
       <body className="font-sans bg-background text-foreground antialiased">
-        <LifeBackground />
-        <IntroCurtain />
-        {children}
+        <MotionProvider>
+          <LifeBackground />
+          <IntroCurtain />
+          {children}
+        </MotionProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

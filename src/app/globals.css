@@ -171,6 +171,18 @@ body {
   }
 }
 
+/* Hold gated animations paused until the component marks itself ready
+   (protects the initial LCP/Speed Index window). */
+.anim-gate[data-animate="off"] * {
+  animation-play-state: paused !important;
+}
+
+/* Skip rendering + animating the heavy service graphics while off-screen. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 520px;
+}
+
 @keyframes marquee-scroll {
   from {
     transform: translateX(0);

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { BracketMark } from "./BracketMark";
 import { CtaButton } from "./CtaButton";
 import { SystemSignature } from "./SystemSignature";
@@ -58,7 +58,7 @@ export function Hero() {
         away and turn it into movement.
       </p>
 
-      <motion.div
+      <m.div
         className="relative mt-8"
         initial={shouldReduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -67,7 +67,7 @@ export function Hero() {
         }
       >
         <CtaButton size="lg" />
-      </motion.div>
+      </m.div>
 
       <div
         aria-hidden="true"

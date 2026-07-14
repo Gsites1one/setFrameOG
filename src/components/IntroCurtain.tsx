@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 
 const SESSION_KEY = "sf-intro-seen";
 
@@ -40,7 +40,7 @@ export function IntroCurtain() {
   return (
     <AnimatePresence>
       {show && (
-        <motion.div
+        <m.div
           className="fixed inset-0 z-[95] flex items-center justify-center bg-background"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -48,39 +48,39 @@ export function IntroCurtain() {
           aria-hidden="true"
         >
           <div className="relative flex items-center">
-            <motion.span
+            <m.span
               className="font-display text-4xl font-bold text-accent"
               initial={{ x: 40, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
             >
               [
-            </motion.span>
-            <motion.span
+            </m.span>
+            <m.span
               className="mx-2 font-display text-3xl font-bold tracking-wide"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.25 }}
             >
               SetFrame
-            </motion.span>
-            <motion.span
+            </m.span>
+            <m.span
               className="font-display text-4xl font-bold text-accent"
               initial={{ x: -40, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
             >
               ]
-            </motion.span>
+            </m.span>
             {/* copper pulse crossing the center */}
-            <motion.span
+            <m.span
               className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-transparent via-accent/40 to-transparent"
               initial={{ x: -40, opacity: 0 }}
               animate={{ x: 220, opacity: [0, 1, 0] }}
               transition={{ duration: 0.5, delay: 0.35, ease: "easeInOut" }}
             />
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

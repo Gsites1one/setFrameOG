@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { m, useReducedMotion, useScroll, useTransform } from "framer-motion";
 
 // Living brand mark for the nav: [ S ]. The gap between the brackets and the
 // letter shifts subtly with scroll (tiny parallax), and the brackets pulse
@@ -19,19 +19,19 @@ export function NavWordmark() {
       aria-label="SetFrame home"
       className="flex items-center font-display text-base font-bold"
     >
-      <motion.span
+      <m.span
         className={`text-accent ${shouldReduceMotion ? "" : "nav-pulse"}`}
         style={{ marginRight: shouldReduceMotion ? 2 : gap }}
       >
         [
-      </motion.span>
+      </m.span>
       <span>S</span>
-      <motion.span
+      <m.span
         className={`text-accent ${shouldReduceMotion ? "" : "nav-pulse"}`}
         style={{ marginLeft: shouldReduceMotion ? 2 : gap }}
       >
         ]
-      </motion.span>
+      </m.span>
     </Link>
   );
 }
