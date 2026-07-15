@@ -76,6 +76,30 @@ export function LifeBackground() {
         }}
       />
 
+      {/* slow gradient shift: a second bloom that drifts + scales + crossfades
+          on a longer period than the glow, so the graphite keeps shifting
+          subtly instead of sitting still. transform + opacity only. */}
+      <div
+        className="gradient-shift absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(45% 40% at 70% 20%, rgba(199,123,63,0.06), transparent 70%), radial-gradient(40% 35% at 25% 85%, rgba(79,179,201,0.05), transparent 70%)",
+        }}
+      />
+
+      {/* always-on faint dot grid: barely visible, gives the graphite a
+          material texture on every device (the cursor grid below brightens a
+          radius of it on fine pointers). */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, rgba(245,245,244,0.4) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+          opacity: 0.04,
+        }}
+      />
+
       {/* cursor-following copper glow; ENHANCEMENT only, layered on top of
           the ambient glow above. Stays invisible on touch / reduced motion. */}
       <div

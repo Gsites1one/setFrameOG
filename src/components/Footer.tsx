@@ -5,6 +5,7 @@ import { CONTACT_EMAIL, KVK_NUMBER, LOCATION } from "@/lib/constants";
 const NAV_LINKS = [
   { href: "/#work", label: "Work" },
   { href: "/#services", label: "Services" },
+  { href: "/knowledge", label: "Systems" },
   { href: "/#faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
 ];

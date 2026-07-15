@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useForm, ValidationError } from "@formspree/react";
-import { useReducedMotion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 
 const FORMSPREE_ID = "mjgnbdbg";
 
@@ -37,13 +37,20 @@ function useRotatingPlaceholder(hints: string[], intervalMs = 3500) {
 
 export function ContactForm() {
   const [state, handleSubmit] = useForm(FORMSPREE_ID);
+  const shouldReduceMotion = useReducedMotion();
   const messagePlaceholder = useRotatingPlaceholder(MESSAGE_HINTS);
+  // The rotating hint is a decorative overlay only; the visible <label> below
+  // stays the field's accessible name. Hide the overlay once the field has
+  // content or focus so it never sits over what the visitor is typing.
+  const [messageEmpty, setMessageEmpty] = useState(true);
+  const [messageFocused, setMessageFocused] = useState(false);
+  const showHint = messageEmpty && !messageFocused;
 
   if (state.succeeded) {
     return (
       <div className="rounded-xl border border-accent/40 bg-surface p-8 text-center">
         <p className="font-display text-xl font-semibold text-accent">
-          [ Message sent ]
+          Message sent
         </p>
         <p className="mt-3 text-sm text-foreground/70">
           Thanks for reaching out. You will hear back within one business day.
@@ -128,14 +135,39 @@ export function ContactForm() {
         >
           Message
         </label>
-        <textarea
-          id="message"
-          name="message"
-          required
-          rows={5}
-          placeholder={messagePlaceholder}
-          className={FIELD_CLASSES}
-        />
+        <div className="relative">
+          <textarea
+            id="message"
+            name="message"
+            required
+            rows={5}
+            onFocus={() => setMessageFocused(true)}
+            onBlur={() => setMessageFocused(false)}
+            onChange={(e) => setMessageEmpty(e.target.value.length === 0)}
+            className={FIELD_CLASSES}
+          />
+          {/* Decorative crossfading hint. aria-hidden + pointer-events-none so
+              it never becomes the accessible name and never blocks typing. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-4 top-3 text-sm text-muted"
+          >
+            <AnimatePresence mode="wait">
+              {showHint && (
+                <m.span
+                  key={messagePlaceholder}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.4 }}
+                  className="block"
+                >
+                  {messagePlaceholder}
+                </m.span>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
         <ValidationError
           prefix="Message"
           field="message"

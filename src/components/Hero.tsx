@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import { m, useReducedMotion } from "framer-motion";
-import { BracketMark } from "./BracketMark";
 import { CtaButton } from "./CtaButton";
-import { SystemSignature } from "./SystemSignature";
+import { HeroVisual } from "./HeroVisual";
 
 // Content-first paint: the headline and CTA are visible and clickable from
-// first paint (no opacity/transform gate). Only decorative elements (brackets,
-// signature, glow) animate in, and opacity fades never block interaction.
+// first paint (no opacity/transform gate). Only decorative elements (the coded
+// visual, glow) animate, and opacity fades never block interaction. No bracket
+// frame around the H1 — the [ ] motif is reserved for logo + buttons.
 
 export function Hero() {
   const shouldReduceMotion = useReducedMotion();
@@ -22,7 +22,7 @@ export function Hero() {
         aria-hidden="true"
         className="ambient-glow pointer-events-none absolute left-1/2 top-1/3 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent blur-[120px]"
       />
-      <SystemSignature />
+      <HeroVisual />
 
       <div className="relative mb-8">
         <Image
@@ -34,23 +34,9 @@ export function Hero() {
         />
       </div>
 
-      <div className="relative flex items-stretch justify-center gap-3 md:gap-6">
-        <BracketMark
-          side="left"
-          duration={0.5}
-          className="w-3 shrink-0 text-foreground md:w-5"
-        />
-
-        <h1 className="max-w-3xl text-center font-display text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
-          Your business is losing money in places you never look.
-        </h1>
-
-        <BracketMark
-          side="right"
-          duration={0.5}
-          className="w-3 shrink-0 text-foreground md:w-5"
-        />
-      </div>
+      <h1 className="relative max-w-3xl text-center font-display text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
+        Your business is losing money in places you never look.
+      </h1>
 
       <p className="relative mt-6 max-w-xl text-center text-foreground/70">
         SetFrame builds websites and systems that catch what quietly slips

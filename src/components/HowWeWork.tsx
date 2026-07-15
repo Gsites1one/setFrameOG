@@ -65,21 +65,21 @@ export function HowWeWork() {
         {!shouldReduceMotion && (
           <div className="hidden lg:block" aria-hidden="true">
             <div className="sticky top-[38vh]">
-              {/* Weight hierarchy (Task 3): active step is large and
-                  copper-filled; inactive steps are small and outline-only
-                  (transparent fill + text stroke), so the rail reads as one
-                  deliberate mark instead of a plain number swap. */}
-              <div className="flex flex-col gap-2">
+              {/* Weight hierarchy: active step is large and copper-filled;
+                  inactive steps are small and outline-only (transparent fill
+                  + text stroke). No brackets — the [ ] motif is logo + buttons
+                  only. */}
+              <div className="flex flex-col gap-2 font-mono">
                 {STEPS.map((step, i) => (
                   <div
                     key={step.number}
                     className={
                       i === active
-                        ? "font-display text-6xl font-bold leading-none text-accent transition-all duration-300"
-                        : "font-display text-2xl font-bold leading-none text-transparent opacity-40 transition-all duration-300 [-webkit-text-stroke:1px_var(--color-foreground)]"
+                        ? "text-6xl font-medium leading-none text-accent transition-all duration-300"
+                        : "text-2xl font-medium leading-none text-transparent opacity-40 transition-all duration-300 [-webkit-text-stroke:1px_var(--color-foreground)]"
                     }
                   >
-                    [{step.number}]
+                    {step.number}
                   </div>
                 ))}
               </div>
@@ -124,11 +124,11 @@ export function HowWeWork() {
                 {/* number shown inline on mobile / reduced motion; the rail
                     carries it on desktop */}
                 <span
-                  className={`font-mono text-sm text-accent ${
+                  className={`font-mono text-sm font-medium text-accent ${
                     shouldReduceMotion ? "" : "lg:hidden"
                   }`}
                 >
-                  [ {step.number} ]
+                  {step.number}
                 </span>
                 <h3 className="mt-3 font-display text-xl font-semibold sm:text-2xl">
                   {step.question}

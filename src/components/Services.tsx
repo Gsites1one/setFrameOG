@@ -8,19 +8,19 @@ import {
 
 const SERVICES = [
   {
-    number: "[ 01 ]",
+    number: "01",
     title: "Websites that turn visitors into booked calls",
     body: "People land on your site already comparing. A credible, fast site makes the next step obvious and easy to take.",
     Graphic: GraphicWebsites,
   },
   {
-    number: "[ 02 ]",
+    number: "02",
     title: "Answers the moment someone asks",
     body: "Questions get answered instantly, day or night, with prices and a booking link included. Warm conversations reach you, cold ones stop costing time.",
     Graphic: GraphicChatbots,
   },
   {
-    number: "[ 03 ]",
+    number: "03",
     title: "Paperwork that reads itself",
     body: "Invoices, forms and documents get read, checked and filed the moment they arrive. The information shows up where you need it.",
     Graphic: GraphicDocuments,

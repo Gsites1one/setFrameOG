@@ -7,6 +7,7 @@ import { NavWordmark } from "./NavWordmark";
 const NAV_LINKS = [
   { href: "#work", label: "Work" },
   { href: "#services", label: "Services" },
+  { href: "/knowledge", label: "Systems" },
   { href: "#faq", label: "FAQ" },
 ];
 
@@ -39,12 +40,21 @@ export function FloatingNav() {
         <ul className="flex items-center gap-4 font-mono text-xs tracking-wide text-foreground/80">
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
-              <a
-                href={link.href}
-                className="transition-colors hover:text-accent"
-              >
-                {link.label}
-              </a>
+              {link.href.startsWith("/") ? (
+                <Link
+                  href={link.href}
+                  className="transition-colors hover:text-accent"
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a
+                  href={link.href}
+                  className="transition-colors hover:text-accent"
+                >
+                  {link.label}
+                </a>
+              )}
             </li>
           ))}
         </ul>

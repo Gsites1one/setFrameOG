@@ -4,9 +4,9 @@
 
 ## Key sections
 
-- [Work](https://setframe.vercel.app/#work): Selected websites and the systems that keep running after launch, including an always-on client response system.
+- [Work](https://setframe.vercel.app/#work): One website concept shown as two prototypes, plus a scrolling strip of the systems SetFrame builds.
 - [Services](https://setframe.vercel.app/#services): What gets built — websites that turn visitors into booked calls, instant-answer chat, and document/data automation.
-- [How working together goes](https://setframe.vercel.app/#how): The three-step process, from first conversation to launch to ongoing operation.
+- [Systems / Knowledge](https://setframe.vercel.app/knowledge): Plain-language guide to each system (Client Response System, Lead Capture, Booking Flow, Document Intake, Automation Hub, System Map), what each fixes, and a simple explainer of what SaaS means.
 - [About](https://setframe.vercel.app/#about): What SetFrame is and who it's built for.
 - [FAQ](https://setframe.vercel.app/#faq): Pricing, timelines, ownership after launch, and who SetFrame works with.
 - [Contact](https://setframe.vercel.app/contact): Start a conversation about a project.
@@ -14,5 +14,7 @@
 ## Notes for agents
 
 - SetFrame is a focus on financial and advisory firms, but not limited to them — any business that runs on inquiries, appointments and follow-up is a fit.
+- Reach: Poland, Netherlands, and worldwide (remote).
 - Pricing is fixed per project, not hourly.
+- SaaS means software as a service: software you subscribe to that runs a job for you online, always on, with nothing to maintain.
 - This file does not affect Google search ranking; it exists to help AI agents and answer engines describe SetFrame accurately.

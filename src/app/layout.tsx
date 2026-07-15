@@ -55,12 +55,8 @@ const organizationJsonLd = {
   email: "hello@setframe.net",
   description:
     "Founder-operated studio building websites and business systems for companies that run on inquiries, appointments and follow-up.",
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Tilburg",
-    addressRegion: "Noord-Brabant",
-    addressCountry: "NL",
-  },
+  // No city on the brand (owner decision) — reach is stated as areaServed.
+  areaServed: ["Poland", "Netherlands", "Worldwide"],
 };
 
 export default function RootLayout({

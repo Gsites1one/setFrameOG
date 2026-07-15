@@ -1,4 +1,5 @@
 import { About } from "@/components/About";
+import { ApproachBand } from "@/components/ApproachBand";
 import { Faq } from "@/components/Faq";
 import { FinalCta } from "@/components/FinalCta";
 import { FloatingNav } from "@/components/FloatingNav";
@@ -31,6 +32,7 @@ export default function Home() {
         {/* Proof block deferred: no real metric yet, no fabricated quote. */}
         <HowWeWork />
         <About />
+        <ApproachBand />
         <Faq />
         <FinalCta />
       </main>

@@ -54,9 +54,12 @@
 - Wordmark: [SetFrame] — white-on-graphite and graphite-on-white PNG/SVG variants
 - Icon mark: [S] in square brackets — both color variants
 - Logo is ALWAYS monochrome. Never recolor the logo with the accent color.
-- The square bracket [ ] is the core visual motif of the brand. Reuse it across
-  the UI: section numbering ([ 01 ], [ 02 ]), button styling ([ Start a
-  conversation ]), card corner details, list markers.
+- The square bracket [ ] is the core visual motif of the brand.
+  BRACKET RULE (REVISED — Phase 7.2, hard criterion): the [ ] motif is
+  reserved for the LOGO and BUTTONS only. It is NOT used for section numbers,
+  the hero headline frame, the process rail, or any other body text. Section
+  numbers are now oversized low-opacity mono ghost numerals with a copper
+  hairline; buttons and the [S] / [SetFrame] logo keep the brackets.
 - Raster illustrations (ADDED — Phase 7 UX pass, do not regenerate): five
   isometric renders in `public/hero/` and `public/systems/`, all sharing the
   graphite backdrop so they blend into the site background —
@@ -358,7 +361,9 @@ requirement):
 
 - KVK number (TODO placeholder until registered).
 - Contact email on the setframe.net domain (not a free gmail/outlook address).
-- Location: Tilburg / Noord-Brabant, NL.
+- Reach line (REVISED — Phase 7.2, owner decision): "Poland · Netherlands ·
+  Worldwide". No city anywhere on the site; the Organization JSON-LD uses
+  `areaServed` instead of a postal address.
 
 ## 11. Workflow & Session Rules (for Claude Code / IDE agents)
 
@@ -468,5 +473,79 @@ requirement):
         * Swap `SITE_URL` from the Vercel URL to `https://setframe.net`
           (in `layout.tsx`, `sitemap.ts`, `robots.ts`) once that domain is
           registered and live.
+- [~] Phase 7.2: Coded hero + structure + /knowledge (this pass). Bracket
+      motif is now reserved for LOGO + BUTTONS only.
+      Hero + background:
+        * Removed the `leak-to-movement.webp` raster from the hero (no raster
+          used as any page/hero/section background). New coded visual
+          `HeroVisual.tsx`: an SVG business leaking copper beads along an arc
+          into a teal+copper cluster that turns them into rising movement,
+          masked with a soft radial falloff so there is no rectangular edge.
+          Motion is opacity-only (bead shimmer, node pulse, rising dots) plus
+          a small fine-pointer parallax; reduced-motion resolves to a calm
+          static state. The hero no longer ships a `priority` image, so the
+          H1 is the clear LCP candidate.
+        * `LifeBackground` enriched: added an always-on faint dot grid and a
+          slow `gradient-shift` bloom (drift + scale + crossfade, 15s) on top
+          of the existing glow-drift / mesh / grain, so the background stays
+          alive by default on every device including mobile. Cursor glow +
+          bright dot grid stay a fine-pointer enhancement. All transform/
+          opacity; reduced-motion static.
+      Numbering + brackets:
+        * `SectionNumber` redesigned to an oversized low-opacity mono ghost
+          numeral + a short copper hairline rule (no brackets). Process rail:
+          active step large + copper, inactive small + outline, no brackets.
+          Stripped `[ 0N ]` from Work, Services, HowWeWork and the contact
+          reasons. Removed the hero H1 bracket frame (`BracketMark` no longer
+          used) and dropped brackets from non-button text ("← Back", the
+          "Message sent" confirmation). Buttons + logo keep the motif.
+          NOTE: `SystemSignature.tsx` and `BracketMark.tsx` are now unused
+          (left in place — deleting them was outside this pass's stated
+          removals; owner can prune).
+      Systems strip + /knowledge:
+        * Deleted the "systems that keep working after launch" anchor block
+          and its tower graphic (`system-tower.webp` removed).
+        * New `SystemsStrip.tsx`: 7 unique tiles (Client Response System,
+          Lead Capture, Booking Flow, Document Intake, Automation Hub, System
+          Map, and a "What is SaaS?" concept tile), two seamless copies so no
+          tile sits next to its own duplicate and there is no ~2s repeat.
+          Every tile is a real `<a>` to `/knowledge#<slug>` with visible
+          focus; the second copy is aria-hidden + `tabIndex -1`.
+        * New route `/knowledge` (`src/app/knowledge/page.tsx`): single H1,
+          one anchored section per tile (what it is / the leak it fixes /
+          what you see), a plain "What is SaaS?" section, and a 3-step "how it
+          works" section mirroring the HowWeWork copy. Own title/description +
+          OpenGraph; added to the floating nav, footer and `sitemap.xml`.
+          All copy is a concise draft flagged `[[REVIEW]]` for owner sign-off;
+          no metrics or testimonials invented.
+      Content + conversion:
+        * Websites consolidated into ONE project shown as two prototypes
+          (Aura Capital = Prototype 01, Project Aura = Prototype 02) in a
+          single labelled card pair; per-prototype hover preview + view-live
+          kept. Data model in `projects.ts` reshaped to `WEBSITE_PROJECT`
+          (prototypes[]) + `SYSTEM_TILES`.
+        * `ApproachBand` added near About: two sentences on diagnosing each
+          business's specific leak (not a template) + `approach/tailored.webp`
+          + a quiet "learn more" link to /knowledge.
+        * `FinalCta` reworked into a lively banner: a copper current sweeps a
+          full-width hairline through one pulsing node into the outcome
+          headline + primary button (transform/opacity; static line under
+          reduced motion).
+        * Contact reasons (`ContactReasons.tsx`): copper line-icons, stronger
+          type hierarchy, staggered scroll reveal.
+        * Contact message hint now crossfades (opacity) between phrases as a
+          decorative aria-hidden overlay; the persistent visible `<label>` is
+          unchanged and remains the field's accessible name.
+        * Location changed to "Poland · Netherlands · Worldwide" everywhere
+          (constants + JSON-LD `areaServed`); no city.
+      STILL TODO before Phase 8 (owner-blocked, cannot verify here):
+        * Lighthouse re-run (mobile + desktop) confirming no category dropped
+          below floor after Phase 7.2 (esp. the coded hero SVG + new
+          background layers vs. Perf/CLS, and the new /knowledge route).
+        * Formspree end-to-end submission test.
+        * Real illustration/screenshots stay owner-supplied; `leak-to-
+          movement.webp` is currently unused (freed from the hero) and may be
+          repurposed on /knowledge or removed.
 - [ ] Phase 8: Final deploy to setframe.net + metatags.io verification
-      (only after the Phase 7 "still TODO" items and a clean Lighthouse re-run)
+      (only after the Phase 7 / 7.2 "still TODO" items and a clean Lighthouse
+      re-run)
