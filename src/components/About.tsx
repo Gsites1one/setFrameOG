@@ -1,4 +1,5 @@
 import { Reveal } from "./Reveal";
+import { SectionNumber } from "./SectionNumber";
 
 // Impersonal studio description (owner decision): no founder framing, no
 // location-as-personal-detail, no photo. What SetFrame is, what it
@@ -7,12 +8,7 @@ export function About() {
   return (
     <section id="about" className="mx-auto max-w-3xl px-6 py-24">
       <Reveal>
-        <div className="mb-8 flex items-baseline gap-4">
-          <span className="font-mono text-sm text-accent">[ 04 ]</span>
-          <h2 className="font-display text-2xl font-bold sm:text-3xl">
-            What SetFrame is.
-          </h2>
-        </div>
+        <SectionNumber number="04" title="What SetFrame is." />
       </Reveal>
 
       <Reveal delay={0.1}>

@@ -57,6 +57,16 @@
 - The square bracket [ ] is the core visual motif of the brand. Reuse it across
   the UI: section numbering ([ 01 ], [ 02 ]), button styling ([ Start a
   conversation ]), card corner details, list markers.
+- Raster illustrations (ADDED — Phase 7 UX pass, do not regenerate): five
+  isometric renders in `public/hero/` and `public/systems/`, all sharing the
+  graphite backdrop so they blend into the site background —
+  `leak-to-movement.webp` (hero signature), `response-system.webp`,
+  `automation-hub.webp`, `system-map.webp` (systems strip tiles), and
+  `system-tower.webp` (systems section anchor visual). These replace the
+  earlier in-code SVG hero/system-flow graphics as the visual base plate;
+  the SVG pulse/motion vocabulary (`.flow-dash`, `.flow-node`, etc.) stays in
+  use elsewhere (Services graphics) and as compositor-safe overlays where it
+  still reads well on top of the raster.
 
 ## 3. Color System
 
@@ -71,6 +81,16 @@
 - WCAG rule: accent (#C77B3F) on background (#121214) passes contrast for
   large text, buttons, and UI elements only. NEVER use accent for body text
   or small paragraph copy. Body/paragraph text is always #F5F5F4.
+- Muted text token (ADDED — Phase 7 UX pass): a real Lighthouse AA failure
+  was traced to `text-foreground/NN` opacity utilities at 40-45%, which
+  compute to 3.6-4.25:1 on graphite/surface — below the 4.5:1 AA floor for
+  normal text (opacity utilities at 50%+ already passed and were left
+  alone). Added a solid `--color-muted: #8a8a89` token in `globals.css`
+  (5.41:1 on graphite, 5.02:1 on surface, both verified), used via
+  `text-muted` / `fill-muted` wherever text needs to read as de-emphasized
+  but must stay legible: the footer's placeholder privacy line, the hero and
+  process-section "scroll" hints, the contact form's placeholder color, and
+  two small SVG labels in the service graphics.
 - Accent usage is restricted to: CTA buttons, hover states, section numbering
   (e.g. [ 01 ]), thin divider lines, icon accents, active/focus states.
 - Logo stays monochrome (pure white/graphite or graphite/white) in all
@@ -107,6 +127,17 @@
      * Paused when prefers-reduced-motion is set (show first project static).
    - Deliberate load animation: bracket-draw (~500ms) → staggered H1 line
      reveal (~400ms) → subline + CTA fade (implemented in Phase 2).
+   - Hero signature visual (UPDATED — Phase 7 UX pass): the in-code SVG
+     bracket/node graphic behind the H1 (`SystemSignature.tsx`) has been
+     replaced with the `leak-to-movement.webp` raster (a business leaking
+     copper particles, caught and redirected by a teal+copper system
+     cluster), rendered via `next/image` with `priority`. It keeps the same
+     compositor-safe motion the SVG had — a mouse-parallax on fine-pointer
+     devices — plus a slow breathing glow over the cluster, and drops the
+     traveling SVG pulse (the raster already shows the particle trail baked
+     in). A static vignette keeps the H1 legible over the busier parts of
+     the image. Only this hero image carries `priority`; the wordmark above
+     it no longer does, so LCP has one clear priority candidate.
 
 2. **Systems strip** (REVISED — split by content type, owner decision)
    - The scrolling marquee is now SYSTEMS-ONLY: the Client Response System
@@ -114,6 +145,21 @@
      diagrams. No website screenshots here.
    - Driven by the shared data array filtered to `type: "system"`.
    - Website screenshots moved out to their own section (see 5, Selected work).
+   - VERIFIED live (Phase 7 UX pass): re-checked the deployed site directly —
+     the strip only ever showed systems and websites already had their own
+     grid. An earlier screenshot suggesting they were mixed did not match
+     either the source or the live site; no filter bug existed.
+   - Capability tiles (ADDED — Phase 7 UX pass): alongside the one real
+     client system (Client Response System), the strip now also shows two
+     illustrative capability tiles — Automation Hub and System Map — using
+     the `automation-hub.webp` / `system-map.webp` raster art. Captions stay
+     in capability framing (service types SetFrame builds), never phrased as
+     client case-study claims, since only one of the three is a named real
+     project. This gives the strip three tiles (marquee mode) instead of one
+     centered card, without waiting on a second real client system.
+   - `system-tower.webp` anchors the systems portion of Work as a small
+     feature visual next to the "systems that keep working after launch"
+     label.
 
 3. **Services** ([ 01 ] [ 02 ] [ 03 ] numbering)
    - Three cards: Websites / Content Systems / Business Automation.
@@ -147,6 +193,17 @@
    - 4-6 questions structured as direct question → concise answer:
      pricing approach, timeline, what happens after launch, do you only work
      with financial firms (answer: no — that is a focus, not a limit).
+   - UPDATED — Phase 7 UX pass: rows were native `<details>/<summary>`, which
+     can only show/hide instantly. Replaced with a controlled
+     `button[aria-expanded]` + `div[role=region]` pattern animated via
+     Framer `AnimatePresence` (height + opacity). This is a deliberate,
+     scoped exception to the transform/opacity-only motion rule — animating
+     to `height: "auto"` isn't a compositor property — but it only ever runs
+     on user click, never during page load, so it can't appear in or affect
+     the Lighthouse non-composited-animations count (measured from the
+     automated load trace, not post-load interaction). All closed by
+     default, matching the previous behavior; FAQPage JSON-LD unaffected
+     (still generated from the same `FAQ_ITEMS` in `src/app/page.tsx`).
 
 8. **Final CTA section**
    - Repeat the single primary CTA. One line of copy + button. Nothing else.
@@ -165,6 +222,13 @@
    - Short privacy line under the form.
    - Same background treatment and motion language as the homepage.
    - Reached via fade page transition from any CTA.
+   - UPDATED — Phase 7 UX pass: the message field's placeholder now rotates
+     through a few varied hints ("Let's talk about your business.", "What's
+     costing you leads?", "Tell me what's not working.", plus the original
+     line) on a 3.5s interval, paused under reduced motion. The field's
+     persistent, visible `<label htmlFor="message">Message</label>` is
+     unchanged and stays the sole accessible name for the field regardless
+     of which hint is showing.
 
 ## 5. Motion & Animation Requirements (mandatory, not optional)
 
@@ -208,6 +272,18 @@ requirement):
      not void.
   Touch devices fall back to the static pulsing glow (no cursor to track).
   All three respect prefers-reduced-motion.
+  UPDATED — Phase 7 UX pass: the background previously went static after
+  first paint and had no life at all on touch (the cursor-follow layers
+  never activate without a pointer). Added a DEFAULT ambient layer that runs
+  on every device with no pointer required — a slow drifting + breathing
+  copper glow (`.ambient-glow-drift`, 9s opacity breathe + 14s transform
+  drift, combined in one rule since `animation` shorthand doesn't stack
+  across separate classes) plus a slower opacity pulse on the static mesh
+  and grain (`.grain-breathe`, 11s, deliberately off-cycle from the glow so
+  nothing reads as synced). The cursor-following glow and dot grid stay as a
+  fine-pointer-only ENHANCEMENT layered on top, not the sole source of life.
+  Transform/opacity only; explicit `animation: none` under reduced motion in
+  addition to the site-wide reduced-motion block.
 - **Micro-interaction set (ADDED in hero rework 2):** magnetic CTA button
   (pulls toward cursor, springs back), custom bracket cursor (copper [ ]
   pair trailing the pointer, expands over interactive elements, hidden over
@@ -224,17 +300,33 @@ requirement):
 - **Marquee strip:** continuous horizontal marquee for project logos/mockups.
 - **Bracket beam detail:** thin animated copper line that draws along section
   dividers as they enter the viewport (echoes the [ ] motif).
+  SHIPPED — Phase 7 UX pass: `SectionNumber.tsx` is the shared component now
+  used by all five numbered sections (Work [01], Services [02], Process
+  [03], About [04], FAQ [05]) — a larger IBM Plex Mono number with a small
+  bracket-corner tick detail, paired with a copper line that draws in
+  (scaleX + opacity) once on section-enter. The Process sticky rail also
+  gained a weight hierarchy: the active step number is large and
+  copper-filled, inactive step numbers are small and outline-only (text-stroke,
+  transparent fill), alongside the existing progress dots.
 - Explicitly out of scope: 3D globe, WebGL scenes, particle systems.
 
 ## 8. SEO / OG / Technical Setup (from day one, not post-launch)
 
-- og:image must use an absolute URL pointing to the live setframe.net domain
-  (not a relative path, not a placeholder domain — this caused a critical bug
-  on a previous project and must be avoided from the first commit).
+- og:image must use an absolute URL. setframe.net is not registered/live yet,
+  so `metadataBase`/`SITE_URL` currently point at the live Vercel URL
+  (https://setframe.vercel.app) with a TODO marker in `layout.tsx` to swap to
+  setframe.net once that domain is live — not a relative path, not a dead
+  placeholder domain (this caused a critical bug on a previous project and
+  must be avoided).
 - Meta title + meta description written per page, not left default.
-- Favicon generated from the [S] bracket icon mark, tested for legibility
-  at 16x16px.
-- sitemap.xml and robots.txt included.
+- Favicon generated from the [S] bracket icon mark (Phase 7: shipped via
+  `src/app/icon.png`, composited from `public/brand/icon-mark-white.png` onto
+  the graphite background, verified legible down to 16x16 and 32x32).
+- sitemap.xml and robots.txt included (Phase 7: shipped via `src/app/sitemap.ts`
+  and `src/app/robots.ts`, Next's file-convention routes).
+- llms.txt at the domain root (Phase 7: shipped as a static `public/llms.txt`
+  — short machine-readable summary of what SetFrame is and its key sections,
+  for agent/answer-engine readability; does not affect Google ranking).
 - Semantic heading structure (single H1 per page, logical H2/H3 hierarchy) so
   AI answer engines and search crawlers can parse and cite the content
   correctly.
@@ -253,6 +345,11 @@ requirement):
 - Primary CTA appears in hero, floating nav (small variant), and final
   closing section. No competing or secondary CTAs pulling attention away
   from the primary action.
+- UPDATED — Phase 7 UX pass: the floating nav's in-page anchor links
+  (`#work`, `#services`, `#faq`) jumped instantly. Added `scroll-behavior:
+  smooth` on `html` in `globals.css`; the existing site-wide reduced-motion
+  block already forces `scroll-behavior: auto !important`, so this is
+  instant under prefers-reduced-motion with no extra JS.
 - On /contact, the form's submit button is the primary action of that page.
 - Portfolio "view live" links open in new tabs and do not use button styling
   (they are secondary by design, visually quiet).
@@ -325,8 +422,51 @@ requirement):
           graphics; confirm transform/opacity-only where composited.
         * Fix aria-hidden focusable descendants (marquee duplicate links).
         * Cache getBoundingClientRect off the pointer loop (forced reflow).
-      STILL TODO before Phase 8: real og:image, favicon from [S] mark,
-      sitemap.xml, robots.txt, contact form E2E test, and a clean Lighthouse
-      re-run showing REAL margin above 90 on mobile (not exactly 90).
+      DONE — Phase 7 UX + graphics + SEO pass (this pass, see sections 2, 3,
+      4, 7, 9 above for detail):
+        * Verified live that the systems/websites split was already correct
+          in both source and the deployed site; no filter bug existed.
+        * Hero SVG signature replaced by the `leak-to-movement.webp` raster
+          + compositor-safe breathing glow + parallax; systems strip now
+          shows the real Client Response System plus two illustrative
+          capability tiles (Automation Hub, System Map), all via
+          `next/image`; `system-tower.webp` anchors the systems portion of
+          Work. All 5 raster assets render through `next/image`
+          (WebP source, explicit `fill`+`sizes`, lazy below the fold; only
+          the hero image is `priority`).
+        * Section numbering redesigned: shared `SectionNumber.tsx`
+          (bracket-beam mark) now used by all five numbered sections; the
+          Process sticky rail gained active/inactive weight hierarchy.
+        * Anchor nav smooth-scrolls (instant under reduced motion); FAQ rows
+          animate open/close via a controlled component (native `<details>`
+          replaced, semantics preserved via `aria-expanded`/`role=region`).
+        * Contact message field placeholder rotates through varied hints;
+          persistent visible `<label>` unchanged.
+        * Background gained a default ambient layer (drifting/breathing
+          glow + slow mesh/grain pulse) active on every device, including
+          touch; cursor-reactive layers remain a fine-pointer enhancement.
+        * AA contrast: added `--color-muted` (#8a8a89, verified >=4.5:1 on
+          both graphite and surface) and applied it to the 5 confirmed
+          failing instances (Footer privacy line, Hero + Process "scroll"
+          hints, contact form placeholder, 2 service-graphic SVG labels).
+        * Favicon (`src/app/icon.png`, from the [S] mark), og:image
+          (`src/app/opengraph-image.png`, hero raster + monochrome
+          wordmark), `sitemap.xml`, `robots.txt` (Next file conventions),
+          and `public/llms.txt` all shipped.
+        * `SITE_URL`/`metadataBase` in `layout.tsx` corrected to the live
+          Vercel URL (setframe.net is not registered/live yet) — this also
+          fixed the Organization JSON-LD `logo` field, which previously
+          pointed at a setframe.net URL that didn't resolve.
+      STILL TODO before Phase 8 (owner-blocked, cannot be verified from this
+      environment):
+        * A real Lighthouse re-run on mobile + desktop, confirming no
+          category dropped below the stated floors (mobile Perf 92 / A11y
+          96 / Best Practices 100 / SEO 100 / Agentic Browsing 2/2; desktop
+          Perf 99) after this pass's changes.
+        * Contact form Formspree submission tested end-to-end (a real
+          message arrives).
+        * Swap `SITE_URL` from the Vercel URL to `https://setframe.net`
+          (in `layout.tsx`, `sitemap.ts`, `robots.ts`) once that domain is
+          registered and live.
 - [ ] Phase 8: Final deploy to setframe.net + metatags.io verification
       (only after the Phase 7 "still TODO" items and a clean Lighthouse re-run)

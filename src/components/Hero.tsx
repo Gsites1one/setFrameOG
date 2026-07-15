@@ -30,7 +30,6 @@ export function Hero() {
           alt="SetFrame"
           width={150}
           height={100}
-          priority
           className="h-auto w-32 md:w-36"
         />
       </div>
@@ -71,7 +70,7 @@ export function Hero() {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 font-mono text-xs tracking-widest text-foreground/40"
+        className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 font-mono text-xs tracking-widest text-muted"
       >
         scroll
       </div>

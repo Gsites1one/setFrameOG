@@ -1,14 +1,43 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm, ValidationError } from "@formspree/react";
+import { useReducedMotion } from "framer-motion";
 
 const FORMSPREE_ID = "mjgnbdbg";
 
 const FIELD_CLASSES =
-  "w-full rounded-lg border border-white/10 bg-surface px-4 py-3 text-sm text-foreground placeholder:text-foreground/40 outline-none transition-colors focus:border-accent/60";
+  "w-full rounded-lg border border-white/10 bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted outline-none transition-colors focus:border-accent/60";
+
+// Rotating placeholder hints for the message field (Task 5). This is a
+// hint only — the persistent, visible <label htmlFor="message"> below
+// stays the sole accessible name for the field, so screen reader users
+// always get a stable name regardless of which hint is currently showing.
+const MESSAGE_HINTS = [
+  "What are you looking to build or improve?",
+  "Let's talk about your business.",
+  "What's costing you leads?",
+  "Tell me what's not working.",
+];
+
+function useRotatingPlaceholder(hints: string[], intervalMs = 3500) {
+  const shouldReduceMotion = useReducedMotion();
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+    const id = window.setInterval(() => {
+      setIndex((i) => (i + 1) % hints.length);
+    }, intervalMs);
+    return () => window.clearInterval(id);
+  }, [shouldReduceMotion, hints.length, intervalMs]);
+
+  return hints[index];
+}
 
 export function ContactForm() {
   const [state, handleSubmit] = useForm(FORMSPREE_ID);
+  const messagePlaceholder = useRotatingPlaceholder(MESSAGE_HINTS);
 
   if (state.succeeded) {
     return (
@@ -104,7 +133,7 @@ export function ContactForm() {
           name="message"
           required
           rows={5}
-          placeholder="What are you looking to build or improve?"
+          placeholder={messagePlaceholder}
           className={FIELD_CLASSES}
         />
         <ValidationError

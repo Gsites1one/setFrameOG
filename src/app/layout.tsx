@@ -25,8 +25,10 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-// Absolute URLs for OG/structured data. TODO: confirmed target domain.
-const SITE_URL = "https://setframe.net";
+// Absolute URLs for OG/structured data. setframe.net is not registered/live
+// yet — using the live Vercel URL until it is.
+// TODO: swap to https://setframe.net once that domain is live.
+const SITE_URL = "https://setframe.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

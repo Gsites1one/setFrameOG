@@ -1,0 +1,18 @@
+# SetFrame
+
+> SetFrame is a founder-operated studio that builds websites and the business systems behind them for companies that run on inquiries, appointments and follow-up. Fixed price per project, agreed before work starts. Websites typically launch in two to four weeks; systems that handle replies, follow-up or paperwork add one to two weeks depending on scope.
+
+## Key sections
+
+- [Work](https://setframe.vercel.app/#work): Selected websites and the systems that keep running after launch, including an always-on client response system.
+- [Services](https://setframe.vercel.app/#services): What gets built — websites that turn visitors into booked calls, instant-answer chat, and document/data automation.
+- [How working together goes](https://setframe.vercel.app/#how): The three-step process, from first conversation to launch to ongoing operation.
+- [About](https://setframe.vercel.app/#about): What SetFrame is and who it's built for.
+- [FAQ](https://setframe.vercel.app/#faq): Pricing, timelines, ownership after launch, and who SetFrame works with.
+- [Contact](https://setframe.vercel.app/contact): Start a conversation about a project.
+
+## Notes for agents
+
+- SetFrame is a focus on financial and advisory firms, but not limited to them — any business that runs on inquiries, appointments and follow-up is a fit.
+- Pricing is fixed per project, not hourly.
+- This file does not affect Google search ranking; it exists to help AI agents and answer engines describe SetFrame accurately.

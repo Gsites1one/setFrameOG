@@ -1,4 +1,5 @@
 import { Reveal } from "./Reveal";
+import { SectionNumber } from "./SectionNumber";
 import {
   GraphicChatbots,
   GraphicDocuments,
@@ -30,12 +31,7 @@ export function Services() {
   return (
     <section id="services" className="cv-auto mx-auto max-w-5xl px-6 py-24">
       <Reveal>
-        <div className="mb-10 flex items-baseline gap-4">
-          <span className="font-mono text-sm text-accent">[ 02 ]</span>
-          <h2 className="font-display text-2xl font-bold sm:text-3xl">
-            What gets built.
-          </h2>
-        </div>
+        <SectionNumber number="02" title="What gets built." />
       </Reveal>
 
       <div className="grid gap-6 md:grid-cols-3">

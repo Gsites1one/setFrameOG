@@ -50,7 +50,7 @@ export function Footer() {
           {/* TODO: real KVK number once the studio is registered */}
           <span>KVK {KVK_NUMBER}</span>
           {/* TODO: link to a real privacy policy page once written */}
-          <span className="text-foreground/40">
+          <span className="text-muted">
             Privacy policy [[ TO FILL ]]
           </span>
         </div>

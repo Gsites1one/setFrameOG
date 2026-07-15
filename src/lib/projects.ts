@@ -43,6 +43,32 @@ export const PROJECTS: Project[] = [
     type: "system",
     url: "/contact",
     displayUrl: "runs 24/7 behind the scenes",
+    image: "/systems/response-system.webp",
+    alt: "Illustration of a central dashboard node wired to a chip network, representing an automated response system",
+  },
+  // Illustrative capability tiles below: service types SetFrame builds, not
+  // client case studies. Copy stays in capability framing (never claims a
+  // specific client's results) so the strip reads honestly at 3 tiles wide
+  // even though only one system above is a real, named client project.
+  {
+    slug: "automation-hub",
+    name: "Automation Hub",
+    outcome: "Repetitive follow-up and reminders, handled without anyone doing it by hand.",
+    type: "system",
+    url: "/contact",
+    displayUrl: "runs 24/7 behind the scenes",
+    image: "/systems/automation-hub.webp",
+    alt: "Illustration of a radiating gear hub connected to smaller nodes, representing business process automation",
+  },
+  {
+    slug: "system-map",
+    name: "System Map",
+    outcome: "Every process mapped and sorted, so nothing depends on memory.",
+    type: "system",
+    url: "/contact",
+    displayUrl: "runs 24/7 behind the scenes",
+    image: "/systems/system-map.webp",
+    alt: "Illustration of a network board with mapped nodes and connections, representing a business's systemized processes",
   },
 ];
 

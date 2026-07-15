@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { m, useReducedMotion } from "framer-motion";
 import { Reveal } from "./Reveal";
+import { SectionNumber } from "./SectionNumber";
 
 // Buyer-perspective steps, framed as question -> answer for AEO.
 const STEPS = [
@@ -48,15 +49,13 @@ export function HowWeWork() {
   }, [shouldReduceMotion]);
 
   return (
-    <section id="how" className="mx-auto max-w-5xl px-6 py-24">
+    <section
+      id="how"
+      className="mx-auto max-w-5xl overflow-x-clip px-6 py-24"
+    >
       <Reveal>
-        <div className="mb-3 flex items-baseline gap-4">
-          <span className="font-mono text-sm text-accent">[ 03 ]</span>
-          <h2 className="font-display text-2xl font-bold sm:text-3xl">
-            How working together goes.
-          </h2>
-        </div>
-        <p className="mb-12 font-mono text-xs tracking-widest text-foreground/40">
+        <SectionNumber number="03" title="How working together goes." />
+        <p className="-mt-6 mb-12 font-mono text-xs tracking-widest text-muted">
           scroll — how it works
         </p>
       </Reveal>
@@ -65,9 +64,24 @@ export function HowWeWork() {
         {/* Sticky number rail: desktop + motion only. */}
         {!shouldReduceMotion && (
           <div className="hidden lg:block" aria-hidden="true">
-            <div className="sticky top-[42vh]">
-              <div className="font-display text-7xl font-bold leading-none text-accent">
-                [{STEPS[active].number}]
+            <div className="sticky top-[38vh]">
+              {/* Weight hierarchy (Task 3): active step is large and
+                  copper-filled; inactive steps are small and outline-only
+                  (transparent fill + text stroke), so the rail reads as one
+                  deliberate mark instead of a plain number swap. */}
+              <div className="flex flex-col gap-2">
+                {STEPS.map((step, i) => (
+                  <div
+                    key={step.number}
+                    className={
+                      i === active
+                        ? "font-display text-6xl font-bold leading-none text-accent transition-all duration-300"
+                        : "font-display text-2xl font-bold leading-none text-transparent opacity-40 transition-all duration-300 [-webkit-text-stroke:1px_var(--color-foreground)]"
+                    }
+                  >
+                    [{step.number}]
+                  </div>
+                ))}
               </div>
               <div className="mt-4 flex gap-2">
                 {STEPS.map((step, i) => (

@@ -5,12 +5,23 @@
   --color-foreground: #f5f5f4;
   --color-accent: #c77b3f;
   --color-surface: #1a1a1d;
+  /* Solid muted text color — verified >=4.5:1 on both graphite and surface
+     (5.41:1 / 5.02:1). Use this instead of text-foreground/NN opacity
+     utilities below ~50% for any text that must stay AA-compliant. */
+  --color-muted: #8a8a89;
   /* Cool secondary glow: service graphics only, never UI chrome or text. */
   --color-cool: #4fb3c9;
 
   --font-display: var(--font-syne);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-ibm-plex-mono);
+}
+
+html {
+  /* Anchor nav smooth-scroll (Task 4). The existing reduced-motion block
+     below forces `scroll-behavior: auto !important`, so this is instant
+     under prefers-reduced-motion with no extra JS needed. */
+  scroll-behavior: smooth;
 }
 
 body {
@@ -37,6 +48,56 @@ body {
 
 .ambient-glow {
   animation: pulse-glow 9s ease-in-out infinite;
+}
+
+/* Default ambient background drift (Task 6): transform + opacity only, on
+   for every device. `.ambient-glow-drift` runs both keyframes at once —
+   note the `animation` shorthand does NOT stack across two separate
+   classes (the later rule wins outright), so drift + breathe must be
+   declared together in one rule to actually run simultaneously. */
+@keyframes ambient-drift {
+  0%,
+  100% {
+    transform: translate3d(-3%, -2%, 0);
+  }
+  50% {
+    transform: translate3d(3%, 3%, 0);
+  }
+}
+
+.ambient-glow-drift {
+  animation:
+    pulse-glow 9s ease-in-out infinite,
+    ambient-drift 14s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-glow-drift {
+    animation: none;
+  }
+}
+
+/* Slow, barely-perceptible grain pulse — a different period than the glow
+   above so nothing on the page reads as synced/mechanical. */
+@keyframes grain-breathe {
+  0%,
+  100% {
+    opacity: 0.04;
+  }
+  50% {
+    opacity: 0.07;
+  }
+}
+
+.grain-breathe {
+  animation: grain-breathe 11s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain-breathe {
+    animation: none;
+    opacity: 0.05;
+  }
 }
 
 @keyframes nav-pulse {

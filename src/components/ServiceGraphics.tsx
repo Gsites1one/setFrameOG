@@ -103,7 +103,7 @@ export function GraphicChatbots() {
       <text x="100" y="134" fontSize="11" className="fill-foreground/70 font-mono">
         and what would it cost?&quot;
       </text>
-      <text x="80" y="76" fontSize="10" className="fill-foreground/45 font-mono">
+      <text x="80" y="76" fontSize="10" className="fill-muted font-mono">
         asked 23:41
       </text>
 
@@ -175,7 +175,7 @@ export function GraphicDocuments() {
       <g style={{ transformOrigin: "287px 174px" }} className="scan-line">
         <line x1="250" y1="174" x2="324" y2="174" stroke={COPPER} strokeWidth="2" strokeLinecap="round" opacity="0.9" />
       </g>
-      <text x="287" y="246" textAnchor="middle" fontSize="10" className="fill-foreground/45 font-mono">
+      <text x="287" y="246" textAnchor="middle" fontSize="10" className="fill-muted font-mono">
         read &amp; checked
       </text>
 
