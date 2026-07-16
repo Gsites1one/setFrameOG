@@ -100,6 +100,155 @@ body {
   }
 }
 
+/* Process step micro-motifs (P7.3): one tiny looping animation per step,
+   thematically matched. transform/opacity only. Paused when the step is not
+   the active one via the [data-active="false"] gate below. */
+@keyframes motif-typing {
+  0%,
+  65%,
+  100% {
+    opacity: 0.25;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+.motif-typing {
+  animation: motif-typing 1.6s ease-in-out infinite;
+}
+
+@keyframes motif-scan {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(9px);
+    opacity: 0;
+  }
+}
+.motif-scan {
+  animation: motif-scan 2.4s ease-in-out infinite;
+}
+
+@keyframes motif-core {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.motif-core {
+  animation: motif-core 2.4s ease-in-out infinite;
+}
+
+@keyframes motif-ring {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+.motif-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: motif-ring 2.4s ease-out infinite;
+}
+
+/* Pause a step's motif while it is not the active step. */
+.step-motif[data-active="false"] * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motif-typing,
+  .motif-scan,
+  .motif-core,
+  .motif-ring {
+    animation: none !important;
+  }
+  .motif-typing {
+    opacity: 0.6 !important;
+  }
+  .motif-scan {
+    opacity: 0.6 !important;
+    transform: none !important;
+  }
+  .motif-core {
+    opacity: 0.9 !important;
+  }
+  .motif-ring {
+    opacity: 0 !important;
+  }
+}
+
+/* About ambient pipe (P7.3): a curved current travels a dashed path with
+   brief leak/catch bursts. The path uses stroke-dashoffset (an explicit,
+   scoped exception to transform/opacity, kept cheap and paused off-screen);
+   the bursts are opacity/scale only. Under reduced motion the pipe is a calm
+   static dashed line and the bursts are hidden. */
+@keyframes pipe-flow {
+  from {
+    stroke-dashoffset: 340;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.pipe-flow {
+  stroke-dasharray: 26 314;
+  animation: pipe-flow 7s linear infinite;
+}
+
+@keyframes leak-burst {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  6% {
+    opacity: 0.9;
+    transform: scale(1.1);
+  }
+  18% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+.leak-burst {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: leak-burst 9s ease-in-out infinite;
+}
+
+/* Paused off-screen: the AboutPipe toggles this via IntersectionObserver. */
+.about-pipe[data-visible="false"] * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pipe-flow {
+    animation: none !important;
+    stroke-dasharray: 2 6 !important;
+  }
+  .leak-burst {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
+
 /* Coded hero visual (P7.2): traveling leak beads + rising movement dots.
    Opacity-driven; a subtle transform only on the rising dots. */
 @keyframes hero-bead {

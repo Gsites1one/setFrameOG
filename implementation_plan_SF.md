@@ -546,6 +546,43 @@ requirement):
         * Real illustration/screenshots stay owner-supplied; `leak-to-
           movement.webp` is currently unused (freed from the hero) and may be
           repurposed on /knowledge or removed.
+- [~] Phase 7.3: Micro-polish (this pass). Two targeted motion additions; the
+      bracket rule gains ONE sanctioned inline exception.
+        * Process rail (`HowWeWork` + new `StepMotif.tsx`): each of the three
+          steps now has a tiny (~24px) motif next to its heading, matched to
+          the copy — step 01 "a conversation" = three typing/exchange dots,
+          step 02 "a working preview" = a small frame with a scan line drawing
+          down, step 03 "the system keeps working" = a steady core with an
+          expanding pulse ring. transform/opacity only; each motif is paused
+          unless it is the active step (reuses the existing `active` state via
+          a `.step-motif[data-active="false"]` CSS gate); static under reduced
+          motion.
+        * About section (`About` + new `AboutPipe.tsx`): a subtle ambient
+          background — a copper current travels a curved, organic path
+          (stroke-dashoffset; the one scoped exception to transform/opacity for
+          this pass, kept faint and paused off-screen) with three brief
+          leak/catch bursts (opacity/scale) that flash and vanish. Paused
+          off-screen via IntersectionObserver (`.about-pipe[data-visible]`),
+          static under reduced motion. Kept at low opacity (container 0.5,
+          faint copper strokes).
+        * Contrast (HARD requirement) re-verified: About body text is
+          `text-foreground/80` (light on dark). Worst realistic case (the
+          brightest travelling dash directly behind a glyph, ~0.21 effective
+          copper alpha) computes to 8.8:1; even an implausible 0.5 alpha stays
+          5.48:1 — comfortably above AA 4.5:1. The pipe cannot pull the body
+          text below AA.
+        * Inline logo mark (`LogoMark.tsx`): the first "SetFrame" in the About
+          copy now renders as the wordmark inline ("Set" + bold "Frame" in
+          copper brackets). This is the single sanctioned inline reuse of the
+          bracket motif; brackets are aria-hidden so assistive tech still reads
+          "SetFrame". No other bracket usage was added.
+      STILL TODO before Phase 8 (owner-blocked): the same Lighthouse re-run
+      and Formspree E2E as Phase 7 / 7.2. Latest owner Lighthouse run before
+      this pass: mobile Perf 91 / A11y 100 / BP 100 / SEO 100 / Agentic 3/3;
+      desktop Perf 98; CLS 0 (Perf ~1 under the 92/99 floors, within run
+      variance). Re-confirm mobile after 7.3, though the new motion is below
+      the fold and paused off-screen so the load-time animation count is
+      unchanged.
 - [ ] Phase 8: Final deploy to setframe.net + metatags.io verification
-      (only after the Phase 7 / 7.2 "still TODO" items and a clean Lighthouse
-      re-run)
+      (only after the Phase 7 / 7.2 / 7.3 "still TODO" items and a clean
+      Lighthouse re-run)

@@ -4,26 +4,31 @@ import { useEffect, useRef, useState } from "react";
 import { m, useReducedMotion } from "framer-motion";
 import { Reveal } from "./Reveal";
 import { SectionNumber } from "./SectionNumber";
+import { StepMotif } from "./StepMotif";
 
-// Buyer-perspective steps, framed as question -> answer for AEO.
+// Buyer-perspective steps, framed as question -> answer for AEO. Each carries
+// a small motif matched to its meaning (P7.3).
 const STEPS = [
   {
     number: "01",
     question: "Where does it start?",
     answer:
       "A conversation, not a pitch. We find where your business leaks time, leads or follow-up, and what stopping that is worth.",
+    motif: "conversation" as const,
   },
   {
     number: "02",
     question: "What do I see before committing?",
     answer:
       "A working preview. You see the direction with your own eyes before anything is signed, so there is nothing to take on faith.",
+    motif: "preview" as const,
   },
   {
     number: "03",
     question: "When do results show up?",
     answer:
       "Launch lands in weeks, not months. Then the system keeps working: replying, reminding and booking while you run the business.",
+    motif: "ongoing" as const,
   },
 ];
 
@@ -130,9 +135,12 @@ export function HowWeWork() {
                 >
                   {step.number}
                 </span>
-                <h3 className="mt-3 font-display text-xl font-semibold sm:text-2xl">
-                  {step.question}
-                </h3>
+                <div className="mt-3 flex items-center gap-3">
+                  <StepMotif type={step.motif} active={i === active} />
+                  <h3 className="font-display text-xl font-semibold sm:text-2xl">
+                    {step.question}
+                  </h3>
+                </div>
                 <p className="mt-3 max-w-lg text-foreground/70">{step.answer}</p>
               </m.div>
             </li>
