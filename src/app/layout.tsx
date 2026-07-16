@@ -3,6 +3,7 @@ import { Syne, Inter, IBM_Plex_Mono } from "next/font/google";
 import { IntroCurtain } from "@/components/IntroCurtain";
 import { LifeBackground } from "@/components/LifeBackground";
 import { MotionProvider } from "@/components/MotionProvider";
+import { RevealObserver } from "@/components/RevealObserver";
 import { CONTACT_EMAIL, SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
@@ -71,6 +72,23 @@ export default function RootLayout({
       className={`${syne.variable} ${inter.variable} ${ibmPlexMono.variable}`}
     >
       <body className="font-sans bg-background text-foreground antialiased">
+        {/* Marks JS as available before body content parses, so scroll reveals
+            only start hidden when something can actually reveal them (runs
+            inline and synchronously, so there is no flash).
+
+            The timer is a failsafe: reveals are hidden by CSS from first paint,
+            so if RevealObserver never mounts (a hydration error, a chunk that
+            fails to load) every section below the fold would stay invisible
+            forever. If nothing has armed within 4s, drop the class and show the
+            page. Costs nothing on a healthy load. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "var d=document.documentElement;d.classList.add('js');" +
+              "setTimeout(function(){if(d.dataset.revealsArmed!=='1')d.classList.remove('js')},4000)",
+          }}
+        />
+        <RevealObserver />
         <MotionProvider>
           <LifeBackground />
           <IntroCurtain />

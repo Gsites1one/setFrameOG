@@ -517,6 +517,55 @@ body {
   contain-intrinsic-size: auto 520px;
 }
 
+/* ── Scroll reveals ─────────────────────────────────────────────────────
+   CSS-driven, with one shared IntersectionObserver (RevealObserver) adding
+   .is-visible. Replaces ~20 Framer Motion components that existed only to
+   fade content up / draw a hairline.
+
+   The hidden start state is scoped to html.js (set by a tiny inline script),
+   so if JS never runs the content is simply visible rather than stuck at
+   opacity 0 forever. Nothing above the fold uses these, so LCP is unaffected. */
+[data-reveal] {
+  transition-duration: 0.5s;
+  transition-timing-function: ease-out;
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+.js [data-reveal="fade"] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+[data-reveal="fade"] {
+  transition-property: opacity, transform;
+  will-change: opacity, transform;
+}
+[data-reveal="fade"].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.js [data-reveal="rule"] {
+  opacity: 0;
+  transform: scaleX(0);
+}
+[data-reveal="rule"] {
+  transition-property: opacity, transform;
+  transition-duration: 0.7s;
+}
+[data-reveal="rule"].is-visible {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
 @keyframes marquee-scroll {
   from {
     transform: translateX(0);
