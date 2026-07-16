@@ -380,16 +380,37 @@ requirement):
 
 ## 12. Definition of Done
 
-- [ ] Lighthouse Performance score > 90
-- [ ] Lighthouse SEO score > 90
-- [ ] Fully responsive and tested on mobile viewport
-- [ ] Contact form verified end-to-end (a real test submission arrives)
-- [ ] All sections from the site structure spec are present and populated with
-      real copy (no lorem ipsum placeholders left in final build)
-- [ ] prefers-reduced-motion respected
-- [ ] Deployed and verified live on setframe.net via Vercel
-- [ ] og:image and favicon verified working when the live URL is shared/tested
-      (check via metatags.io)
+- [~] Lighthouse Performance score > 90
+      Last owner run (on the .vercel.app origin): mobile 90, desktop 98.
+      The LCP/Speed-Index root cause was found and fixed AFTER that run
+      (template.tsx gated every first paint at opacity:0 behind the wipe;
+      intro curtain covered the viewport ~1.25s). NEEDS a re-run on
+      setframe.net to confirm the owner's 92+ mobile floor.
+- [x] Lighthouse SEO score > 90 — owner run: 100 mobile + desktop.
+- [x] Fully responsive and tested on mobile viewport (375px: no horizontal
+      overflow, sticky process falls back to a stacked list).
+- [~] Contact form verified end-to-end. A submission DOES arrive, but the
+      test landed in Formspree's Spam folder. Cause is Formspree's Formshield
+      ML filter reacting to test-shaped content ("Test" / test123@gmail.com /
+      "I need website."), not our code. Honeypot (_gotcha) + _subject added.
+      Re-test with realistic content and mark "Not spam" to train the filter;
+      filter aggressiveness is a Formspree paid-plan setting.
+- [x] All sections present and populated with real copy (no lorem ipsum).
+      Remaining intentional placeholders: KVK number and privacy policy
+      ([[ TO FILL ]]); proof block deliberately deferred until a real metric
+      exists.
+- [x] prefers-reduced-motion respected (full static fallback across intro,
+      wipe, marquee, SVG graphics, sticky process, ambient background).
+- [x] Deployed and verified live on setframe.net via Vercel.
+      Apex A -> Vercel, www CNAME -> Vercel and redirecting to apex, HTTPS
+      active, `vercel domains verify` = configured-correctly, zero conflicts.
+      A leftover OVH AAAA record on the apex was serving IPv6 visitors the
+      wrong host; removed.
+- [x] og:image and favicon verified working from the live domain.
+      Fetched from setframe.net: og:image 200 image/png (absolute URL on
+      setframe.net), favicon 200, robots.txt 200 pointing at
+      setframe.net/sitemap.xml, sitemap.xml 200 listing all three routes.
+      Owner may still eyeball the social card on metatags.io.
 
 ## 13. Build Checklist (update as you go)
 
@@ -598,35 +619,45 @@ requirement):
       to clear the "non-composited animations" diagnostic. LCP (~3.2s mobile) is
       font-swap bound and not worth chasing without a type change (a UX change),
       so it was left alone.
-- [~] Phase 8: Final deploy to setframe.net + metatags.io verification
-      DONE this pass:
-        * setframe.net + www.setframe.net attached to the Vercel project;
-          domain ownership verified. Awaiting DNS only.
-        * SITE_URL centralised in src/lib/constants.ts. metadataBase,
-          og:image, Organization JSON-LD, sitemap and robots now all derive
-          from ONE value (previously duplicated across three files). This is
-          the guard against the past critical bug where a partial swap left
-          og:image on the wrong origin.
-        * Mobile Perf root cause found and fixed: template.tsx runs on
-          initial load (not just navigations), so the bracket wipe wrapped
-          every first paint in opacity:0 for 250ms (content at opacity 0 is
-          ineligible for LCP) behind two opaque full-screen panels for
-          ~550ms. Wipe now plays only on client-side navigations. The intro
-          curtain (opaque, ~1.25s — exactly what Speed Index measures) is now
-          skipped on phones and trimmed to 700ms elsewhere.
-        * Contact form: _gotcha honeypot + _subject added.
-      BLOCKED ON OWNER — set DNS at the registrar (currently OVH: nameservers
-      dns200/ns200.anycast.me, apex A still 213.32.10.205):
-        * remove the existing apex A record (213.32.10.205)
-        * A      @     216.198.79.1
-        * A      @     64.29.17.1
-        * CNAME  www   0b8ecdb402c87a69.vercel-dns-017.com.
-      THEN, strictly in this order:
-        1. `vercel domains verify setframe.net` returns ok.
-        2. Flip SITE_URL in src/lib/constants.ts to https://setframe.net.
-        3. Redeploy; verify og:image + favicon on metatags.io.
-        4. Re-run Lighthouse against the real domain.
-      NOTE on the form: the test submission was classified by Formspree's
-      Formshield ML filter, not by our code. Filter aggressiveness is a
-      Formspree paid-plan setting; re-test with realistic content and mark
-      "Not spam" to train it.
+- [x] Phase 8: Final deploy to setframe.net — LIVE.
+      Domain:
+        * setframe.net + www.setframe.net attached to the Vercel project.
+          Apex A -> 216.198.79.1 / 64.29.17.1, www CNAME -> Vercel and
+          redirecting to the apex. HTTPS active.
+        * `vercel domains verify setframe.net` = ok / configured-correctly,
+          conflicts: []. 
+        * ROOT CAUSE worth remembering: after the A/CNAME records were set,
+          the domain still failed verification and was unreachable over IPv6.
+          A leftover OVH AAAA record (2001:41d0:301:5::29) remained on the
+          apex, so IPv6-preferring clients (most mobile carriers) resolved to
+          OVH instead of Vercel — a silent partial outage invisible to anyone
+          testing over IPv4. Removing the AAAA fixed verification immediately.
+          When cutting a domain over, always check AAAA, not just A.
+      Cutover:
+        * SITE_URL centralised in src/lib/constants.ts, so one line moved
+          metadataBase, og:image, og:url, Organization JSON-LD, sitemap and
+          robots together. This is the guard against the past critical bug
+          where a partial swap left og:image on the wrong origin.
+        * Verified live from setframe.net: og:image 200 image/png on an
+          absolute setframe.net URL, favicon 200, robots.txt 200 pointing at
+          setframe.net/sitemap.xml, sitemap.xml 200 with all three routes,
+          /contact + /knowledge 200, honeypot present on the live form, no
+          .vercel.app origin anywhere in the build output.
+        * Organization JSON-LD description was still "Founder-operated
+          studio", contradicting the impersonal-About decision. Fixed —
+          answer engines quote that field verbatim.
+      Perf fixes shipped alongside (need an owner re-run to score):
+        * template.tsx runs on initial load, not just navigations, so the
+          bracket wipe wrapped every first paint in opacity:0 for 250ms
+          (content at opacity 0 is ineligible for LCP) behind two opaque
+          full-screen panels for ~550ms. Wipe now plays only on client-side
+          navigations.
+        * Intro curtain (opaque, ~1.25s — exactly what Speed Index measures)
+          skipped on phones, trimmed to 700ms elsewhere.
+      REMAINING (owner):
+        1. Lighthouse re-run on https://setframe.net (mobile floor 92+).
+        2. Contact form re-test with realistic content; mark the earlier test
+           "Not spam" in Formspree to train Formshield.
+        3. Optional: eyeball the social card on metatags.io.
+        4. Fill KVK number + privacy policy; add a real metric to restore the
+           deferred proof block.
