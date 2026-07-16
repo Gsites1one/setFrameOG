@@ -5,12 +5,11 @@
 // critical bug where og:image pointed at the wrong origin; a partial swap
 // across several files is exactly how that happens.
 //
-// DOMAIN CUTOVER: setframe.net is attached to the Vercel project but its DNS
-// still points elsewhere. Flip this to "https://setframe.net" ONLY once the
-// domain actually resolves to the site, then verify on metatags.io. Flipping
-// early points og:image at a dead host, which is worse than the .vercel.app
-// origin it uses today.
-export const SITE_URL = "https://setframe.vercel.app";
+// Domain cutover completed: setframe.net is attached to the Vercel project,
+// DNS resolves to it (apex A -> Vercel, www CNAME -> Vercel) and Vercel
+// reports configured-correctly with no conflicts. setframe.vercel.app still
+// resolves and is kept only as the deployment alias, never as a canonical URL.
+export const SITE_URL = "https://setframe.net";
 
 export const CONTACT_EMAIL = "hello@setframe.net"; // TODO: replace once the mailbox is live
 export const KVK_NUMBER = "[[ TO FILL ]]"; // TODO: real KVK number once registered

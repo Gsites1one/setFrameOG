@@ -52,8 +52,10 @@ const organizationJsonLd = {
   url: SITE_URL,
   logo: `${SITE_URL}/brand/wordmark-white.png`,
   email: CONTACT_EMAIL,
+  // Impersonal, matching the About copy (owner decision: no founder framing).
+  // Answer engines quote this verbatim, so it must not contradict the site.
   description:
-    "Founder-operated studio building websites and business systems for companies that run on inquiries, appointments and follow-up.",
+    "A studio that builds websites and the systems behind them for businesses that run on inquiries, appointments and follow-up.",
   // No city on the brand (owner decision) — reach is stated as areaServed.
   areaServed: ["Poland", "Netherlands", "Worldwide"],
 };
