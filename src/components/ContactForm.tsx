@@ -61,6 +61,24 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Formspree honeypot: hidden from people, irresistible to bots. Any
+          submission that fills it is silently discarded, which keeps bot
+          traffic out of the inbox (and out of the spam classifier's way). */}
+      <input
+        type="text"
+        name="_gotcha"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="hidden"
+      />
+      {/* Clear, consistent subject line on the notification email. */}
+      <input
+        type="hidden"
+        name="_subject"
+        value="New enquiry via setframe.net"
+      />
+
       <div>
         <label
           htmlFor="name"

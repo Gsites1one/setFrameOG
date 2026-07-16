@@ -5,10 +5,15 @@ import { AnimatePresence, m } from "framer-motion";
 
 const SESSION_KEY = "sf-intro-seen";
 
-// First-visit-per-session brand orientation (<=900ms). The hero headline and
+// First-visit-per-session brand orientation (<=700ms). The hero headline and
 // CTA are already painted underneath; this is a lightweight overlay that never
-// delays interaction. Dismissed instantly by scroll, tap, or keydown. Skipped
-// entirely on prefers-reduced-motion and on return visits. Runs at most once.
+// delays interaction. Dismissed instantly by scroll, tap, or keydown. Runs at
+// most once.
+//
+// Skipped entirely on prefers-reduced-motion, on return visits, and on phones.
+// The phone rule is deliberate: an opaque overlay is precisely what Speed Index
+// penalises, and mobile is both the slowest connection and the ranking-critical
+// surface. Desktop keeps the branded moment at no measurable cost.
 export function IntroCurtain() {
   const [show, setShow] = useState(false);
 
@@ -16,14 +21,15 @@ export function IntroCurtain() {
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    if (reducedMotion) return;
+    const isPhone = window.matchMedia("(max-width: 767px)").matches;
+    if (reducedMotion || isPhone) return;
     if (sessionStorage.getItem(SESSION_KEY)) return;
 
     sessionStorage.setItem(SESSION_KEY, "1");
     setShow(true);
 
     const dismiss = () => setShow(false);
-    const timer = setTimeout(dismiss, 900);
+    const timer = setTimeout(dismiss, 700);
 
     window.addEventListener("scroll", dismiss, { once: true, passive: true });
     window.addEventListener("pointerdown", dismiss, { once: true });
