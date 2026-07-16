@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Coded hero focal visual (P7.2): the SetFrame idea expressed in SVG, no
 // raster and no rectangular photo edge. A business on the left leaks copper
@@ -12,6 +12,11 @@ import { useEffect, useRef } from "react";
 // tiny transform parallax on fine pointers. Under reduced motion the CSS
 // animations resolve to a calm static state (see globals.css overrides), so
 // the scene stays legible with no movement.
+//
+// P7.4: the CSS animations are held paused until after first paint via the
+// `.anim-gate` gate (requestIdleCallback), so these above-the-fold,
+// non-composited SVG animations do not run inside the LCP / Speed Index
+// window on throttled mobile — restoring the deferral the previous hero had.
 
 const COPPER = "#c77b3f";
 const COOL = "#4fb3c9";
@@ -38,6 +43,22 @@ const CENTER = { x: 648, y: 214 };
 
 export function HeroVisual() {
   const ref = useRef<HTMLDivElement>(null);
+  // Hold the continuous CSS pulses until the browser is idle after first
+  // paint, so they never compete with the headline for the LCP / Speed Index
+  // window.
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    const start = () => setAnimate(true);
+    const ric = window.requestIdleCallback;
+    const idleId = ric
+      ? ric(start, { timeout: 1200 })
+      : window.setTimeout(start, 800);
+    return () => {
+      if (window.cancelIdleCallback) window.cancelIdleCallback(idleId as number);
+      else clearTimeout(idleId as number);
+    };
+  }, []);
 
   // Up to 10px parallax on fine pointers only; static otherwise.
   useEffect(() => {
@@ -81,7 +102,8 @@ export function HeroVisual() {
     <div
       ref={ref}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 flex items-center justify-center"
+      data-animate={animate ? "on" : "off"}
+      className="anim-gate pointer-events-none absolute inset-0 flex items-center justify-center"
       style={{
         maskImage:
           "radial-gradient(ellipse 60% 60% at 50% 46%, #000 45%, transparent 82%)",

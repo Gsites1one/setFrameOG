@@ -94,8 +94,11 @@
   but must stay legible: the footer's placeholder privacy line, the hero and
   process-section "scroll" hints, the contact form's placeholder color, and
   two small SVG labels in the service graphics.
-- Accent usage is restricted to: CTA buttons, hover states, section numbering
-  (e.g. [ 01 ]), thin divider lines, icon accents, active/focus states.
+- Accent usage is restricted to: CTA buttons, hover states, section numbering,
+  thin divider lines, icon accents, active/focus states.
+  (UPDATED — Phase 7.2: section numbers no longer use the [ 01 ] bracket form;
+  they are oversized low-opacity mono ghost numerals + a copper hairline. See
+  the bracket rule in section 2.)
 - Logo stays monochrome (pure white/graphite or graphite/white) in all
   placements.
 
@@ -107,40 +110,30 @@
    - H1 (locked copy): "Your business is losing money in places you never look."
    - Subline (locked): "SetFrame builds websites and systems that catch what
      quietly slips away and turn it into movement."
-   - Right of the showcase: three bracket-numbered keyword lines on why
-     websites matter now (kept at keyword level on purpose, the full
-     reasoning stays private).
    - Primary CTA button → /contact. Label: [ Start a conversation ].
      Font: Syne semibold (REVISED — was IBM Plex Mono, rejected in review).
-   - Visual proof above the fold: **corner-fold project showcase** (REVISED —
-     replaces static placeholder). Browser-chrome frame with bracket corner
-     details cycling through real portfolio screenshots:
-     * Each project holds ~6s, then the four bracket corners fold inward
-       (frame "closes"), content swaps, corners fold back out (~0.45s per
-       direction), revealing the next project. Loops continuously.
-     * Address bar shows example-style display domains (auracapital.com,
-       projectaura.net), not the real deployment URLs. Layout: showcase
-       sits left, why-websites keyword list sits right (two columns on
-       desktop).
-     * Real portfolio sites to feature (screenshots to capture):
-       - Aura Capital — https://auracapitalv1.vercel.app
-       - Financial advisor site — https://bolt-tryouts-finacial-advisor-v2.vercel.app
-     * Driven by the same data array as the work strip (add once, appears
-       everywhere).
-     * Paused when prefers-reduced-motion is set (show first project static).
-   - Deliberate load animation: bracket-draw (~500ms) → staggered H1 line
-     reveal (~400ms) → subline + CTA fade (implemented in Phase 2).
-   - Hero signature visual (UPDATED — Phase 7 UX pass): the in-code SVG
-     bracket/node graphic behind the H1 (`SystemSignature.tsx`) has been
-     replaced with the `leak-to-movement.webp` raster (a business leaking
-     copper particles, caught and redirected by a teal+copper system
-     cluster), rendered via `next/image` with `priority`. It keeps the same
-     compositor-safe motion the SVG had — a mouse-parallax on fine-pointer
-     devices — plus a slow breathing glow over the cluster, and drops the
-     traveling SVG pulse (the raster already shows the particle trail baked
-     in). A static vignette keeps the H1 legible over the busier parts of
-     the image. Only this hero image carries `priority`; the wordmark above
-     it no longer does, so LCP has one clear priority candidate.
+   - CURRENT hero (SUPERSEDES the corner-fold showcase, raster signature and
+     bracket-framed H1 described in the history below) — Phase 7.2 + 7.4:
+     * No raster anywhere in the hero. The focal visual is coded SVG
+       (`HeroVisual.tsx`): a business leaking copper beads along an arc into a
+       teal+copper cluster that turns them into rising movement, masked with a
+       soft radial falloff (no rectangular edge). Opacity-only bead/node/rise
+       motion + a small fine-pointer parallax.
+     * The H1 has NO bracket frame (bracket rule, section 2). The three
+       "why websites" keyword lines moved OUT of the hero into the Work
+       section.
+     * No `priority` image ships (the raster is gone), so the H1 text is the
+       LCP candidate. The SVG animations are idle-gated (`.anim-gate` +
+       requestIdleCallback, Phase 7.4) so they do not run inside the LCP /
+       Speed Index window on mobile.
+     * Paused / static under prefers-reduced-motion.
+   - HISTORY (superseded, kept for intent): a corner-fold project showcase
+     cycling portfolio screenshots sat right of the copy with three
+     bracket-numbered keyword lines; Phase 7 briefly used a
+     `leak-to-movement.webp` raster with `priority` in place of the earlier
+     `SystemSignature.tsx` SVG. Both were replaced by the coded hero above.
+   - Deliberate load animation: staggered H1 line reveal → subline + CTA fade
+     (implemented in Phase 2).
 
 2. **Systems strip** (REVISED — split by content type, owner decision)
    - The scrolling marquee is now SYSTEMS-ONLY: the Client Response System
@@ -152,20 +145,23 @@
      the strip only ever showed systems and websites already had their own
      grid. An earlier screenshot suggesting they were mixed did not match
      either the source or the live site; no filter bug existed.
-   - Capability tiles (ADDED — Phase 7 UX pass): alongside the one real
-     client system (Client Response System), the strip now also shows two
-     illustrative capability tiles — Automation Hub and System Map — using
-     the `automation-hub.webp` / `system-map.webp` raster art. Captions stay
-     in capability framing (service types SetFrame builds), never phrased as
-     client case-study claims, since only one of the three is a named real
-     project. This gives the strip three tiles (marquee mode) instead of one
-     centered card, without waiting on a second real client system.
-   - `system-tower.webp` anchors the systems portion of Work as a small
-     feature visual next to the "systems that keep working after launch"
-     label.
+   - CURRENT systems strip (SUPERSEDES the 3-tile / tower version below) —
+     Phase 7.2: seven UNIQUE tiles driven by `SYSTEM_TILES` in `projects.ts`
+     (Client Response System, Lead Capture, Booking Flow, Document Intake,
+     Automation Hub, System Map, and a "What is SaaS?" concept tile). Two
+     seamless marquee copies so no tile sits next to its own duplicate and
+     there is no ~2s repeat. EVERY tile is a real `<a>` to `/knowledge#<slug>`
+     with visible focus; the duplicate copy is aria-hidden + `tabIndex -1`.
+     The "systems that keep working after launch" anchor block and its
+     `system-tower.webp` graphic were REMOVED.
+   - HISTORY (superseded): Phase 7 briefly showed three capability tiles
+     (Client Response System + Automation Hub + System Map) with the tower
+     graphic anchoring the section.
 
-3. **Services** ([ 01 ] [ 02 ] [ 03 ] numbering)
+3. **Services**
    - Three cards: Websites / Content Systems / Business Automation.
+   - Numbering: plain copper mono numerals (01 / 02 / 03) — NO brackets
+     (bracket rule, Phase 7.2).
    - Each card: outcome-first title, 2-3 sentence description, no tech jargon,
      no "AI" in titles.
    - Hover: subtle scale + copper border shift + spotlight effect (see section 7).
@@ -173,17 +169,21 @@
 4. **How we work** (3 steps, buyer's perspective, AEO-friendly)
    - Frame as question → answer where natural
      (e.g. "How does a project start?").
-   - Step numbering with bracket motif.
+   - Step numbering: plain numerals, NO bracket motif (Phase 7.2). Each step
+     also carries a small thematic micro-animation next to its heading
+     (Phase 7.3, `StepMotif.tsx`), paused unless it is the active step.
 
-5. **Selected work — website portfolio** (REVISED — split by content type)
-   - Dedicated, NON-scrolling section: a simple two-up grid of the website
-     projects (Aura Capital, Project Aura). Too few items to marquee
-     convincingly, so shown statically.
-   - Driven by the shared data array filtered to `type: "website"`.
-   - Each card: browser-chrome frame + screenshot, hover-preview effect,
-     name, one-line outcome, and a quiet "view live" link (opens in a new
-     tab, not button-styled, per section 9). Carries the signature copper
-     cursor-spotlight.
+5. **Selected work — website portfolio**
+   - CURRENT (SUPERSEDES the two-up type-filtered grid below) — Phase 7.2:
+     ONE consolidated website project (`WEBSITE_PROJECT` in `projects.ts`)
+     shown as two prototypes of one concept — Aura Capital = Prototype 01,
+     Project Aura = Prototype 02 — in a single labelled card pair.
+   - Each prototype card: browser-chrome frame + screenshot, hover-preview
+     effect, "Prototype 0N" label, name, one-line outcome, and a quiet
+     "view live" link (opens in a new tab, not button-styled, per section 9).
+     Carries the signature copper cursor-spotlight.
+   - HISTORY (superseded): originally a two-up NON-scrolling grid of two
+     separate website projects filtered by `type: "website"`.
 
 6. **About** (REVISED — impersonal, owner decision)
    - No founder-personal framing: no bio, no location-as-personal-detail,
