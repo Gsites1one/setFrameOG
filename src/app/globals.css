@@ -566,6 +566,45 @@ body {
   }
 }
 
+/* Page-transition bracket wipe (see app/template.tsx). Pure CSS: a browser
+   guarantees an animation runs once the class is attached, unlike a JS
+   animation library's effect-driven start, which is what silently failed
+   here in production. */
+@keyframes wipe-panel-left {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+@keyframes wipe-panel-right {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.wipe-panel {
+  animation-duration: 0.5s;
+  animation-delay: 0.05s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  animation-fill-mode: forwards;
+}
+.wipe-panel-left {
+  animation-name: wipe-panel-left;
+}
+.wipe-panel-right {
+  animation-name: wipe-panel-right;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wipe-panel {
+    animation: none;
+    display: none;
+  }
+}
+
 @keyframes marquee-scroll {
   from {
     transform: translateX(0);
