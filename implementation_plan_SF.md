@@ -598,6 +598,35 @@ requirement):
       to clear the "non-composited animations" diagnostic. LCP (~3.2s mobile) is
       font-swap bound and not worth chasing without a type change (a UX change),
       so it was left alone.
-- [ ] Phase 8: Final deploy to setframe.net + metatags.io verification
-      (only after the Phase 7 / 7.2 / 7.3 "still TODO" items and a clean
-      Lighthouse re-run)
+- [~] Phase 8: Final deploy to setframe.net + metatags.io verification
+      DONE this pass:
+        * setframe.net + www.setframe.net attached to the Vercel project;
+          domain ownership verified. Awaiting DNS only.
+        * SITE_URL centralised in src/lib/constants.ts. metadataBase,
+          og:image, Organization JSON-LD, sitemap and robots now all derive
+          from ONE value (previously duplicated across three files). This is
+          the guard against the past critical bug where a partial swap left
+          og:image on the wrong origin.
+        * Mobile Perf root cause found and fixed: template.tsx runs on
+          initial load (not just navigations), so the bracket wipe wrapped
+          every first paint in opacity:0 for 250ms (content at opacity 0 is
+          ineligible for LCP) behind two opaque full-screen panels for
+          ~550ms. Wipe now plays only on client-side navigations. The intro
+          curtain (opaque, ~1.25s — exactly what Speed Index measures) is now
+          skipped on phones and trimmed to 700ms elsewhere.
+        * Contact form: _gotcha honeypot + _subject added.
+      BLOCKED ON OWNER — set DNS at the registrar (currently OVH: nameservers
+      dns200/ns200.anycast.me, apex A still 213.32.10.205):
+        * remove the existing apex A record (213.32.10.205)
+        * A      @     216.198.79.1
+        * A      @     64.29.17.1
+        * CNAME  www   0b8ecdb402c87a69.vercel-dns-017.com.
+      THEN, strictly in this order:
+        1. `vercel domains verify setframe.net` returns ok.
+        2. Flip SITE_URL in src/lib/constants.ts to https://setframe.net.
+        3. Redeploy; verify og:image + favicon on metatags.io.
+        4. Re-run Lighthouse against the real domain.
+      NOTE on the form: the test submission was classified by Formspree's
+      Formshield ML filter, not by our code. Filter aggressiveness is a
+      Formspree paid-plan setting; re-test with realistic content and mark
+      "Not spam" to train it.

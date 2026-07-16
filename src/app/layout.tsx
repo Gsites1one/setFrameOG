@@ -3,6 +3,7 @@ import { Syne, Inter, IBM_Plex_Mono } from "next/font/google";
 import { IntroCurtain } from "@/components/IntroCurtain";
 import { LifeBackground } from "@/components/LifeBackground";
 import { MotionProvider } from "@/components/MotionProvider";
+import { CONTACT_EMAIL, SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
 const syne = Syne({
@@ -25,10 +26,8 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-// Absolute URLs for OG/structured data. setframe.net is not registered/live
-// yet — using the live Vercel URL until it is.
-// TODO: swap to https://setframe.net once that domain is live.
-const SITE_URL = "https://setframe.vercel.app";
+// SITE_URL is the single source for every absolute URL (see lib/constants.ts
+// for the domain-cutover note).
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -52,7 +51,7 @@ const organizationJsonLd = {
   name: "SetFrame",
   url: SITE_URL,
   logo: `${SITE_URL}/brand/wordmark-white.png`,
-  email: "hello@setframe.net",
+  email: CONTACT_EMAIL,
   description:
     "Founder-operated studio building websites and business systems for companies that run on inquiries, appointments and follow-up.",
   // No city on the brand (owner decision) — reach is stated as areaServed.
