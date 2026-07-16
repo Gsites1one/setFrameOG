@@ -577,12 +577,27 @@ requirement):
           bracket motif; brackets are aria-hidden so assistive tech still reads
           "SetFrame". No other bracket usage was added.
       STILL TODO before Phase 8 (owner-blocked): the same Lighthouse re-run
-      and Formspree E2E as Phase 7 / 7.2. Latest owner Lighthouse run before
-      this pass: mobile Perf 91 / A11y 100 / BP 100 / SEO 100 / Agentic 3/3;
-      desktop Perf 98; CLS 0 (Perf ~1 under the 92/99 floors, within run
-      variance). Re-confirm mobile after 7.3, though the new motion is below
-      the fold and paused off-screen so the load-time animation count is
-      unchanged.
+      and Formspree E2E as Phase 7 / 7.2.
+- [~] Phase 7.4 / 7.5: mobile Perf recovery (invisible to users; no UX change).
+      Owner Lighthouse runs showed mobile Perf slipping (92 → 91 → 87 → 89)
+      with Speed Index the weak metric (~5s), because the coded hero + the
+      full-viewport ambient background were animating from the first frame and
+      keeping the early filmstrip "in motion".
+        * P7.4: restored the idle-gate the previous raster hero had — the
+          HeroVisual SVG animations now pause until requestIdleCallback after
+          first paint.
+        * P7.5: extended the same idle-gate (shared `useAnimateAfterIdle` hook
+          + `.anim-gate`) to the whole `LifeBackground` layer stack (glow drift,
+          mesh, gradient shift, grain) and the hero glow blob. They resume a
+          beat after first paint — imperceptible against the graphite base, so
+          nothing changes from the visitor's perspective, but the early frames
+          Speed Index weights most are now static.
+      Owner must re-run mobile Lighthouse to confirm Perf clears the 92 floor.
+      If it still falls short, the next (still invisible) lever is trimming the
+      hero bead count / converting bead motion to compositor-friendly transforms
+      to clear the "non-composited animations" diagnostic. LCP (~3.2s mobile) is
+      font-swap bound and not worth chasing without a type change (a UX change),
+      so it was left alone.
 - [ ] Phase 8: Final deploy to setframe.net + metatags.io verification
       (only after the Phase 7 / 7.2 / 7.3 "still TODO" items and a clean
       Lighthouse re-run)

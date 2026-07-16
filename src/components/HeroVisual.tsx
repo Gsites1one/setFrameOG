@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useAnimateAfterIdle } from "@/lib/useAnimateAfterIdle";
 
 // Coded hero focal visual (P7.2): the SetFrame idea expressed in SVG, no
 // raster and no rectangular photo edge. A business on the left leaks copper
@@ -46,19 +47,7 @@ export function HeroVisual() {
   // Hold the continuous CSS pulses until the browser is idle after first
   // paint, so they never compete with the headline for the LCP / Speed Index
   // window.
-  const [animate, setAnimate] = useState(false);
-
-  useEffect(() => {
-    const start = () => setAnimate(true);
-    const ric = window.requestIdleCallback;
-    const idleId = ric
-      ? ric(start, { timeout: 1200 })
-      : window.setTimeout(start, 800);
-    return () => {
-      if (window.cancelIdleCallback) window.cancelIdleCallback(idleId as number);
-      else clearTimeout(idleId as number);
-    };
-  }, []);
+  const animate = useAnimateAfterIdle();
 
   // Up to 10px parallax on fine pointers only; static otherwise.
   useEffect(() => {

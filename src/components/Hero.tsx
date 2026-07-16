@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { m, useReducedMotion } from "framer-motion";
+import { useAnimateAfterIdle } from "@/lib/useAnimateAfterIdle";
 import { CtaButton } from "./CtaButton";
 import { HeroVisual } from "./HeroVisual";
 
@@ -12,16 +13,22 @@ import { HeroVisual } from "./HeroVisual";
 
 export function Hero() {
   const shouldReduceMotion = useReducedMotion();
+  const animate = useAnimateAfterIdle();
 
   return (
     <section
       id="hero"
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-24"
     >
+      {/* Idle-gated so the glow's opacity pulse doesn't run inside the Speed
+          Index window (P7.5). */}
       <div
         aria-hidden="true"
-        className="ambient-glow pointer-events-none absolute left-1/2 top-1/3 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent blur-[120px]"
-      />
+        data-animate={animate ? "on" : "off"}
+        className="anim-gate pointer-events-none absolute inset-0"
+      >
+        <div className="ambient-glow absolute left-1/2 top-1/3 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent blur-[120px]" />
+      </div>
       <HeroVisual />
 
       <div className="relative mb-8">
