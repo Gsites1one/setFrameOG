@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useForm, ValidationError } from "@formspree/react";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 
@@ -209,7 +210,11 @@ export function ContactForm() {
 
       <p className="text-center text-xs leading-relaxed text-foreground/50">
         Your details are used only to reply to your message. No newsletters,
-        no sharing with third parties.
+        no sharing with third parties. Read the{" "}
+        <Link href="/privacy" className="text-accent hover:opacity-80">
+          privacy policy
+        </Link>
+        .
       </p>
     </form>
   );

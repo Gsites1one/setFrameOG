@@ -32,11 +32,11 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "SetFrame — Websites and systems that quietly run your business",
+  title: "SetFrame — Websites and systems that run your business",
   description:
     "SetFrame builds websites and systems that catch what your business quietly loses and turn it into movement.",
   openGraph: {
-    title: "SetFrame — Websites and systems that quietly run your business",
+    title: "SetFrame — Websites and systems that run your business",
     description:
       "SetFrame builds websites and systems that catch what your business quietly loses and turn it into movement.",
     url: SITE_URL,
