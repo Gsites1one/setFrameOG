@@ -60,16 +60,25 @@
   the hero headline frame, the process rail, or any other body text. Section
   numbers are now oversized low-opacity mono ghost numerals with a copper
   hairline; buttons and the [S] / [SetFrame] logo keep the brackets.
-- Raster illustrations (ADDED — Phase 7 UX pass, do not regenerate): five
-  isometric renders in `public/hero/` and `public/systems/`, all sharing the
-  graphite backdrop so they blend into the site background —
-  `leak-to-movement.webp` (hero signature), `response-system.webp`,
-  `automation-hub.webp`, `system-map.webp` (systems strip tiles), and
-  `system-tower.webp` (systems section anchor visual). These replace the
-  earlier in-code SVG hero/system-flow graphics as the visual base plate;
-  the SVG pulse/motion vocabulary (`.flow-dash`, `.flow-node`, etc.) stays in
+- Raster illustrations (ADDED — Phase 7 UX pass, do not regenerate).
+  CURRENT (Phase 9, verified against `public/`): seven isometric renders in
+  `public/systems/` driving the systems strip / `/knowledge` tiles —
+  `response-system.webp`, `lead-capture.webp`, `booking-flow.webp`,
+  `document-intake.webp`, `automation-hub.webp`, `system-map.webp`, and the
+  "What is SaaS?" concept tile `saas.webp` — plus `public/approach/
+  tailored.webp` and three `public/process/` step images (Phase 9). All
+  share the graphite backdrop so they blend into the site background.
+  ORPHANED (owner decision: leave as-is, do not delete): `public/hero/
+  leak-to-movement.webp` was the original hero art, replaced by the coded
+  `HeroVisual.tsx` SVG in Phase 7.2. It has zero references in `src/` and is
+  NOT the OG image source (that is `public/brand/opengraph-source.png`,
+  Phase 8, a separate asset) — the two are easy to confuse since both are
+  copper/teal hero-style art. `public/systems/system-tower.webp` (the
+  earlier systems-section anchor) was deleted in Phase 7.2 along with the
+  section it anchored.
+  The SVG pulse/motion vocabulary (`.flow-dash`, `.flow-node`, etc.) stays in
   use elsewhere (Services graphics) and as compositor-safe overlays where it
-  still reads well on top of the raster.
+  still reads well on top of a raster.
 
 ## 3. Color System
 
@@ -104,6 +113,13 @@
 
 ## 4. Site Structure (single page + minimal footer pages)
 
+CURRENT on-page order (Phase 9, verified in `src/app/page.tsx`): Hero →
+Services (01) → Work (02, merges the website prototypes and the systems
+strip — see items 2 and 5 below, kept separate here for history) → How we
+work (03) → About (04) → Approach band → FAQ (05) → Final CTA → Footer.
+The numbered list below is grouped by TOPIC, not page order; where a number
+is given it is the on-page section numeral, current as of Phase 9.
+
 1. **Hero** (REVISED again after review: loss-led messaging, sell movement
    not technology; never mention team size or city in the hero)
    - Wordmark kicker: [SetFrame] wordmark above the H1, first element to fade in.
@@ -135,7 +151,8 @@
    - Deliberate load animation: staggered H1 line reveal → subline + CTA fade
      (implemented in Phase 2).
 
-2. **Systems strip** (REVISED — split by content type, owner decision)
+2. **Systems strip** — lives inside the `Work` section (02), not standalone
+   (REVISED — split by content type, owner decision)
    - The scrolling marquee is now SYSTEMS-ONLY: the Client Response System
      flow diagram and any future automation / system graphics or animated
      diagrams. No website screenshots here.
@@ -158,22 +175,36 @@
      (Client Response System + Automation Hub + System Map) with the tower
      graphic anchoring the section.
 
-3. **Services**
+3. **Services** — section 01 (RENUMBERED — Phase 9, was 02; now the first
+   section after the hero so the broad capability statement is not preceded
+   by the narrower Work/proof section; see section 4 top note and Phase 9
+   checklist).
    - Three cards: Websites / Content Systems / Business Automation.
-   - Numbering: plain copper mono numerals (01 / 02 / 03) — NO brackets
+   - Card numbering: plain copper mono numerals (01 / 02 / 03) — NO brackets
      (bracket rule, Phase 7.2).
    - Each card: outcome-first title, 2-3 sentence description, no tech jargon,
      no "AI" in titles.
    - Hover: subtle scale + copper border shift + spotlight effect (see section 7).
 
-4. **How we work** (3 steps, buyer's perspective, AEO-friendly)
+4. **How we work** — section 03 (3 steps, buyer's perspective, AEO-friendly)
    - Frame as question → answer where natural
      (e.g. "How does a project start?").
-   - Step numbering: plain numerals, NO bracket motif (Phase 7.2). Each step
-     also carries a small thematic micro-animation next to its heading
-     (Phase 7.3, `StepMotif.tsx`), paused unless it is the active step.
+   - Step numbering: plain numerals, NO bracket motif (Phase 7.2).
+   - CURRENT (SUPERSEDES the sticky scroll-rail + StepMotif micro-animation
+     described in the history below) — Phase 9: a static 3-column grid
+     (stacked on mobile), no sticky positioning, no scroll-triggered step
+     advance. Each step: a thin copper line icon, a non-overlapping ghost
+     numeral, the existing question as title, the existing answer as
+     description, and a supporting image from `public/process/` below. One-
+     time Reveal fade-in only. Server component, no client JS.
+   - HISTORY (superseded): Phase 7.3 added a sticky number rail (desktop) with
+     a small thematic micro-animation next to each step's heading
+     (`StepMotif.tsx`), paused unless active. `StepMotif.tsx` is left in the
+     repo but is now unused dead code (owner can prune).
 
-5. **Selected work — website portfolio**
+5. **Selected work — website portfolio** — lives inside the `Work` section
+   (02, headed "Built and running", Phase 9) alongside the systems strip
+   (item 2 above), not standalone.
    - CURRENT (SUPERSEDES the two-up type-filtered grid below) — Phase 7.2:
      ONE consolidated website project (`WEBSITE_PROJECT` in `projects.ts`)
      shown as two prototypes of one concept — Aura Capital = Prototype 01,
@@ -185,14 +216,14 @@
    - HISTORY (superseded): originally a two-up NON-scrolling grid of two
      separate website projects filtered by `type: "website"`.
 
-6. **About** (REVISED — impersonal, owner decision)
+6. **About** — section 04 (REVISED — impersonal, owner decision)
    - No founder-personal framing: no bio, no location-as-personal-detail,
      no photo or photo placeholder.
    - Impersonal studio description: what SetFrame is, what it specializes in,
      how it helps the visitor's business. 3-4 sentences, outcome-first
      (section 6 copy rules).
 
-7. **FAQ** (objection handling, AEO-friendly)
+7. **FAQ** — section 05 (objection handling, AEO-friendly)
    - 4-6 questions structured as direct question → concise answer:
      pricing approach, timeline, what happens after launch, do you only work
      with financial firms (answer: no — that is a focus, not a limit).
@@ -303,14 +334,17 @@ requirement):
 - **Marquee strip:** continuous horizontal marquee for project logos/mockups.
 - **Bracket beam detail:** thin animated copper line that draws along section
   dividers as they enter the viewport (echoes the [ ] motif).
-  SHIPPED — Phase 7 UX pass: `SectionNumber.tsx` is the shared component now
-  used by all five numbered sections (Work [01], Services [02], Process
-  [03], About [04], FAQ [05]) — a larger IBM Plex Mono number with a small
-  bracket-corner tick detail, paired with a copper line that draws in
-  (scaleX + opacity) once on section-enter. The Process sticky rail also
-  gained a weight hierarchy: the active step number is large and
-  copper-filled, inactive step numbers are small and outline-only (text-stroke,
-  transparent fill), alongside the existing progress dots.
+  SHIPPED — Phase 7 UX pass: `SectionNumber.tsx` is the shared component used
+  by all five numbered sections. CURRENT numbering (Phase 9, RENUMBERED —
+  Services and Work swapped so the broad capability statement comes first):
+  Services [01], Work [02], Process [03], About [04], FAQ [05]. Design
+  UPDATED — Phase 9: the numeral moved from an absolute watermark behind the
+  heading to an in-flow block above it (so it can never overlap text), no
+  longer has the bracket-corner tick detail, still paired with a copper line
+  that draws in (scaleX + opacity) once on section-enter.
+  Process rail weight hierarchy (active large + copper-filled, inactive small
+  + outline) — SUPERSEDED, Phase 9: the sticky rail no longer exists; "How
+  we work" is now a static 3-column grid (see section 4, item 4).
 - Explicitly out of scope: 3D globe, WebGL scenes, particle systems.
 
 ## 8. SEO / OG / Technical Setup (from day one, not post-launch)
@@ -380,14 +414,24 @@ requirement):
 
 ## 12. Definition of Done
 
-- [x] Lighthouse Performance score > 90
-      On setframe.net: mobile 90 (desktop 98), confirmed by the owner as
-      sufficient after a two-step journey — an interim run scored 86 (an
-      accounting artefact: every visual metric had improved, but fixing the
-      opacity:0 first paint also pulled hydration cost inside the TBT
-      measurement window). Root cause fixed by moving 15 Framer Motion
-      scroll-reveal components to CSS + one shared observer. See Phase 8 for
-      the full account.
+- [~] Lighthouse Performance score > 90
+      HISTORY: on setframe.net, mobile 90 (desktop 98) after the Phase 8
+      cutover, confirmed by the owner as sufficient after a two-step journey —
+      an interim run scored 86 (an accounting artefact: every visual metric
+      had improved, but fixing the opacity:0 first paint also pulled hydration
+      cost inside the TBT measurement window). Root cause fixed by moving 15
+      Framer Motion scroll-reveal components to CSS + one shared observer.
+      See Phase 8 for the full account.
+      SINCE THEN (Phases 7.2-9, all landed after that measurement): coded
+      hero SVG, richer ambient background, new /knowledge route, per-section
+      micro-animations, and the Phase 9 restructure/redesign all touched
+      Perf-relevant code. Owner re-runs during this stretch tracked
+      91 -> 87 -> 89 -> 90/92 (mobile/desktop) as fixes landed (idle-gating
+      the hero + background animations, Phase 7.4/7.5). NOT YET
+      RE-VERIFIED after Phase 9 specifically (hero edge fix, numeral
+      reposition, section reorder, static HowWeWork grid, contact form
+      change) — re-run mobile + desktop on setframe.net before treating this
+      as done again.
 - [x] Lighthouse SEO score > 90 — owner run: 100 mobile + desktop.
 - [x] Fully responsive and tested on mobile viewport (375px: no horizontal
       overflow, sticky process falls back to a stacked list).
@@ -522,9 +566,9 @@ requirement):
           reasons. Removed the hero H1 bracket frame (`BracketMark` no longer
           used) and dropped brackets from non-button text ("← Back", the
           "Message sent" confirmation). Buttons + logo keep the motif.
-          NOTE: `SystemSignature.tsx` and `BracketMark.tsx` are now unused
-          (left in place — deleting them was outside this pass's stated
-          removals; owner can prune).
+          NOTE: `SystemSignature.tsx` and `BracketMark.tsx` became unused
+          here — DELETED in Phase 7.4 housekeeping (see below), so this is no
+          longer an open item.
       Systems strip + /knowledge:
         * Deleted the "systems that keep working after launch" anchor block
           and its tower graphic (`system-tower.webp` removed).
