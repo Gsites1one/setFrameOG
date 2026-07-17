@@ -27,9 +27,10 @@ export default function Home() {
       <FloatingNav />
       <main>
         <Hero />
-        <Work />
+        {/* Broad capability first (what gets built), then the proof (Work),
+            so the offering never reads narrower than it is (P9). */}
         <Services />
-        {/* Proof block deferred: no real metric yet, no fabricated quote. */}
+        <Work />
         <HowWeWork />
         <About />
         <ApproachBand />

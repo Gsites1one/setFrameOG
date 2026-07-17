@@ -713,3 +713,52 @@ requirement):
       fix for this pattern). Does not affect rendered output and Best
       Practices still scores 100, so left alone rather than touched under an
       explicit no-other-changes instruction.
+
+- [~] Phase 9: Clarity pass (structure, naming, hero edge, process redesign)
+      + a contact-form field tweak. External review drove this.
+      Hero background edge (Task 1): the coded hero SVG was capped at
+      `max-w-5xl` and centred, so on wide viewports it read as an inset panel
+      with graphite "bars" either side. Removed the width cap so the SVG spans
+      the full viewport and fades out via its radial mask (widened to
+      `ellipse 72% 62% ... transparent 92%`); verified at 1920px it now fills
+      the width with no hard edge.
+      Section numeral overlap (Task 2): `SectionNumber`'s ghost numeral was an
+      absolute watermark behind the heading and clipped into the text on some
+      breakpoints. It is now an in-flow block ABOVE the heading (smaller,
+      faint), so it can never overlap heading/body at any width. Verified no
+      overlap across all five numbered sections at mobile + desktop.
+      Scope narrative (Task 3, owner chose "reorder"): the broad capability
+      statement ("What gets built", Services) now comes FIRST, right after the
+      hero (renumbered 01); the portfolio + systems strip (Work, renumbered
+      02) follows as ONE cohesive proof section headed "Built and running."
+      Its intro states both sides (websites live + systems running); the
+      website-only "why websites" lines that re-narrowed the framing were
+      replaced with that both-category intro (no service removed — websites
+      are still in Services and shown as prototypes). The systems strip subhead
+      is reframed as "The systems side of the same work" so it ties back to the
+      capability list instead of reading as a separate, narrower offering.
+      Process redesign (Task 4): "How working together goes" dropped the
+      sticky scroll-rail + continuous StepMotif animation for a static 3-column
+      grid (stacked on mobile). Each step: a thin copper line icon, a
+      non-overlapping ghost numeral, the existing question as title, the
+      existing answer as description, and a supporting image below. Images are
+      the owner's public/process/ art, which arrived mis-named and oversized
+      (discovery.webp.jpg 70KB, preview.webp.png 1.96MB, ongoing.webp.png
+      1.68MB); converted to real optimised .webp at the correct paths
+      (16/38/33 KiB) and removed the originals. One-time Reveal fade only, no
+      scroll-driven motion. HowWeWork is now a server component (no client JS);
+      `StepMotif.tsx` is left in place but unused (deleting was outside this
+      pass's scope).
+      Preserved (Task 5, confirmed untouched): hero ambient glow blob,
+      systems-strip / website-card cursor spotlight, FinalCta "leak reversed"
+      banner, ContactReasons staggered reveal.
+      Contact form (owner request, separate from the review): the "preferred
+      contact method" select is now controlled and moved above the contact
+      field; choosing "Phone call" or "Video call" swaps the Email row for a
+      Phone number row (label / name / type=tel / autocomplete / validation all
+      switch, visible label stays correct). Note: a phone-preference submission
+      carries no email, so the reply happens by the requested call, not email.
+      OWNER must re-run Lighthouse on setframe.net to confirm no category
+      regressed (verification not possible from here). Build passes, no new
+      console errors (the pre-existing <html> hydration dev-warning is
+      unchanged and unrelated).

@@ -31,7 +31,7 @@ export function Services() {
   return (
     <section id="services" className="cv-auto mx-auto max-w-5xl px-6 py-24">
       <Reveal>
-        <SectionNumber number="02" title="What gets built." />
+        <SectionNumber number="01" title="What gets built." />
       </Reveal>
 
       <div className="grid gap-6 md:grid-cols-3">

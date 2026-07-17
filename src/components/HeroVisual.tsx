@@ -95,14 +95,17 @@ export function HeroVisual() {
       className="anim-gate pointer-events-none absolute inset-0 flex items-center justify-center"
       style={{
         maskImage:
-          "radial-gradient(ellipse 60% 60% at 50% 46%, #000 45%, transparent 82%)",
+          "radial-gradient(ellipse 72% 62% at 50% 45%, #000 48%, transparent 92%)",
         WebkitMaskImage:
-          "radial-gradient(ellipse 60% 60% at 50% 46%, #000 45%, transparent 82%)",
+          "radial-gradient(ellipse 72% 62% at 50% 45%, #000 48%, transparent 92%)",
       }}
     >
+      {/* Full-viewport width (no max-w cap): the ambient visual spans edge to
+          edge and fades out via the radial mask, so it never reads as an inset
+          panel with hard graphite bars on wide screens (P9). */}
       <svg
         viewBox="0 0 800 460"
-        className="h-full w-full max-w-5xl"
+        className="h-full w-full"
         fill="none"
         preserveAspectRatio="xMidYMid slice"
       >

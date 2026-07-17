@@ -1,151 +1,109 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
-import { m, useReducedMotion } from "framer-motion";
+import Image from "next/image";
 import { Reveal } from "./Reveal";
 import { SectionNumber } from "./SectionNumber";
-import { StepMotif } from "./StepMotif";
 
-// Buyer-perspective steps, framed as question -> answer for AEO. Each carries
-// a small motif matched to its meaning (P7.3).
+// Thin copper line icons, one per step (P9). Static, not filled/bold.
+type IconProps = { className?: string };
+
+function IconConversation({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M4 4h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-5l-4 3v-3H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
+      <path d="M8 9.5h.01M11 9.5h.01M14 9.5h.01" />
+    </svg>
+  );
+}
+
+function IconPreview({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z" />
+      <circle cx="12" cy="12" r="2.5" />
+    </svg>
+  );
+}
+
+function IconOngoing({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M20 12a8 8 0 1 1-2.3-5.6" />
+      <path d="M20 4v4h-4" />
+    </svg>
+  );
+}
+
+// Buyer-perspective steps, framed as question -> answer for AEO. Copy is
+// unchanged; the supporting images live in public/process/.
 const STEPS = [
   {
     number: "01",
-    question: "Where does it start?",
-    answer:
-      "A conversation, not a pitch. We find where your business leaks time, leads or follow-up, and what stopping that is worth.",
-    motif: "conversation" as const,
+    title: "Where does it start?",
+    body: "A conversation, not a pitch. We find where your business leaks time, leads or follow-up, and what stopping that is worth.",
+    Icon: IconConversation,
+    image: "/process/discovery.webp",
+    alt: "Two armchairs facing each other with a copper speech bubble above them, representing the first conversation.",
   },
   {
     number: "02",
-    question: "What do I see before committing?",
-    answer:
-      "A working preview. You see the direction with your own eyes before anything is signed, so there is nothing to take on faith.",
-    motif: "preview" as const,
+    title: "What do I see before committing?",
+    body: "A working preview. You see the direction with your own eyes before anything is signed, so there is nothing to take on faith.",
+    Icon: IconPreview,
+    image: "/process/preview.webp",
+    alt: "An isometric screen showing a website half built in copper and half as a teal wireframe, representing a working preview.",
   },
   {
     number: "03",
-    question: "When do results show up?",
-    answer:
-      "Launch lands in weeks, not months. Then the system keeps working: replying, reminding and booking while you run the business.",
-    motif: "ongoing" as const,
+    title: "When do results show up?",
+    body: "Launch lands in weeks, not months. Then the system keeps working: replying, reminding and booking while you run the business.",
+    Icon: IconOngoing,
+    image: "/process/ongoing.webp",
+    alt: "An open crate with a glowing monitor inside and a teal ring around it, representing a system that keeps running after launch.",
   },
 ];
 
+// Static 3-column process (P9). Replaces the earlier sticky scroll-rail: no
+// sticky positioning, no scroll-triggered step advance, no continuous motion.
+// Each step just fades up once on scroll-into-view via the shared
+// RevealObserver (compositor-safe CSS, reduced-motion shows everything).
 export function HowWeWork() {
-  const shouldReduceMotion = useReducedMotion();
-  const [active, setActive] = useState(0);
-  const stepRefs = useRef<(HTMLLIElement | null)[]>([]);
-
-  useEffect(() => {
-    if (shouldReduceMotion) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActive(Number(entry.target.getAttribute("data-index")));
-          }
-        }
-      },
-      { rootMargin: "-45% 0px -45% 0px" }
-    );
-    for (const el of stepRefs.current) if (el) observer.observe(el);
-    return () => observer.disconnect();
-  }, [shouldReduceMotion]);
-
   return (
-    <section
-      id="how"
-      className="mx-auto max-w-5xl overflow-x-clip px-6 py-24"
-    >
+    <section id="how" className="mx-auto max-w-5xl px-6 py-24">
       <Reveal>
         <SectionNumber number="03" title="How working together goes." />
-        <p className="-mt-6 mb-12 font-mono text-xs tracking-widest text-muted">
-          scroll — how it works
-        </p>
       </Reveal>
 
-      <div className="lg:grid lg:grid-cols-[160px_1fr] lg:gap-16">
-        {/* Sticky number rail: desktop + motion only. */}
-        {!shouldReduceMotion && (
-          <div className="hidden lg:block" aria-hidden="true">
-            <div className="sticky top-[38vh]">
-              {/* Weight hierarchy: active step is large and copper-filled;
-                  inactive steps are small and outline-only (transparent fill
-                  + text stroke). No brackets — the [ ] motif is logo + buttons
-                  only. */}
-              <div className="flex flex-col gap-2 font-mono">
-                {STEPS.map((step, i) => (
-                  <div
-                    key={step.number}
-                    className={
-                      i === active
-                        ? "text-6xl font-medium leading-none text-accent transition-all duration-300"
-                        : "text-2xl font-medium leading-none text-transparent opacity-40 transition-all duration-300 [-webkit-text-stroke:1px_var(--color-foreground)]"
-                    }
-                  >
-                    {step.number}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 flex gap-2">
-                {STEPS.map((step, i) => (
-                  <span
-                    key={step.number}
-                    className={`h-1 w-8 rounded-full transition-colors ${
-                      i === active ? "bg-accent" : "bg-foreground/15"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <ol className="space-y-12 lg:space-y-0">
-          {STEPS.map((step, i) => (
-            <li
-              key={step.number}
-              ref={(el) => {
-                stepRefs.current[i] = el;
-              }}
-              data-index={i}
-              className={
-                shouldReduceMotion
-                  ? "border-t border-accent/30 pt-5"
-                  : "flex flex-col justify-center border-t border-accent/30 pt-5 lg:min-h-[62vh] lg:border-t-0 lg:pt-0"
-              }
-            >
-              <m.div
-                initial={shouldReduceMotion ? false : { opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: false, margin: "-30% 0px -30% 0px" }}
-                transition={
-                  shouldReduceMotion
-                    ? { duration: 0 }
-                    : { duration: 0.5, ease: "easeOut" }
-                }
-              >
-                {/* number shown inline on mobile / reduced motion; the rail
-                    carries it on desktop */}
+      <div className="grid gap-10 md:grid-cols-3 md:gap-8">
+        {STEPS.map((step, i) => (
+          <Reveal key={step.number} delay={i * 0.1}>
+            <div className="flex h-full flex-col">
+              <div className="flex items-center gap-3">
+                <step.Icon className="h-6 w-6 shrink-0 text-accent" />
                 <span
-                  className={`font-mono text-sm font-medium text-accent ${
-                    shouldReduceMotion ? "" : "lg:hidden"
-                  }`}
+                  aria-hidden="true"
+                  className="font-mono text-2xl font-medium leading-none text-foreground/[0.18]"
                 >
                   {step.number}
                 </span>
-                <div className="mt-3 flex items-center gap-3">
-                  <StepMotif type={step.motif} active={i === active} />
-                  <h3 className="font-display text-xl font-semibold sm:text-2xl">
-                    {step.question}
-                  </h3>
-                </div>
-                <p className="mt-3 max-w-lg text-foreground/70">{step.answer}</p>
-              </m.div>
-            </li>
-          ))}
-        </ol>
+              </div>
+              <h3 className="mt-4 font-display text-lg font-semibold sm:text-xl">
+                {step.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-foreground/70">
+                {step.body}
+              </p>
+              <div className="relative mt-5 aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-surface">
+                <Image
+                  src={step.image}
+                  alt={step.alt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  loading="lazy"
+                  className="object-cover"
+                />
+              </div>
+            </div>
+          </Reveal>
+        ))}
       </div>
     </section>
   );

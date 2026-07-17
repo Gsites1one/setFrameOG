@@ -40,6 +40,10 @@ export function ContactForm() {
   const [state, handleSubmit] = useForm(FORMSPREE_ID);
   const shouldReduceMotion = useReducedMotion();
   const messagePlaceholder = useRotatingPlaceholder(MESSAGE_HINTS);
+  // When the visitor prefers a call, the contact field asks for a phone number
+  // instead of an email — you can't email-reply to someone who wants a call.
+  const [method, setMethod] = useState("Email");
+  const wantsPhone = method === "Phone call" || method === "Video call";
   // The rotating hint is a decorative overlay only; the visible <label> below
   // stays the field's accessible name. Hide the overlay once the field has
   // content or focus so it never sits over what the visitor is typing.
@@ -106,30 +110,6 @@ export function ContactForm() {
 
       <div>
         <label
-          htmlFor="email"
-          className="mb-1.5 block font-mono text-xs tracking-wide text-foreground/60"
-        >
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          name="email"
-          required
-          autoComplete="email"
-          placeholder="you@company.com"
-          className={FIELD_CLASSES}
-        />
-        <ValidationError
-          prefix="Email"
-          field="email"
-          errors={state.errors}
-          className="mt-1 block text-xs text-accent"
-        />
-      </div>
-
-      <div>
-        <label
           htmlFor="contactMethod"
           className="mb-1.5 block font-mono text-xs tracking-wide text-foreground/60"
         >
@@ -138,7 +118,8 @@ export function ContactForm() {
         <select
           id="contactMethod"
           name="contactMethod"
-          defaultValue="Email"
+          value={method}
+          onChange={(e) => setMethod(e.target.value)}
           className={FIELD_CLASSES}
         >
           <option>Email</option>
@@ -146,6 +127,59 @@ export function ContactForm() {
           <option>Video call</option>
         </select>
       </div>
+
+      {/* Email or phone, depending on the preferred contact method above. The
+          visible <label> stays the field's accessible name and switches with
+          the field so it is never mislabelled. */}
+      {wantsPhone ? (
+        <div>
+          <label
+            htmlFor="phone"
+            className="mb-1.5 block font-mono text-xs tracking-wide text-foreground/60"
+          >
+            Phone number
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            name="phone"
+            required
+            autoComplete="tel"
+            placeholder="+31 6 12 34 56 78"
+            className={FIELD_CLASSES}
+          />
+          <ValidationError
+            prefix="Phone"
+            field="phone"
+            errors={state.errors}
+            className="mt-1 block text-xs text-accent"
+          />
+        </div>
+      ) : (
+        <div>
+          <label
+            htmlFor="email"
+            className="mb-1.5 block font-mono text-xs tracking-wide text-foreground/60"
+          >
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            required
+            autoComplete="email"
+            placeholder="you@company.com"
+            className={FIELD_CLASSES}
+          />
+          <ValidationError
+            prefix="Email"
+            field="email"
+            errors={state.errors}
+            className="mt-1 block text-xs text-accent"
+          />
+        </div>
+      )}
 
       <div>
         <label
