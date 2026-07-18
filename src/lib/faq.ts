@@ -28,6 +28,6 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     question: "Do you only work with financial firms?",
     answer:
-      "No. Financial and advisory firms are a focus, not a limit. If your business runs on inquiries, appointments and follow-up, this works for you.",
+      "No. The advisory project shown is one example of the approach in action. Websites, response systems, outreach, e-commerce and the rest apply to any business that wants more of what it already does well, whatever the industry.",
   },
 ];

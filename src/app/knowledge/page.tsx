@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { CtaButton } from "@/components/CtaButton";
-import { SYSTEM_TILES } from "@/lib/projects";
+import { CAPABILITIES } from "@/lib/projects";
 
 export const metadata: Metadata = {
   title: "How the systems work — SetFrame",
@@ -37,7 +37,8 @@ const STEPS = [
   },
 ];
 
-const TILE_SECTIONS = SYSTEM_TILES.filter((tile) => tile.knowledge);
+// Every capability now carries a knowledge object, so this is the full list.
+const TILE_SECTIONS = CAPABILITIES;
 
 export default function KnowledgePage() {
   return (
@@ -119,7 +120,7 @@ export default function KnowledgePage() {
                       What it is
                     </dt>
                     <dd className="mt-1.5 leading-relaxed text-foreground/80">
-                      {tile.knowledge!.whatItIs}
+                      {tile.knowledge.whatItIs}
                     </dd>
                   </div>
                   <div>
@@ -127,7 +128,7 @@ export default function KnowledgePage() {
                       The leak it fixes
                     </dt>
                     <dd className="mt-1.5 leading-relaxed text-foreground/80">
-                      {tile.knowledge!.theLeak}
+                      {tile.knowledge.theLeak}
                     </dd>
                   </div>
                   <div>
@@ -135,7 +136,7 @@ export default function KnowledgePage() {
                       What you see
                     </dt>
                     <dd className="mt-1.5 leading-relaxed text-foreground/80">
-                      {tile.knowledge!.whatClientSees}
+                      {tile.knowledge.whatClientSees}
                     </dd>
                   </div>
                 </dl>

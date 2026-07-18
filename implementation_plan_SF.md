@@ -819,3 +819,107 @@ requirement):
       returns across Phases 7.4/7.5/9 and the explicit "not at all costs"
       instruction, treated as accepted rather than chased further unless the
       owner decides otherwise.
+
+## 14. Iteration 3 — Architecture & Breadth Revision
+
+Triggered by a third-party review and an independent code read, both landing
+on the same root cause: the page introduced up to 9 named things (3
+illustrated services + 7 thin system tiles, one of which, "What is SaaS?",
+was course-glossary content, not a delivered system) with badly uneven visual
+weight. Two things got full illustration, seven got a name and a tagline —
+visitors remembered the two illustrated things and forgot the rest, producing
+a "websites, then a pile of stuff, then just websites again" impression.
+
+**Non-negotiable constraints for this iteration** (owner-set, override
+anything earlier that conflicts):
+- The site is not niche-targeted. Financial-advisory framing stays confined
+  to the two existing website prototypes; nothing else should read as built
+  for one industry.
+- No course terminology surfaces verbatim anywhere on the page.
+- The offering is broader than websites + documents + chat: lead capture,
+  high-volume personalized outreach, e-commerce, dashboards/Python tooling,
+  specialized LLM skill-building all belong on the page.
+- No FAQ hedging about scope or client history (there are zero clients yet).
+  Confident, capability-forward language now; revisit once real proof exists.
+- No fixed pillar count. The organizing principle is visual consistency and
+  trust, not a compressed feature list.
+- Every card leads with the pain the visitor already feels; the mechanism is
+  the supporting line, never the headline.
+
+**Graphics**: before writing any code, five new isometric illustrations were
+requested from the owner (this style cannot be generated in-session — it is
+AI-rendered raster art, confirmed by direct visual inspection of the existing
+assets) with an explicit brief per image. All five arrived matching the
+established grammar exactly (dark graphite background, copper+teal glowing
+isometric forms, connector lines, floating node cubes, no baked-in text):
+`site-conversion.jpg`, `instant-reply.jpg`, `outreach-scale.jpg`,
+`storefront-cycle.jpg`, `skill-assembly.jpg`.
+
+**Task 1-2 — unified capability gallery** (`src/lib/projects.ts`,
+`src/components/Services.tsx`): `SYSTEM_TILES`/`SystemTile` renamed to
+`CAPABILITIES`/`Capability`. Ten cards now share identical visual treatment
+(isometric image, pain-led headline, one outcome line), replacing both the
+old 3-card Services grid and the old 7-tile systems marquee:
+Websites / Automated response & booking / Document processing / Lead capture
+/ High-volume outreach / E-commerce / Dashboards & Python tooling /
+Specialized LLM skill-building / Automation Hub / System Map (the last two
+kept as bonus cards per owner decision — real capabilities, not forced into
+the original 8-item table). Asset reassignment: `response-system.webp`'s
+actual imagery (bar chart, gauge, database icons) reads as a dashboard, not
+"instant reply," so it now illustrates Dashboards; the response/booking card
+uses the new `instant-reply.jpg`. "What is SaaS?" is fully removed from the
+gallery/strip — it already lived in its own hardcoded, visually separate
+section on /knowledge (never data-driven from the tile array), so removing it
+from `CAPABILITIES` was sufficient with no template changes needed there.
+Coded SVG components (`ServiceGraphics.tsx`, its three `Graphic*` exports)
+and the old marquee (`SystemsStrip.tsx`) are deleted, not left unused —
+keeping them would have reintroduced the exact two-illustration-language
+inconsistency this iteration exists to fix.
+
+**Task 3 — nav simplification** (`FloatingNav.tsx`): "Systems" removed as a
+top-level destination. Nav is Work / Services / FAQ (+ Contact), matching the
+3-item acceptance criterion. /knowledge stays reachable: every gallery card
+links to `/knowledge#slug`, plus a "See how each one works" link under the
+gallery, plus the existing ApproachBand link — contextual, not competing.
+
+**Task 4 — hero clipping fix** (`HeroVisual.tsx`): `preserveAspectRatio`
+changed from `xMidYMid slice` to `xMidYMid meet`. Slice mode scaled the SVG
+to cover its container, cropping whichever axis overflowed; on a tall/narrow
+viewport (most phones) the business-glyph rectangle near the left edge got
+sliced through, reading as "the border is cut off." Meet mode never crops,
+only adds empty space on the non-matching axis. Verified at 320px width
+directly: the glyph's bounding rect stays fully inside the SVG's rendered
+box.
+
+**Task 5 — FAQ confidence** (`src/lib/faq.ts`): "Do you only work with
+financial firms?" rewritten from "financial firms are a focus, not a limit"
+(itself a hedge) to naming the broadened capability range as the evidence of
+breadth, with no claim of client history that doesn't exist. Other FAQ
+answers already stated general capability/timeline, not client history, so
+needed no change.
+
+**Task 6 — visual consistency**: achieved by construction, not audited
+separately — all 10 gallery cards render from one card template (same image
+treatment, same hover: lift + border + ambient glow, same anatomy), so there
+is one illustration language on the page, not two.
+
+**Task 7 — verification performed in this session** (owner should still spot
+-check visually; the screenshot tool was unreliable again this session, so
+this was verified via direct DOM measurement, which is more precise than a
+visual glance for confirming zero overlap):
+- 320px width: hero glyph rect fully within the SVG's rendered box (no
+  clipping); every numbered section's ghost numeral sits with a clean ~12px
+  gap above its heading, zero overlap, across all 5 numbered sections.
+- Desktop width: same, zero overlap, zero clipping.
+- Gallery: all 10 cards confirmed rendering with correct pain-led headline,
+  correct outcome line, correct image, in the live DOM.
+- Nav confirmed at exactly 3 items (Work / Services / FAQ).
+- Work section confirmed showing only the 2 website prototypes, no
+  duplicate systems content.
+- FAQ confirmed rendering the rewritten financial-firms answer on click.
+- /knowledge confirmed rendering all 10 capability sections plus the
+  separately-framed SaaS explainer (first, no image, distinct treatment).
+- Build passes clean; no new lint errors introduced (two pre-existing
+  `setState`-in-effect errors in `template.tsx` and `IntroCurtain.tsx` are
+  unchanged, unrelated to this iteration, and were already flagged to the
+  owner in an earlier pass as intentionally left alone).

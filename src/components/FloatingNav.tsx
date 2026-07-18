@@ -4,10 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { NavWordmark } from "./NavWordmark";
 
+// Iteration 3, Task 3: nav stays at 3 section-level items. /knowledge is
+// still reachable (each Services card links to it, plus a "See how each one
+// works" link under the gallery) but is no longer a competing top-level
+// destination alongside Work/Services.
 const NAV_LINKS = [
   { href: "#work", label: "Work" },
   { href: "#services", label: "Services" },
-  { href: "/knowledge", label: "Systems" },
   { href: "#faq", label: "FAQ" },
 ];
 

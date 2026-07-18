@@ -107,7 +107,7 @@ export function HeroVisual() {
         viewBox="0 0 800 460"
         className="h-full w-full"
         fill="none"
-        preserveAspectRatio="xMidYMid slice"
+        preserveAspectRatio="xMidYMid meet"
       >
         <defs>
           <radialGradient id="hero-cluster-glow">

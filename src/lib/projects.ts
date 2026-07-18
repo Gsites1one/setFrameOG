@@ -1,10 +1,14 @@
-// Single source of truth for portfolio + systems content.
+// Single source of truth for portfolio + capability content.
 //
-// Two distinct shapes now:
-//  - WEBSITE_PROJECT: one consolidated website project shown as two prototypes.
-//  - SYSTEM_TILES: the scrolling systems strip on the homepage AND the
-//    per-tile depth sections on /knowledge (each tile's `slug` is the anchor
-//    the strip links to: /knowledge#<slug>).
+// Two distinct shapes:
+//  - WEBSITE_PROJECT: the one real portfolio case study (two prototypes),
+//    shown in the Work section as actual delivered-work proof.
+//  - CAPABILITIES: the broad range of what gets built, shown as one
+//    consistently-illustrated gallery (Services section) AND as the deeper
+//    per-capability sections on /knowledge (each slug is the anchor).
+//    Every headline leads with the pain a visitor already feels; the
+//    mechanism that solves it stays in the supporting line, never the
+//    headline (Iteration 3, Constraint 6).
 
 /* ─────────────────────────── Website work ─────────────────────────── */
 
@@ -56,39 +60,59 @@ export const WEBSITE_PROJECT: {
   ],
 };
 
-/* ─────────────────────────── Systems ─────────────────────────── */
+/* ─────────────────────────── Capabilities ─────────────────────────── */
 
-export type SystemTile = {
+export type Capability = {
   slug: string;
+  /**
+   * Plain-language capability name — shown as the H2 on /knowledge, where a
+   * named heading is the right frame for a deeper technical page. NOT shown
+   * on the Services gallery card itself: that card's headline must lead with
+   * the pain (below), never the mechanism name (Iteration 3, Constraint 6).
+   */
   name: string;
-  /** Short caption on the strip tile. */
-  tagline: string;
+  /** Pain-led headline — what the visitor already feels. Shown on the card. */
+  headline: string;
+  /** Mechanism/outcome — the payoff, shown as the supporting line. */
+  outcome: string;
   image: string;
   alt: string;
-  /**
-   * Depth shown on /knowledge. Omitted for the SaaS concept tile, which
-   * links to the dedicated "What is SaaS?" explainer section instead.
-   */
-  knowledge?: {
+  knowledge: {
     whatItIs: string;
     theLeak: string;
     whatClientSees: string;
   };
-  /** The plain-language concept tile ("What is SaaS?"). */
-  concept?: boolean;
 };
 
-// Capability tiles: the kinds of systems SetFrame builds. Framed as service
-// types (never as a specific client's measured results), so nothing here
-// needs a fabricated metric. If a specific number is ever added, tag it
-// [[REVIEW]] so the owner signs off before it ships.
-export const SYSTEM_TILES: SystemTile[] = [
+// The full range of what gets built. Every card gets identical visual
+// treatment (full illustration, same anatomy) — breadth is represented by
+// showing all of it well, not by trimming to a tidy small number.
+export const CAPABILITIES: Capability[] = [
   {
-    slug: "response-system",
-    name: "Client Response System",
-    tagline: "Every inquiry answered in seconds.",
-    image: "/systems/response-system.webp",
-    alt: "Illustration of a central dashboard node wired to a chip network, representing an automated response system",
+    slug: "websites",
+    name: "Websites that convert",
+    headline: "Visitors browse and leave without booking a call.",
+    outcome:
+      "A credible, fast site that makes the next step obvious and easy to take.",
+    image: "/systems/site-conversion.jpg",
+    alt: "Isometric illustration of a screen-like panel with a search bar and data lines, wired to glowing connector nodes, representing a website built to convert",
+    knowledge: {
+      whatItIs:
+        "A site built specifically to turn a first-time visitor into a booked call, not just to look good.",
+      theLeak:
+        "Visitors compare you against everyone else in seconds. A slow or unclear site loses that comparison before you get a chance to talk to them.",
+      whatClientSees:
+        "A fast, credible site where the next step is obvious, and a working preview you can see before anything is signed.",
+    },
+  },
+  {
+    slug: "response-booking",
+    name: "Automated response and booking",
+    headline: "Leads go cold while you're busy with something else.",
+    outcome:
+      "Every inquiry gets an instant, on-brand reply and a booking link, day or night.",
+    image: "/systems/instant-reply.jpg",
+    alt: "Isometric illustration of a glowing envelope icon with a clock beside it and pulsing rings beneath, wired to connector nodes, representing an instant automated reply",
     knowledge: {
       whatItIs:
         "An always-on responder that greets every inquiry the moment it lands, by form, chat or message, and points it to the right next step.",
@@ -99,39 +123,11 @@ export const SYSTEM_TILES: SystemTile[] = [
     },
   },
   {
-    slug: "lead-capture",
-    name: "Lead Capture",
-    tagline: "Turn visitors into named leads.",
-    image: "/systems/lead-capture.webp",
-    alt: "Illustration of a glowing point traveling along a curved path into a screen, representing a visitor becoming a captured lead",
-    knowledge: {
-      whatItIs:
-        "A short, fast path that turns an interested visitor into a named lead with the details you actually need.",
-      theLeak:
-        "Visitors who were ready to talk leave because the form was long, unclear, or asked for too much too soon.",
-      whatClientSees:
-        "Focused capture points that fill the inbox with real prospects instead of noise.",
-    },
-  },
-  {
-    slug: "booking-flow",
-    name: "Booking Flow",
-    tagline: "Let people book themselves in.",
-    image: "/systems/booking-flow.webp",
-    alt: "Illustration of a calendar on a platform with a glowing path curving toward it, representing self-serve booking",
-    knowledge: {
-      whatItIs:
-        "A self-serve booking path that lets people pick a time and confirm without a single back-and-forth email.",
-      theLeak:
-        "Every 'what times are you free?' exchange adds delay, and some people give up before a slot is agreed.",
-      whatClientSees:
-        "A calendar that fills itself, with reminders so fewer people forget the appointment.",
-    },
-  },
-  {
-    slug: "document-intake",
-    name: "Document Intake",
-    tagline: "Paperwork that files itself.",
+    slug: "document-processing",
+    name: "Document processing",
+    headline: "Hours lost every week to paperwork and admin.",
+    outcome:
+      "Invoices, forms and documents read, checked and filed the moment they arrive.",
     image: "/systems/document-intake.webp",
     alt: "Illustration of a stack of documents connected by a glowing line to an ordered set of blocks, representing automated document intake",
     knowledge: {
@@ -144,9 +140,92 @@ export const SYSTEM_TILES: SystemTile[] = [
     },
   },
   {
+    slug: "lead-capture",
+    name: "Lead capture",
+    headline: "Visitors leave without any way to follow up with them.",
+    outcome: "Every visitor becomes a named, reachable contact.",
+    image: "/systems/lead-capture.webp",
+    alt: "Illustration of a glowing point traveling along a curved path into a screen, representing a visitor becoming a captured lead",
+    knowledge: {
+      whatItIs:
+        "A short, fast path that turns an interested visitor into a named lead with the details you actually need.",
+      theLeak:
+        "Visitors who were ready to talk leave because the form was long, unclear, or asked for too much too soon.",
+      whatClientSees:
+        "Focused capture points that fill the inbox with real prospects instead of noise.",
+    },
+  },
+  {
+    slug: "outreach",
+    name: "High-volume personalized outreach",
+    headline: "Not enough new clients coming in.",
+    outcome:
+      "Automated, individually-personalized outreach at volume — consistent daily contact with hundreds or thousands of prospects.",
+    image: "/systems/outreach-scale.jpg",
+    alt: "Isometric illustration of a central glowing cube radiating many thin connector lines to a wide ring of smaller nodes, representing outreach sent at scale to many individual prospects",
+    knowledge: {
+      whatItIs:
+        "A system that reaches large numbers of prospects with messages personalized to each one, instead of one generic blast.",
+      theLeak:
+        "Personalizing outreach by hand does not scale, and generic blasts get ignored or marked as spam.",
+      whatClientSees:
+        "Consistent daily contact with hundreds or thousands of prospects, each message speaking to that specific person or business.",
+    },
+  },
+  {
+    slug: "ecommerce",
+    name: "E-commerce",
+    headline: "Losing sales because there's no way to buy outside business hours.",
+    outcome: "A store built and running, selling around the clock.",
+    image: "/systems/storefront-cycle.jpg",
+    alt: "Isometric illustration of a small lit storefront with an awning, sitting on a glowing looped platform, representing a store that runs continuously",
+    knowledge: {
+      whatItIs:
+        "A store that takes orders and payments on its own, day and night, without someone behind the counter.",
+      theLeak:
+        "Every hour the shop is not open online is an hour of sales going to whoever is open.",
+      whatClientSees: "A store that is always open, selling while you sleep.",
+    },
+  },
+  {
+    slug: "dashboards",
+    name: "Dashboards and Python tooling",
+    headline: "No clear picture of what's actually happening in the business.",
+    outcome: "Real numbers, live, in one place.",
+    image: "/systems/response-system.webp",
+    alt: "Illustration of a glowing dashboard panel with a search bar and data bars, wired to connector nodes, representing a live business data dashboard",
+    knowledge: {
+      whatItIs:
+        "A live dashboard that pulls the numbers that matter into one place, updated automatically instead of copied in by hand.",
+      theLeak:
+        "Decisions get made on guesswork because the real numbers are scattered across spreadsheets, inboxes and someone's memory.",
+      whatClientSees:
+        "One screen with the figures that actually matter, always current, no manual pulling of reports.",
+    },
+  },
+  {
+    slug: "ai-skills",
+    name: "Specialized LLM skill-building",
+    headline: "Repetitive work eating hours that should go to clients.",
+    outcome: "Tasks that used to take a person now run themselves.",
+    image: "/systems/skill-assembly.jpg",
+    alt: "Isometric illustration of a central modular cube built from four snapping pieces, connected to a ring of smaller floating modules, representing a custom capability assembled from parts",
+    knowledge: {
+      whatItIs:
+        "A custom-built capability, shaped around one specific repetitive task in your business.",
+      theLeak:
+        "The tasks eating the most hours are usually the most repetitive ones, and repetitive work is exactly what should not need a person every time.",
+      whatClientSees:
+        "The task still gets done, just without someone doing it by hand every time.",
+    },
+  },
+  {
     slug: "automation-hub",
-    name: "Automation Hub",
-    tagline: "Repetitive work, handled for you.",
+    name: "Automation hub",
+    headline:
+      "Reminders and hand-offs fall through the cracks when your team is stretched thin.",
+    outcome:
+      "Follow-ups, reminders and updates that happen automatically, every time.",
     image: "/systems/automation-hub.webp",
     alt: "Illustration of a radiating gear hub connected to smaller nodes, representing business process automation",
     knowledge: {
@@ -160,8 +239,10 @@ export const SYSTEM_TILES: SystemTile[] = [
   },
   {
     slug: "system-map",
-    name: "System Map",
-    tagline: "Every process, out of your head.",
+    name: "System map",
+    headline: "If it's only in your head, the business stalls the moment you're away.",
+    outcome:
+      "Every process documented and connected, so things keep moving without you holding it together.",
     image: "/systems/system-map.webp",
     alt: "Illustration of a network board with mapped nodes and connections, representing a business's systemized processes",
     knowledge: {
@@ -172,13 +253,5 @@ export const SYSTEM_TILES: SystemTile[] = [
       whatClientSees:
         "Every step documented and connected, so the business keeps moving without you holding it together.",
     },
-  },
-  {
-    slug: "saas",
-    name: "What is SaaS?",
-    tagline: "New to this? Start here.",
-    image: "/systems/saas.webp",
-    alt: "Illustration of a glowing data block sending a trail of light to a small house, representing software delivered as a service",
-    concept: true,
   },
 ];
