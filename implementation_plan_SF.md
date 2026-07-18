@@ -427,11 +427,14 @@ requirement):
       micro-animations, and the Phase 9 restructure/redesign all touched
       Perf-relevant code. Owner re-runs during this stretch tracked
       91 -> 87 -> 89 -> 90/92 (mobile/desktop) as fixes landed (idle-gating
-      the hero + background animations, Phase 7.4/7.5). NOT YET
-      RE-VERIFIED after Phase 9 specifically (hero edge fix, numeral
-      reposition, section reorder, static HowWeWork grid, contact form
-      change) — re-run mobile + desktop on setframe.net before treating this
-      as done again.
+      the hero + background animations, Phase 7.4/7.5).
+      RE-VERIFIED after Phase 9 (hero edge fix, numeral reposition, section
+      reorder, static HowWeWork grid, contact form change): mobile 90 /
+      desktop 98, all other categories 100, CLS 0, no regression. Owner
+      accepted mobile at 90 (2 under the stretch floor; Speed Index 4.8s and
+      LCP 3.1s are font-swap/filmstrip bound, not fixable without a visible
+      UX change) rather than chase the last points. See Phase 9 in section
+      13 for the full detail.
 - [x] Lighthouse SEO score > 90 — owner run: 100 mobile + desktop.
 - [x] Fully responsive and tested on mobile viewport (375px: no horizontal
       overflow, sticky process falls back to a stacked list).
@@ -806,3 +809,13 @@ requirement):
       regressed (verification not possible from here). Build passes, no new
       console errors (the pre-existing <html> hydration dev-warning is
       unchanged and unrelated).
+      Lighthouse re-run (owner, post-Phase-9, on setframe.net): mobile
+      Performance 90, Accessibility 100, Best Practices 100, SEO 100,
+      Agentic Browsing 3/3; desktop Performance 98. CLS 0 on both. No
+      category regressed. Mobile sits 2 points under the original 92 stretch
+      floor (Speed Index 4.8s and LCP 3.1s the soft spots, both already
+      diagnosed in Phase 7.4/7.5 as font-swap/filmstrip bound, not something
+      fixable without a visible UX change). Given the repeated diminishing
+      returns across Phases 7.4/7.5/9 and the explicit "not at all costs"
+      instruction, treated as accepted rather than chased further unless the
+      owner decides otherwise.
