@@ -2,41 +2,45 @@ import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "./Reveal";
 
-// Calm "approach" band (P7.2) near the About block: a modern, individual
-// method stated in two short sentences, with a supporting graphic and a quiet
-// link into the depth on /knowledge. Light on purpose; the detail lives there.
+// "The approach" banner — image-dominant (Iteration 4, Task 6). The supplied
+// puzzle artwork is a complete 3:2 infographic (nine capability pieces, one
+// glowing "specific gap" piece, a four-step process column, a closing line),
+// so the HTML no longer restates any of that: only the eyebrow label and the
+// link into /knowledge remain. The artwork carries the message.
+//
+// The art already matches the site's dark-graphite + copper palette, so it
+// needs the shared container (radius + line-colour border) but not the warm
+// unifying tint. On narrow screens the infographic's small legend text would
+// drop below legibility if shrunk to fit, so instead it holds a legible
+// min-width and the frame pans horizontally.
 export function ApproachBand() {
   return (
     <section aria-label="Our approach" className="mx-auto max-w-5xl px-6 py-16">
       <Reveal>
-        <div className="grid items-center gap-8 rounded-2xl border border-white/10 bg-surface/40 p-6 md:grid-cols-[1fr_1.4fr] md:gap-12 md:p-10">
-          <div className="relative mx-auto aspect-square w-40 shrink-0 overflow-hidden rounded-xl md:w-full md:max-w-xs">
+        <div className="rounded-2xl border border-white/10 bg-surface/40 p-4 sm:p-6 md:p-8">
+          <p className="mb-5 font-mono text-xs uppercase tracking-widest text-accent">
+            The approach
+          </p>
+
+          <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Image
-              src="/approach/tailored.webp"
-              alt="Illustration of a copper core linked to four distinct nodes, representing a system tailored to one business"
-              fill
-              sizes="(max-width: 768px) 160px, 320px"
+              src="/approach/puzzle.webp"
+              width={1536}
+              height={1024}
+              alt="A dark isometric puzzle of nine business areas with one empty slot, and a glowing copper piece labelled the specific gap in your business hovering above it. A four-step column reads: we investigate, we identify the gap, we find the perfect fit, we complete the picture."
+              sizes="(min-width: 1024px) 960px, 640px"
               loading="lazy"
-              className="object-contain"
+              className="h-auto w-full min-w-[640px] max-w-none rounded-lg border border-white/10"
             />
           </div>
-          <div>
-            <p className="font-mono text-xs uppercase tracking-widest text-accent">
-              The approach
-            </p>
-            <p className="mt-4 font-display text-xl font-semibold leading-snug sm:text-2xl">
-              Every business leaks in a different place: time, leads, or
-              follow-up. We diagnose your specific gap and build to it, not to a
-              template.
-            </p>
-            <Link
-              href="/knowledge"
-              className="mt-6 inline-flex items-center gap-1.5 font-mono text-xs text-foreground/70 transition-colors hover:text-accent"
-            >
-              Learn how the systems work
-              <span aria-hidden="true">→</span>
-            </Link>
-          </div>
+
+          <Link
+            href="/knowledge"
+            className="mt-6 inline-flex items-center gap-1.5 font-mono text-xs text-foreground/70 transition-colors hover:text-accent"
+          >
+            Learn how the systems work
+            <span aria-hidden="true">→</span>
+          </Link>
         </div>
       </Reveal>
     </section>

@@ -91,7 +91,11 @@ export function HowWeWork() {
               <p className="mt-2 text-sm leading-relaxed text-foreground/70">
                 {step.body}
               </p>
-              <div className="relative mt-5 aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-surface">
+              {/* mt-auto pushes every illustration to the bottom of its
+                  equal-height column so all three share one baseline (T5).
+                  Columns are equal width and the boxes share one aspect ratio,
+                  so aligned bottoms mean aligned tops too. */}
+              <div className="relative mt-5 aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-surface md:mt-auto">
                 <Image
                   src={step.image}
                   alt={step.alt}

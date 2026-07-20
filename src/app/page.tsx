@@ -6,7 +6,8 @@ import { FloatingNav } from "@/components/FloatingNav";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
 import { HowWeWork } from "@/components/HowWeWork";
-import { Services } from "@/components/Services";
+import { CapabilityMarquee } from "@/components/CapabilityMarquee";
+import { Foundation } from "@/components/Foundation";
 import { Work } from "@/components/Work";
 import { FAQ_ITEMS } from "@/lib/faq";
 
@@ -27,9 +28,10 @@ export default function Home() {
       <FloatingNav />
       <main>
         <Hero />
-        {/* Broad capability first (what gets built), then the proof (Work),
-            so the offering never reads narrower than it is (P9). */}
-        <Services />
+        {/* 01 The foundation (three pillars) grounds the visitor before the
+            breadth strip lists specifics; then the proof (Work). Iteration 4. */}
+        <Foundation />
+        <CapabilityMarquee />
         <Work />
         <HowWeWork />
         <About />

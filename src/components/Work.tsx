@@ -3,10 +3,10 @@ import { Reveal } from "./Reveal";
 import { SectionNumber } from "./SectionNumber";
 import { WebsiteCard } from "./WebsiteCard";
 
-// Delivered-work proof (Iteration 3): the real portfolio case study only.
-// The broader capability range lives entirely in Services now — this section
-// no longer duplicates it, so there is exactly one place breadth is shown
-// and exactly one place proof is shown.
+// Delivered-work proof. Intro reframed around adaptability (Iteration 4,
+// Task 3): the same brief produced two deliberately different designs, which
+// makes the "shaped around the client" pillar visible without naming it — and
+// keeps the niche (advisory) inside the prototype cards, not the section head.
 export function Work() {
   return (
     <section id="work" className="mx-auto max-w-5xl px-6 py-24" aria-label="Selected work">
@@ -15,12 +15,14 @@ export function Work() {
       </Reveal>
 
       <Reveal delay={0.1}>
-        <div className="mb-6">
-          <h3 className="font-display text-lg font-semibold">
-            {WEBSITE_PROJECT.name}
+        <div className="mb-8 max-w-2xl">
+          <h3 className="font-display text-2xl font-bold sm:text-3xl">
+            One brief. Two different directions.
           </h3>
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-foreground/60">
-            {WEBSITE_PROJECT.concept}
+          <p className="mt-3 leading-relaxed text-foreground/70">
+            The same brief, taken two deliberately different ways: one goal,
+            two designs that share nothing but intent. Proof that a project is
+            shaped around the client, not stamped from a house template.
           </p>
         </div>
         <div className="grid gap-8 md:grid-cols-2">
