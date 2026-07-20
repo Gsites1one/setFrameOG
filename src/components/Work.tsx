@@ -15,7 +15,7 @@ export function Work() {
       </Reveal>
 
       <Reveal delay={0.1}>
-        <div className="mb-8 max-w-2xl">
+        <div className="mx-auto mb-12 max-w-2xl text-center">
           <h3 className="font-display text-2xl font-bold sm:text-3xl">
             One brief. Two different directions.
           </h3>
