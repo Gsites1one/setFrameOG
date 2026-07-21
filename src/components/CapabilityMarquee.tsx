@@ -40,11 +40,13 @@ function MarqueeCard({
           className="object-contain p-2 transition-transform duration-500 ease-out group-hover:scale-105"
         />
       </div>
+      {/* Both lines share one text size; hierarchy comes from weight/colour
+          only, so every card in the belt reads uniformly. */}
       <div className="min-w-0">
         <p className="font-display text-sm font-semibold leading-snug">
           {capability.headline}
         </p>
-        <p className="mt-1.5 text-xs leading-relaxed text-foreground/60">
+        <p className="mt-1.5 text-sm leading-snug text-foreground/60">
           {capability.outcome}
         </p>
       </div>
