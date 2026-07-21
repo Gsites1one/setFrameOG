@@ -1,9 +1,14 @@
-import { Reveal } from "./Reveal";
+"use client";
 
-// The three "why work with me" reasons, given a copper line-icon, a stronger
-// type hierarchy and a staggered scroll reveal (opacity + translate, handled
-// by Reveal — compositor-safe). No brackets: numbers are gone in favour of
-// icons, so nothing competes with the logo/button motif.
+import { useEffect, useState } from "react";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
+
+// The three "why work with me" reasons as ONE quiet rotating line
+// (Iteration 4.1, item 6): the previous three-card grid pulled too much
+// attention on a page whose only job is the form. One reason shows at a
+// time, crossfading 1-2-3-1-2-3 (~6s each, paused on hover so it can be
+// read); copper line-icon + title + body, with small progress dots.
+// Reduced motion: no rotation, all three rendered as a plain static list.
 
 type IconProps = { className?: string };
 
@@ -75,24 +80,95 @@ const REASONS = [
   },
 ];
 
+const HOLD_MS = 6000;
+
 export function ContactReasons() {
-  return (
-    <section aria-label="Why SetFrame" className="mt-12 grid gap-6 sm:grid-cols-3">
-      {REASONS.map((reason, i) => (
-        <Reveal key={reason.title} delay={i * 0.1}>
-          <div className="flex h-full flex-col rounded-xl border border-white/10 bg-surface/60 p-5">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-accent/30 text-accent">
+  const shouldReduceMotion = useReducedMotion();
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (shouldReduceMotion || paused) return;
+    const id = window.setInterval(
+      () => setIndex((i) => (i + 1) % REASONS.length),
+      HOLD_MS
+    );
+    return () => window.clearInterval(id);
+  }, [shouldReduceMotion, paused]);
+
+  // Reduced motion: plain static list, nothing rotates.
+  if (shouldReduceMotion) {
+    return (
+      <section aria-label="Why SetFrame" className="mt-12 space-y-5">
+        {REASONS.map((reason) => (
+          <div key={reason.title} className="flex items-start gap-4">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-accent/30 text-accent">
               <reason.Icon className="h-5 w-5" />
             </span>
-            <h2 className="mt-4 font-display text-base font-semibold leading-snug">
-              {reason.title}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-foreground/70">
-              {reason.body}
-            </p>
+            <div>
+              <h2 className="font-display text-base font-semibold">
+                {reason.title}
+              </h2>
+              <p className="mt-1 text-sm leading-relaxed text-foreground/70">
+                {reason.body}
+              </p>
+            </div>
           </div>
-        </Reveal>
-      ))}
+        ))}
+      </section>
+    );
+  }
+
+  const reason = REASONS[index];
+
+  return (
+    <section
+      aria-label="Why SetFrame"
+      className="mt-12 rounded-xl border border-white/10 bg-surface/60 p-5"
+      onPointerEnter={() => setPaused(true)}
+      onPointerLeave={() => setPaused(false)}
+    >
+      {/* Fixed min-height so the card never resizes as copy length changes. */}
+      <div className="relative min-h-[7.5rem] sm:min-h-[6rem]">
+        <AnimatePresence mode="wait">
+          <m.div
+            key={reason.title}
+            className="flex items-start gap-4"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+          >
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-accent/30 text-accent">
+              <reason.Icon className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="font-display text-base font-semibold">
+                {reason.title}
+              </h2>
+              <p className="mt-1 text-sm leading-relaxed text-foreground/70">
+                {reason.body}
+              </p>
+            </div>
+          </m.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Progress dots double as manual controls. */}
+      <div className="mt-4 flex items-center gap-2">
+        {REASONS.map((r, i) => (
+          <button
+            key={r.title}
+            type="button"
+            aria-label={`Show reason ${i + 1}: ${r.title}`}
+            aria-current={i === index || undefined}
+            onClick={() => setIndex(i)}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              i === index ? "w-6 bg-accent" : "w-1.5 bg-foreground/20 hover:bg-foreground/40"
+            }`}
+          />
+        ))}
+      </div>
     </section>
   );
 }

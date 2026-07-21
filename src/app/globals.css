@@ -17,12 +17,11 @@
   --font-mono: var(--font-ibm-plex-mono);
 }
 
-html {
-  /* Anchor nav smooth-scroll (Task 4). The existing reduced-motion block
-     below forces `scroll-behavior: auto !important`, so this is instant
-     under prefers-reduced-motion with no extra JS needed. */
-  scroll-behavior: smooth;
-}
+/* No global scroll-behavior: smooth. With it set on <html>, every route
+   change (e.g. homepage -> /knowledge) smooth-scrolled the whole page back
+   to the top, which read as the page "rolling everything up" on navigation.
+   In-page anchor links get smooth scrolling via scrollIntoView in
+   FloatingNav instead, so navigation is instant and anchors stay smooth. */
 
 body {
   background-color: var(--color-background);
@@ -615,7 +614,8 @@ body {
 }
 
 .marquee-track {
-  animation: marquee-scroll 40s linear infinite;
+  /* ~80s per loop: slow enough to read a card headline in passing. */
+  animation: marquee-scroll 80s linear infinite;
 }
 
 .marquee:hover .marquee-track,

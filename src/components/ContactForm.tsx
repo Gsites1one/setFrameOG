@@ -130,9 +130,22 @@ export function ContactForm() {
 
       {/* Email or phone, depending on the preferred contact method above. The
           visible <label> stays the field's accessible name and switches with
-          the field so it is never mislabelled. */}
+          the field so it is never mislabelled.
+          Deliberately NO AnimatePresence exit here: a required form field must
+          never depend on an exit animation completing to appear (the earlier
+          page-transition bug was exactly that failure class). The old row
+          unmounts instantly; the new row plays a quick enter-only fade/slide,
+          which reads as a smooth swap with zero deadlock risk. Both rows share
+          one anatomy, so there is no height jump. */}
       {wantsPhone ? (
-        <div>
+        <m.div
+          key="phone"
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={
+            shouldReduceMotion ? { duration: 0 } : { duration: 0.22, ease: "easeOut" }
+          }
+        >
           <label
             htmlFor="phone"
             className="mb-1.5 block font-mono text-xs tracking-wide text-foreground/60"
@@ -154,9 +167,16 @@ export function ContactForm() {
             errors={state.errors}
             className="mt-1 block text-xs text-accent"
           />
-        </div>
+        </m.div>
       ) : (
-        <div>
+        <m.div
+          key="email"
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={
+            shouldReduceMotion ? { duration: 0 } : { duration: 0.22, ease: "easeOut" }
+          }
+        >
           <label
             htmlFor="email"
             className="mb-1.5 block font-mono text-xs tracking-wide text-foreground/60"
@@ -178,7 +198,7 @@ export function ContactForm() {
             errors={state.errors}
             className="mt-1 block text-xs text-accent"
           />
-        </div>
+        </m.div>
       )}
 
       <div>

@@ -53,6 +53,23 @@ export function FloatingNav() {
               ) : (
                 <a
                   href={link.href}
+                  onClick={(e) => {
+                    // Smooth scroll for in-page anchors only. The global
+                    // scroll-behavior:smooth was removed because it made
+                    // route changes smooth-scroll the whole page to the top;
+                    // this keeps the nice anchor glide without that bug.
+                    // Reduced-motion users get the browser default (instant).
+                    const target = document.querySelector(link.href);
+                    if (
+                      target &&
+                      !window.matchMedia("(prefers-reduced-motion: reduce)")
+                        .matches
+                    ) {
+                      e.preventDefault();
+                      target.scrollIntoView({ behavior: "smooth" });
+                      history.pushState(null, "", link.href);
+                    }
+                  }}
                   className="transition-colors hover:text-accent"
                 >
                   {link.label}

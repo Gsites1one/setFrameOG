@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CAPABILITIES, type Capability } from "@/lib/projects";
+import { Eyebrow } from "./Eyebrow";
 
 // Section 01b — breadth showcase (Iteration 4, Task 2). The ten pain cards
 // that used to be a static grid now scroll horizontally as a compact strip
@@ -54,10 +55,8 @@ function MarqueeCard({
 export function CapabilityMarquee() {
   return (
     <section aria-label="What SetFrame builds" className="py-8">
-      <div className="mx-auto mb-8 max-w-5xl px-6">
-        <p className="font-mono text-xs uppercase tracking-widest text-foreground/50">
-          Wherever it leaks, it gets built.
-        </p>
+      <div className="mx-auto mb-10 max-w-5xl px-6">
+        <Eyebrow align="center">Wherever it leaks, it gets built.</Eyebrow>
       </div>
 
       <div className="marquee overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

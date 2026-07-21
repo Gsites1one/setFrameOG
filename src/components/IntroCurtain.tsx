@@ -3,17 +3,18 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, m } from "framer-motion";
 
-const SESSION_KEY = "sf-intro-seen";
-
-// First-visit-per-session brand orientation (<=700ms). The hero headline and
-// CTA are already painted underneath; this is a lightweight overlay that never
-// delays interaction. Dismissed instantly by scroll, tap, or keydown. Runs at
-// most once.
+// Brand orientation on page open (<=700ms). The hero headline and CTA are
+// already painted underneath; this is a lightweight overlay that never delays
+// interaction. Dismissed instantly by scroll, tap, or keydown.
 //
-// Skipped entirely on prefers-reduced-motion, on return visits, and on phones.
-// The phone rule is deliberate: an opaque overlay is precisely what Speed Index
-// penalises, and mobile is both the slowest connection and the ranking-critical
-// surface. Desktop keeps the branded moment at no measurable cost.
+// Plays on EVERY hard page load (owner request — the earlier once-per-session
+// gate made it look like the animation had disappeared). It only mounts on
+// full loads anyway; client-side navigations never replay it.
+//
+// Skipped entirely on prefers-reduced-motion and on phones. The phone rule is
+// deliberate: an opaque overlay is precisely what Speed Index penalises, and
+// mobile is both the slowest connection and the ranking-critical surface.
+// Desktop keeps the branded moment at no measurable cost.
 export function IntroCurtain() {
   const [show, setShow] = useState(false);
 
@@ -23,9 +24,7 @@ export function IntroCurtain() {
     ).matches;
     const isPhone = window.matchMedia("(max-width: 767px)").matches;
     if (reducedMotion || isPhone) return;
-    if (sessionStorage.getItem(SESSION_KEY)) return;
 
-    sessionStorage.setItem(SESSION_KEY, "1");
     setShow(true);
 
     const dismiss = () => setShow(false);
