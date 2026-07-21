@@ -28,25 +28,28 @@ function MarqueeCard({
       href={`/knowledge#${capability.slug}`}
       tabIndex={interactive ? undefined : -1}
       aria-hidden={interactive ? undefined : true}
-      className="group mx-3 flex w-[320px] shrink-0 items-center gap-4 rounded-xl border border-white/10 bg-surface p-4 transition-colors hover:border-accent/50 focus-visible:border-accent"
+      className="group mx-3 flex h-44 w-[420px] shrink-0 items-center gap-4 overflow-hidden rounded-xl border border-white/10 bg-surface p-5 transition-colors hover:border-accent/50 focus-visible:border-accent"
     >
-      <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-lg bg-background">
+      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-background">
         <Image
           src={capability.image}
           alt={capability.alt}
           fill
-          sizes="128px"
+          sizes="80px"
           loading="lazy"
-          className="object-contain p-2 transition-transform duration-500 ease-out group-hover:scale-105"
+          className="object-contain p-1.5 transition-transform duration-500 ease-out group-hover:scale-105"
         />
       </div>
-      {/* Both lines share one text size; hierarchy comes from weight/colour
-          only, so every card in the belt reads uniformly. */}
-      <div className="min-w-0">
-        <p className="font-display text-sm font-semibold leading-snug">
+      {/* Every card is one fixed size (h-44 x 420px) with a wide text column,
+          so copy wraps to a similar number of lines instead of ballooning one
+          card and leaving the next half empty. Both lines share one text size;
+          hierarchy comes from weight/colour only. The clamps are a safety net
+          for future copy — at this width none of the current lines hit them. */}
+      <div className="flex min-h-[6.5rem] min-w-0 flex-col justify-center">
+        <p className="line-clamp-3 font-display text-sm font-semibold leading-snug">
           {capability.headline}
         </p>
-        <p className="mt-1.5 text-sm leading-snug text-foreground/60">
+        <p className="mt-1.5 line-clamp-4 text-sm leading-snug text-foreground/60">
           {capability.outcome}
         </p>
       </div>
