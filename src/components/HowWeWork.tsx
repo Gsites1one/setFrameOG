@@ -38,7 +38,7 @@ const STEPS = [
   {
     number: "01",
     title: "Where does it start?",
-    body: "A conversation, not a pitch. We find where your business leaks time, leads or follow-up, and what stopping that is worth.",
+    body: "A conversation, not a pitch. We find where your business leaks time, leads or follow-up, then write the goal as one sentence you can hold me to: quote turnaround goes from two days to two hours, inside 30.",
     Icon: IconConversation,
     image: "/process/discovery.webp",
     alt: "Two armchairs facing each other with a copper speech bubble above them, representing the first conversation.",
@@ -54,7 +54,7 @@ const STEPS = [
   {
     number: "03",
     title: "When do results show up?",
-    body: "Launch lands in weeks, not months. Then the system keeps working: replying, reminding and booking while you run the business.",
+    body: "A working version is live in 7 days and the full build in 30. Then the system keeps working: replying, reminding and booking while you run the business.",
     Icon: IconOngoing,
     image: "/process/ongoing.webp",
     alt: "An open crate with a glowing monitor inside and a teal ring around it, representing a system that keeps running after launch.",

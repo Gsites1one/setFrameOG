@@ -93,7 +93,7 @@ export const CAPABILITIES: Capability[] = [
     name: "Websites that convert",
     headline: "Visitors browse and leave without booking a call.",
     outcome:
-      "A credible, fast site that makes the next step obvious and easy to take.",
+      "The same traffic starts booking calls instead of leaving.",
     image: "/systems/site-conversion.jpg",
     alt: "Isometric illustration of a screen-like panel with a search bar and data lines, wired to glowing connector nodes, representing a website built to convert",
     knowledge: {
@@ -110,7 +110,7 @@ export const CAPABILITIES: Capability[] = [
     name: "Automated response and booking",
     headline: "Leads go cold while you're busy with something else.",
     outcome:
-      "Every inquiry gets an instant, on-brand reply and a booking link, day or night.",
+      "Replies land in seconds instead of hours, day or night.",
     image: "/systems/instant-reply.jpg",
     alt: "Isometric illustration of a glowing envelope icon with a clock beside it and pulsing rings beneath, wired to connector nodes, representing an instant automated reply",
     knowledge: {
@@ -127,7 +127,7 @@ export const CAPABILITIES: Capability[] = [
     name: "Document processing",
     headline: "Hours lost every week to paperwork and admin.",
     outcome:
-      "Invoices, forms and documents read, checked and filed the moment they arrive.",
+      "A morning of paperwork each week comes back as minutes.",
     image: "/systems/document-intake.webp",
     alt: "Illustration of a stack of documents connected by a glowing line to an ordered set of blocks, representing automated document intake",
     knowledge: {
@@ -143,7 +143,7 @@ export const CAPABILITIES: Capability[] = [
     slug: "lead-capture",
     name: "Lead capture",
     headline: "Visitors leave without any way to follow up with them.",
-    outcome: "Every visitor becomes a named, reachable contact.",
+    outcome: "Visitors you could never name become contacts you can reach.",
     image: "/systems/lead-capture.webp",
     alt: "Illustration of a glowing point traveling along a curved path into a screen, representing a visitor becoming a captured lead",
     knowledge: {
@@ -160,7 +160,7 @@ export const CAPABILITIES: Capability[] = [
     name: "High-volume personalized outreach",
     headline: "Not enough new clients coming in.",
     outcome:
-      "Automated, individually-personalized outreach at volume — consistent daily contact with hundreds or thousands of prospects.",
+      "Hundreds of the right prospects hear from you every week, personally.",
     image: "/systems/outreach-scale.jpg",
     alt: "Isometric illustration of a central glowing cube radiating many thin connector lines to a wide ring of smaller nodes, representing outreach sent at scale to many individual prospects",
     knowledge: {
@@ -176,7 +176,7 @@ export const CAPABILITIES: Capability[] = [
     slug: "ecommerce",
     name: "E-commerce",
     headline: "Losing sales because there's no way to buy outside business hours.",
-    outcome: "A store built and running, selling around the clock.",
+    outcome: "Orders arrive overnight and at weekends, while you sleep.",
     image: "/systems/storefront-cycle.jpg",
     alt: "Isometric illustration of a small lit storefront with an awning, sitting on a glowing looped platform, representing a store that runs continuously",
     knowledge: {
@@ -191,7 +191,7 @@ export const CAPABILITIES: Capability[] = [
     slug: "dashboards",
     name: "Dashboards and Python tooling",
     headline: "No clear picture of what's actually happening in the business.",
-    outcome: "Real numbers, live, in one place.",
+    outcome: "You know today's numbers today, not at month end.",
     image: "/systems/response-system.webp",
     alt: "Illustration of a glowing dashboard panel with a search bar and data bars, wired to connector nodes, representing a live business data dashboard",
     knowledge: {
@@ -207,7 +207,7 @@ export const CAPABILITIES: Capability[] = [
     slug: "ai-skills",
     name: "Specialized LLM skill-building",
     headline: "Repetitive work eating hours that should go to clients.",
-    outcome: "Tasks that used to take a person now run themselves.",
+    outcome: "Work that filled hours every week hands itself back.",
     image: "/systems/skill-assembly.jpg",
     alt: "Isometric illustration of a central modular cube built from four snapping pieces, connected to a ring of smaller floating modules, representing a custom capability assembled from parts",
     knowledge: {
@@ -225,7 +225,7 @@ export const CAPABILITIES: Capability[] = [
     headline:
       "Reminders and hand-offs fall through the cracks when your team is stretched thin.",
     outcome:
-      "Follow-ups, reminders and updates that happen automatically, every time.",
+      "Nothing gets forgotten, even in your busiest week.",
     image: "/systems/automation-hub.webp",
     alt: "Illustration of a radiating gear hub connected to smaller nodes, representing business process automation",
     knowledge: {
@@ -242,7 +242,7 @@ export const CAPABILITIES: Capability[] = [
     name: "System map",
     headline: "If it's only in your head, the business stalls the moment you're away.",
     outcome:
-      "Every process documented and connected, so things keep moving without you holding it together.",
+      "The business keeps running the week you are not there.",
     image: "/systems/system-map.webp",
     alt: "Illustration of a network board with mapped nodes and connections, representing a business's systemized processes",
     knowledge: {

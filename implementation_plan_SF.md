@@ -923,3 +923,122 @@ visual glance for confirming zero overlap):
   `setState`-in-effect errors in `template.tsx` and `IntroCurtain.tsx` are
   unchanged, unrelated to this iteration, and were already flagged to the
   owner in an earlier pass as intentionally left alone).
+
+---
+
+## Iteration 4.2 — owner review (5 items)
+
+### 1. Movement pillar graphic → v2
+`movementv2.png` (1.9MB) converted to WebP (72KB) and wired into pillar 1.
+Alt rewritten: v2 is a cinematic knight-move close-up with a copper light
+trail, and the previous alt described labelled milestones ("time back, leads
+that stop going cold…") that do not exist in the new image. v2's 1.50 aspect
+also fills the `aspect-[4/3]` ArtFrame better than the square file it replaced
+(1.00), so letterboxing decreased rather than increased.
+
+### 2. Mobile: back-navigation left only the hero visible — REAL FIX
+Symptom: on mobile, /contact → Back showed only the hero until a manual
+refresh. The hero is the only section with no `[data-reveal]`, so "only the
+hero is visible" is precisely the signature of every scroll reveal stuck at
+its hidden state.
+
+Could NOT be reproduced in tooling: the automation browser runs its tab at
+`visibilityState: "hidden"`, which freezes IntersectionObserver delivery, so
+reveals fail there even on a plain first load. A first "reproduction" was
+discarded as a false positive after a control test proved IO never fires in
+that tab at all. Diagnosis therefore came from the code, and the fix was
+designed to hold regardless of which mechanism was actually failing.
+
+Root problem: `RevealObserver` had **no recovery path**. Nodes were being
+observed correctly (verified: 29 `observe()` calls across a navigation), but
+if IO failed to deliver for any reason, content stayed invisible forever with
+no error — the same failure class as the old `template.tsx` opacity:0 bug, and
+the same rule applies: content must never depend on a single mechanism
+succeeding in order to be visible.
+
+Fix: IO stays the primary path, backed by a geometric sweep that reveals
+anything at or above the viewport bottom using `getBoundingClientRect` alone.
+It runs on route change (`usePathname`), on `pageshow` (bfcache restores), and
+throttled on scroll, and the scroll listener detaches itself as soon as
+nothing is left hidden. The sweep deliberately does not also test
+`rect.bottom > 0` — that would skip elements already scrolled past and strand
+hairlines above the fold when a fast scroll outruns it.
+
+Verified against the worst case: with IO fully frozen, **25/25 reveals
+recover**, including after /contact → Back.
+
+### 3. Contact form broke under Chrome Translate — root cause was NOT the crash
+Initial hypothesis (React/Translate `removeChild` conflict) was **wrong** and
+was disproved by simulation: rewriting every text node in the form produced
+zero React errors, and the swap still failed.
+
+Actual cause: the `<select>` used `<option>Email</option>` with **no `value`
+attribute**. An option with no value takes its value from its own text, so
+Chrome Translate rewriting the labels changed the selected *value* to the
+translated string. `method === "Phone call"` could then never match and the
+field silently refused to switch — which is exactly why the bug appeared only
+with translation on.
+
+Fix: explicit `value` on every option. Translate rewrites visible text but not
+attributes, so the value is stable in every language, and the submitted
+`contactMethod` now always arrives in the inbox in English rather than in
+whatever language the visitor was reading.
+
+Hardening kept alongside it (correct in its own right, prevents the crash
+class): the email and phone rows are both always mounted and swap via
+`[hidden]` + `disabled` instead of conditional rendering, and the rotating
+message hint crossfades stacked spans instead of mounting/unmounting a text
+node every 3.5s. `disabled` matters as much as `hidden` — a hidden-but-enabled
+required field blocks submission with a message the visitor cannot see, and
+disabled controls are omitted from the payload. Enter motion moved to a CSS
+keyframe (`.field-enter`), which replays on `display:none` → displayed, so the
+swap stays animated with no mount/unmount and nothing the field depends on to
+exist. Verified: with all 16 text nodes translated, both swap directions work
+with zero errors.
+
+### 4. Mobile nav CTA
+Font dropped a step on phones only (`text-[11px]`, `sm:text-xs`). The font was
+only half the problem: "[ Start a conversation ]" wrapped onto **three lines**
+at 390px, inflating the whole pill to 67px tall — that was what read as "too
+big". Full label set to nowrap would need ~128px beside Work/Services/FAQ and
+overflow a 390px screen, so phones get "[ Start ]" and `sm:` and up keep the
+full label. `aria-label` carries the complete wording at every breakpoint, so
+the accessible name never changes. Result: pill 67px → 42px, one line, fits
+with ~51px margins each side.
+
+### 5. Copy — what is being sold, time frames, outcomes over descriptions
+**What is sold.** The hero never stated the transaction. Added one mono line
+under the sub-headline — deliberately a spec line, not another paragraph, as
+the page already carries a lot of prose: "Websites and business systems, built
+to order. 7 days to a working version, 30 days to full rollout," with both
+numbers in copper. Reinforced with a new first FAQ, "What do you actually
+build?", which also strengthens the FAQPage structured data for AEO.
+
+**Time frames** (owner's own numbers: 7 days = quick win, 30 days = full
+rollout with measured change). Applied in four places only, not everywhere:
+hero spec line, process step 03 ("weeks, not months" → "live in 7 days and the
+full build in 30"), and two FAQ answers ("a few days" → "two working days";
+"two to four weeks / add one to two weeks" → 7-day quick win, 30-day complete
+project). `/knowledge` step 03 updated to match.
+
+**Descriptions → outcomes.** All ten capability `outcome` lines rewritten to
+name what changes for the client rather than what gets installed, e.g. "Real
+numbers, live, in one place" → "You know today's numbers today, not at month
+end"; "Tasks that used to take a person now run themselves" → "Work that
+filled hours every week hands itself back". The ten pain `headline`s are
+untouched, per the standing constraint. Marquee symmetry re-verified after the
+rewrite: all cards still 420×176 with identical 104px text blocks, nothing
+clipped, and the line spread actually tightened from 3–5 to 1–3.
+
+Process step 01 now writes the goal as a commitment: "…then write the goal as
+one sentence you can hold me to: quote turnaround goes from two days to two
+hours, inside 30." Pillar 1 states the outcome-vs-description rule outright:
+"A three-hour job that comes back as thirty minutes is a result. A new
+dashboard is not."
+
+**HONESTY LINE HELD — owner decision may be needed.** SetFrame has no clients
+yet, so no line claims a measured past result. Delivery windows (7/30 days)
+are the owner's own promise and are stated flat. Before→after magnitudes are
+framed as what the build targets or as the definition of what counts as a
+result — never as a case study. If the owner wants harder numbers on the page,
+they must come from a real delivered project.

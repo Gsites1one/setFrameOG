@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useForm, ValidationError } from "@formspree/react";
-import { AnimatePresence, m, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 
 const FORMSPREE_ID = "mjgnbdbg";
 
@@ -21,6 +21,9 @@ const MESSAGE_HINTS = [
   "Tell me what's not working.",
 ];
 
+// Returns the index of the hint currently showing. Deliberately an index and
+// not the string itself: every hint stays mounted and is crossfaded with
+// opacity, so no text node is ever removed (see the swap comment below).
 function useRotatingPlaceholder(hints: string[], intervalMs = 3500) {
   const shouldReduceMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
@@ -33,13 +36,12 @@ function useRotatingPlaceholder(hints: string[], intervalMs = 3500) {
     return () => window.clearInterval(id);
   }, [shouldReduceMotion, hints.length, intervalMs]);
 
-  return hints[index];
+  return index;
 }
 
 export function ContactForm() {
   const [state, handleSubmit] = useForm(FORMSPREE_ID);
-  const shouldReduceMotion = useReducedMotion();
-  const messagePlaceholder = useRotatingPlaceholder(MESSAGE_HINTS);
+  const hintIndex = useRotatingPlaceholder(MESSAGE_HINTS);
   // When the visitor prefers a call, the contact field asks for a phone number
   // instead of an email — you can't email-reply to someone who wants a call.
   const [method, setMethod] = useState("Email");
@@ -115,6 +117,16 @@ export function ContactForm() {
         >
           Preferred contact method
         </label>
+        {/* Each option carries an explicit value. This is load-bearing, not
+            tidiness: an <option> with no value attribute takes its value from
+            its own text, so when Chrome's translate rewrites the labels the
+            selected value becomes the translated string, `method` never again
+            equals "Phone call", and the field below silently refuses to switch
+            from email to phone. That was the owner-reported bug, and it only
+            ever appeared with translation on. Translate rewrites visible text
+            but not attributes, so an explicit value stays stable in every
+            language — and the submitted value stays consistent in the inbox
+            instead of arriving in whatever language the visitor was reading. */}
         <select
           id="contactMethod"
           name="contactMethod"
@@ -122,84 +134,85 @@ export function ContactForm() {
           onChange={(e) => setMethod(e.target.value)}
           className={FIELD_CLASSES}
         >
-          <option>Email</option>
-          <option>Phone call</option>
-          <option>Video call</option>
+          <option value="Email">Email</option>
+          <option value="Phone call">Phone call</option>
+          <option value="Video call">Video call</option>
         </select>
       </div>
 
       {/* Email or phone, depending on the preferred contact method above. The
           visible <label> stays the field's accessible name and switches with
           the field so it is never mislabelled.
-          Deliberately NO AnimatePresence exit here: a required form field must
-          never depend on an exit animation completing to appear (the earlier
-          page-transition bug was exactly that failure class). The old row
-          unmounts instantly; the new row plays a quick enter-only fade/slide,
-          which reads as a smooth swap with zero deadlock risk. Both rows share
-          one anatomy, so there is no height jump. */}
-      {wantsPhone ? (
-        <m.div
-          key="phone"
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={
-            shouldReduceMotion ? { duration: 0 } : { duration: 0.22, ease: "easeOut" }
-          }
+
+          Both rows are ALWAYS mounted and swapped via the [hidden] attribute.
+          They are deliberately NOT conditionally rendered. Google Translate
+          rewrites React-managed text nodes in place (wrapping them in its own
+          <font> elements); when React later unmounts a subtree Translate has
+          rewritten, removeChild throws on a node that is no longer where React
+          left it, the component stops re-rendering, and the field silently
+          refuses to switch — which is exactly the bug the owner hit with
+          Chrome's translate turned on. Nothing here unmounts, so React and
+          Translate never fight over the same nodes, and the page stays fully
+          translatable (no translate="no" needed on real content).
+
+          `disabled` matters as much as `hidden`: a hidden-but-enabled required
+          field blocks submission with a validation message the visitor cannot
+          see, and disabled controls are omitted from the payload, so only the
+          contact method actually chosen is submitted.
+
+          The enter motion is a CSS keyframe that replays whenever a row goes
+          from display:none back to displayed, so the swap still feels smooth
+          with no mount/unmount and no animation the field depends on to
+          exist. Both rows share one anatomy, so there is no height jump. */}
+      <div hidden={wantsPhone} className="field-enter">
+        <label
+          htmlFor="email"
+          className="mb-1.5 block font-mono text-xs tracking-wide text-foreground/60"
         >
-          <label
-            htmlFor="phone"
-            className="mb-1.5 block font-mono text-xs tracking-wide text-foreground/60"
-          >
-            Phone number
-          </label>
-          <input
-            id="phone"
-            type="tel"
-            name="phone"
-            required
-            autoComplete="tel"
-            placeholder="+31 6 12 34 56 78"
-            className={FIELD_CLASSES}
-          />
-          <ValidationError
-            prefix="Phone"
-            field="phone"
-            errors={state.errors}
-            className="mt-1 block text-xs text-accent"
-          />
-        </m.div>
-      ) : (
-        <m.div
-          key="email"
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={
-            shouldReduceMotion ? { duration: 0 } : { duration: 0.22, ease: "easeOut" }
-          }
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          name="email"
+          required={!wantsPhone}
+          disabled={wantsPhone}
+          autoComplete="email"
+          placeholder="you@company.com"
+          className={FIELD_CLASSES}
+        />
+        <ValidationError
+          prefix="Email"
+          field="email"
+          errors={state.errors}
+          className="mt-1 block text-xs text-accent"
+        />
+      </div>
+
+      <div hidden={!wantsPhone} className="field-enter">
+        <label
+          htmlFor="phone"
+          className="mb-1.5 block font-mono text-xs tracking-wide text-foreground/60"
         >
-          <label
-            htmlFor="email"
-            className="mb-1.5 block font-mono text-xs tracking-wide text-foreground/60"
-          >
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            required
-            autoComplete="email"
-            placeholder="you@company.com"
-            className={FIELD_CLASSES}
-          />
-          <ValidationError
-            prefix="Email"
-            field="email"
-            errors={state.errors}
-            className="mt-1 block text-xs text-accent"
-          />
-        </m.div>
-      )}
+          Phone number
+        </label>
+        <input
+          id="phone"
+          type="tel"
+          name="phone"
+          required={wantsPhone}
+          disabled={!wantsPhone}
+          autoComplete="tel"
+          placeholder="+31 6 12 34 56 78"
+          className={FIELD_CLASSES}
+        />
+        <ValidationError
+          prefix="Phone"
+          field="phone"
+          errors={state.errors}
+          className="mt-1 block text-xs text-accent"
+        />
+      </div>
 
       <div>
         <label
@@ -220,25 +233,27 @@ export function ContactForm() {
             className={FIELD_CLASSES}
           />
           {/* Decorative crossfading hint. aria-hidden + pointer-events-none so
-              it never becomes the accessible name and never blocks typing. */}
+              it never becomes the accessible name and never blocks typing.
+              Every hint stays in the DOM and only its opacity changes, for the
+              same Translate-safety reason as the email/phone swap above: this
+              used to mount and unmount a text node every 3.5s, which is the
+              single most reliable way to make React and Google Translate
+              collide on a page. Crossfading instead of swapping means nothing
+              is ever removed, and the hints still translate normally. */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute left-4 top-3 text-sm text-muted"
           >
-            <AnimatePresence mode="wait">
-              {showHint && (
-                <m.span
-                  key={messagePlaceholder}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: shouldReduceMotion ? 0 : 0.4 }}
-                  className="block"
-                >
-                  {messagePlaceholder}
-                </m.span>
-              )}
-            </AnimatePresence>
+            {MESSAGE_HINTS.map((hint, i) => (
+              <span
+                key={hint}
+                className={`absolute left-0 top-0 whitespace-nowrap transition-opacity duration-500 motion-reduce:transition-none ${
+                  showHint && i === hintIndex ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                {hint}
+              </span>
+            ))}
           </div>
         </div>
         <ValidationError

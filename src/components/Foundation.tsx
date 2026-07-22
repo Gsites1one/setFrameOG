@@ -20,11 +20,12 @@ import { SectionNumber } from "./SectionNumber";
 const PILLARS = [
   {
     slug: "movement",
-    image: "/pillars/movement.webp",
-    alt: "A dark mountain range with a glowing path climbing to a sunlit summit, marked with four milestones: time back, leads that stop going cold, costs that stop leaking, revenue that grows.",
+    image: "/pillars/movementv2.webp",
+    alt: "A hand placing a chess knight under a warm lamp, a glowing copper trail marking the square it moved from.",
     heading: "Movement, not technology.",
     body: [
       "What matters is never what gets installed. It is what changes once it does, and every build is measured by that move alone.",
+      "A three-hour job that comes back as thirty minutes is a result. A new dashboard is not.",
     ],
   },
   {

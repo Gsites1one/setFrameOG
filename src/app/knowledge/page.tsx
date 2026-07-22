@@ -33,7 +33,7 @@ const STEPS = [
   {
     number: "03",
     title: "A system that keeps running",
-    body: "Launch lands in weeks, not months. Then the system keeps working: replying, reminding and sorting while you run the business.",
+    body: "A working version is live in 7 days and the full build in 30. Then the system keeps working: replying, reminding and sorting while you run the business.",
   },
 ];
 

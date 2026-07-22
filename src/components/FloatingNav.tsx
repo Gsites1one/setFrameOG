@@ -78,11 +78,25 @@ export function FloatingNav() {
             </li>
           ))}
         </ul>
+        {/* Sized down on phones only (owner review: "a little too big").
+            The font step is half the fix — the real cause was that the full
+            label wrapped onto THREE lines at 390px, which inflated the whole
+            pill to 67px tall. Setting the full label to nowrap instead would
+            need ~128px next to Work/Services/FAQ and overflow the screen, so
+            phones get a short label and everything from sm up keeps the full
+            one. aria-label carries the complete wording either way, so the
+            accessible name never changes with the breakpoint. */}
         <Link
           href="/contact"
-          className="font-display text-xs font-semibold text-accent transition-opacity hover:opacity-80"
+          aria-label="Start a conversation"
+          className="whitespace-nowrap font-display text-[11px] font-semibold text-accent transition-opacity hover:opacity-80 sm:text-xs"
         >
-          [ Start a conversation ]
+          <span aria-hidden="true" className="sm:hidden">
+            [ Start ]
+          </span>
+          <span aria-hidden="true" className="hidden sm:inline">
+            [ Start a conversation ]
+          </span>
         </Link>
       </div>
     </nav>

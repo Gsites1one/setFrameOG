@@ -50,6 +50,18 @@ export function Hero() {
         away and turn it into movement.
       </p>
 
+      {/* The one literal fact the headline deliberately does not state: this is
+          something you buy, it is made for your business specifically, and it
+          arrives on a date. Kept to a single mono line rather than another
+          paragraph — the page already carries a lot of prose, and set in mono
+          at low contrast this reads as a spec, not as more marketing. The two
+          numbers are the whole point, so they get the copper. */}
+      <p className="relative mt-5 max-w-xl text-center font-mono text-xs leading-relaxed tracking-wide text-foreground/55">
+        Websites and business systems, built to order.{" "}
+        <span className="text-accent">7 days</span> to a working version,{" "}
+        <span className="text-accent">30 days</span> to full rollout.
+      </p>
+
       <m.div
         className="relative mt-8"
         initial={shouldReduceMotion ? false : { opacity: 0 }}

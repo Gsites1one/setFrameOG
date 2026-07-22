@@ -6,9 +6,14 @@ export type FaqItem = {
 // Single source for the FAQ section and the FAQPage structured data.
 export const FAQ_ITEMS: FaqItem[] = [
   {
+    question: "What do you actually build?",
+    answer:
+      "Custom websites and the business systems behind them: booking, follow-up, outreach, e-commerce, dashboards and internal automation. Every project is designed and built for one business against one goal. Nothing is resold from a template.",
+  },
+  {
     question: "How does a project start?",
     answer:
-      "With a short conversation about where your business loses time, leads or follow-up. You get a clear proposal with scope, price and timeline within a few days.",
+      "With a short conversation about where your business loses time, leads or follow-up. You get a clear proposal with scope, price and timeline within two working days.",
   },
   {
     question: "How do you price projects?",
@@ -18,7 +23,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     question: "How long does a project take?",
     answer:
-      "Most websites launch in two to four weeks. Systems that handle replies, follow-up or paperwork usually add one to two weeks depending on scope.",
+      "A quick win — a working version you can already use — lands in about 7 days. A complete project, built, rolled out and measured against the goal we agreed, runs about 30 days.",
   },
   {
     question: "What happens after launch?",
