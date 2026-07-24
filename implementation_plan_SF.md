@@ -1042,3 +1042,76 @@ are the owner's own promise and are stated flat. Before→after magnitudes are
 framed as what the build targets or as the definition of what counts as a
 result — never as a case study. If the owner wants harder numbers on the page,
 they must come from a real delivered project.
+
+---
+
+## Iteration 5 — SEO/AEO foundations + design-safe mobile perf pass
+
+### Premise correction (verified in-repo, not assumed)
+The brief assumed structured data, sitemap, and robots were probably missing.
+They already existed and were correct:
+- `Organization` JSON-LD in `layout.tsx`, `FAQPage` JSON-LD in `page.tsx`.
+- `sitemap.ts` (/, /knowledge, /contact, /privacy), `robots.ts` (allow all +
+  sitemap ref).
+- Fonts already `next/font` + `display:swap`; modern `.browserslistrc`.
+So Tasks 2 & 4 became verification, Task 3 a small enhancement.
+
+### T1 — KVK removed
+Deleted the `KVK [[ TO FILL ]]` footer line and the now-unused `KVK_NUMBER`
+constant. No placeholder anywhere on the site. Verified in built HTML + live.
+
+### T2 — FAQPage schema (verify)
+Schema and the visible FAQ both map over the same `FAQ_ITEMS`, so they mirror
+verbatim by construction. Confirmed live: 6 Q/A pairs, schema text ===
+rendered button text exactly.
+
+### T3 — Organization contactPoint (add)
+Added `contactPoint {ContactPoint, customer support, hello@setframe.net}`.
+Deliberately minimal: no phone, no availableLanguage (site is English-only, so
+Polish would be unsupported by anything on the page), no sameAs (no live
+socials). areaServed order matches the footer's visible LOCATION text.
+
+### T4 — sitemap/robots (verify)
+Both already correct; left as-is. Confirmed `/sitemap.xml` and `/robots.txt`
+resolve live.
+
+### T5 — mobile performance: diagnosis-first, one safe fix, one flagged tradeoff
+Real Lighthouse (run locally against the prod build, since the bash sandbox has
+no external HTTPS) plus live DOM measurement established the facts:
+
+- **The mobile LCP element is the H1 heading TEXT** (~58,860px^2, ~3x anything
+  else), set in Syne — NOT an image.
+- **Observed (raw trace) FCP and LCP are both 136ms** — the heading paints
+  instantly; fonts finish at ~35ms; render-blocking CSS shows 0ms savings.
+- The reported ~3.6s mobile LCP is a **Lantern SIMULATION artifact**: 87% of it
+  is modeled "Render Delay" (main-thread contention under 4x CPU throttle),
+  driven by the framer-motion hydration graph — even though observed render
+  delay is ~0 and TBT is 20ms.
+
+**Applied (safe, zero design change): fixed two inverted loading priorities.**
+- Hero wordmark (above the fold) was `loading="lazy"` -> `priority`.
+- Foundation pillar 1 was `priority`+`eager` but sits ~1080px down, below the
+  fold on both breakpoints -> now `lazy` like pillars 2/3. Its preload had been
+  competing with above-the-fold resources on the throttled mobile pipe.
+Image `sizes` were audited and are already correctly scoped (no over-serving of
+desktop widths to mobile — the brief's hypothesis there was not confirmed).
+
+**Flagged tradeoff (NOT resolved unilaterally, per the constraints).** The only
+lever that would meaningfully move the *simulated* mobile LCP is reducing the
+initial framer-motion/hydration JS. But framer-motion is on the critical path
+via ABOVE-the-fold protected design: the living nav pulse (`NavWordmark`), the
+ambient `LifeBackground`, `IntroCurtain`, and the `MotionProvider` LazyMotion
+root. Code-splitting the only below-the-fold client pieces (`Faq`,
+`BrowserFrame`) cannot remove framer from the initial load because the nav and
+background already require it, so the payoff is ~0. The marquee is already a
+zero-JS server component, so the brief's "lazy-mount the marquee's JS"
+suggestion is moot. Moving the number further would mean stripping animation
+from the above-the-fold design, which the constraints forbid. Real-world paint
+is already instant (136ms), TBT 20ms, CLS 0.
+
+**Measured (local prod build; local != field environment):**
+- Desktop: Performance 100 (no regression; field baseline 98).
+- Mobile: Performance 89 (field baseline 88), FCP 0.9s, LCP 3.6s (simulated;
+  observed 0.136s), TBT 20ms, CLS 0, Speed Index 3.3s (down from field 4.8s).
+Authoritative after-numbers should come from PageSpeed Insights on the live
+HTTPS site; local Lighthouse absolute values are not directly comparable.
