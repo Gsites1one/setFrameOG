@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CONTACT_EMAIL, KVK_NUMBER, LOCATION } from "@/lib/constants";
+import { CONTACT_EMAIL, LOCATION } from "@/lib/constants";
 
 const NAV_LINKS = [
   { href: "/#work", label: "Work" },
@@ -48,8 +48,6 @@ export function Footer() {
           >
             {CONTACT_EMAIL}
           </a>
-          {/* TODO: real KVK number once the studio is registered */}
-          <span>KVK {KVK_NUMBER}</span>
           <Link
             href="/privacy"
             className="transition-colors hover:text-accent"

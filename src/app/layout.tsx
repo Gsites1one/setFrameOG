@@ -58,7 +58,18 @@ const organizationJsonLd = {
   description:
     "A studio that builds websites and the systems behind them for businesses that run on inquiries, appointments and follow-up.",
   // No city on the brand (owner decision) — reach is stated as areaServed.
+  // Order matches the footer's visible LOCATION text exactly.
   areaServed: ["Poland", "Netherlands", "Worldwide"],
+  // The single, real contact channel on the site (the same address the footer
+  // and contact form use). Kept minimal on purpose: no phone (there is no
+  // public number), no availableLanguage (the site is English-only, so Polish
+  // would be a claim nothing on the page supports), and no sameAs (no live
+  // social profiles exist yet). Every one of those would be fabricated data.
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer support",
+    email: CONTACT_EMAIL,
+  },
 };
 
 export default function RootLayout({

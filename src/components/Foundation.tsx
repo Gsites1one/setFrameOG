@@ -62,13 +62,20 @@ export function Foundation() {
           <Reveal key={pillar.slug} delay={i * 0.08}>
             <div className="flex h-full flex-col">
               <ArtFrame className="aspect-[4/3]">
+                {/* All three pillars lazy-load. The section sits ~1080px down
+                    the page, below the fold on both mobile and desktop (the
+                    hero is min-h-screen), so none of them is the LCP. Pillar 1
+                    previously had priority+eager, which injected a preload for
+                    a below-the-fold image that competed with the above-the-fold
+                    Syne font — the actual mobile LCP element — on the throttled
+                    mobile connection, delaying it. Removing that lets the hero
+                    font win the pipe first. */}
                 <Image
                   src={pillar.image}
                   fill
                   alt={pillar.alt}
                   sizes="(max-width: 768px) 100vw, 360px"
-                  loading={i === 0 ? "eager" : "lazy"}
-                  priority={i === 0}
+                  loading="lazy"
                   className="object-contain"
                 />
               </ArtFrame>

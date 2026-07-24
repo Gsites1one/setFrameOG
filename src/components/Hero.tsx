@@ -32,11 +32,17 @@ export function Hero() {
       <HeroVisual />
 
       <div className="relative mb-8">
+        {/* Above the fold and the first brand element the visitor sees, so it
+            loads with the initial resources rather than lazily. It is a tiny
+            optimized asset, so preloading it costs almost nothing and stops the
+            brand mark appearing after everything else. (The mobile LCP is the
+            H1 text below, not this — see the perf notes in the plan.) */}
         <Image
           src="/brand/wordmark-white.png"
           alt="SetFrame"
           width={150}
           height={100}
+          priority
           className="h-auto w-32 md:w-36"
         />
       </div>

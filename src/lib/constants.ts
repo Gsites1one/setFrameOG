@@ -12,5 +12,4 @@
 export const SITE_URL = "https://setframe.net";
 
 export const CONTACT_EMAIL = "hello@setframe.net"; // TODO: replace once the mailbox is live
-export const KVK_NUMBER = "[[ TO FILL ]]"; // TODO: real KVK number once registered
 export const LOCATION = "Poland · Netherlands · Worldwide";
