@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Syne, Inter, IBM_Plex_Mono } from "next/font/google";
+import { FloatingNav } from "@/components/FloatingNav";
 import { IntroCurtain } from "@/components/IntroCurtain";
 import { LifeBackground } from "@/components/LifeBackground";
 import { MotionProvider } from "@/components/MotionProvider";
@@ -103,6 +104,12 @@ export default function RootLayout({
         <MotionProvider>
           <LifeBackground />
           <IntroCurtain />
+          {/* Site-wide as of Iteration 6, Task 8: it used to be mounted only
+              on the homepage, which left /services, /about, /knowledge and
+              /contact with no way to reach the rest of the site except the
+              back link. It must sit inside MotionProvider — NavWordmark
+              animates through LazyMotion. */}
+          <FloatingNav />
           {children}
         </MotionProvider>
         <script

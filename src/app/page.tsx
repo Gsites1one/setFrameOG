@@ -2,7 +2,6 @@ import { About } from "@/components/About";
 import { ApproachBand } from "@/components/ApproachBand";
 import { Faq } from "@/components/Faq";
 import { FinalCta } from "@/components/FinalCta";
-import { FloatingNav } from "@/components/FloatingNav";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
 import { HowWeWork } from "@/components/HowWeWork";
@@ -25,7 +24,6 @@ const faqJsonLd = {
 export default function Home() {
   return (
     <>
-      <FloatingNav />
       <main>
         <Hero />
         {/* 01 The foundation (three pillars) grounds the visitor before the

@@ -556,6 +556,24 @@ body {
   transform: scaleX(1);
 }
 
+/* Vertical counterpart of "rule", for the section 03 step connector on
+   mobile, where the thread runs top-to-bottom instead of left-to-right
+   (Iteration 6, Task 5). Same shared observer, same once-only behaviour, and
+   the reduced-motion block below already covers it because it matches on the
+   [data-reveal] attribute rather than a specific value. */
+.js [data-reveal="rule-y"] {
+  opacity: 0;
+  transform: scaleY(0);
+}
+[data-reveal="rule-y"] {
+  transition-property: opacity, transform;
+  transition-duration: 0.7s;
+}
+[data-reveal="rule-y"].is-visible {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-reveal],
   .js [data-reveal] {

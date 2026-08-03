@@ -2,11 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { CONTACT_EMAIL, LOCATION } from "@/lib/constants";
 
+// Mirrors the floating nav (Iteration 6, Task 8) so the two never disagree
+// about where "Services" goes — it used to point at the homepage #services
+// anchor, which is now a real page. "Systems" keeps pointing at /knowledge,
+// which stays the deeper technical reference reachable by contextual links.
 const NAV_LINKS = [
   { href: "/#work", label: "Work" },
-  { href: "/#services", label: "Services" },
-  { href: "/knowledge", label: "Systems" },
+  { href: "/services", label: "Services" },
+  { href: "/about", label: "About" },
   { href: "/#faq", label: "FAQ" },
+  { href: "/knowledge", label: "Systems" },
   { href: "/contact", label: "Contact" },
 ];
 

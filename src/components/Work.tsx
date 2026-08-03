@@ -25,9 +25,19 @@ export function Work() {
             shaped around the client, not stamped from a house template.
           </p>
         </div>
-        <div className="grid gap-8 md:grid-cols-2">
-          {WEBSITE_PROJECT.prototypes.map((prototype) => (
-            <WebsiteCard key={prototype.slug} prototype={prototype} />
+        {/* The two prototypes sit on staggered planes rather than in a
+            perfectly level pair (Iteration 6, Task 5): the second frame is
+            dropped ~64px on desktop, so section 02 no longer shares the
+            level-grid rhythm of sections 01 and 03. It is a composition change
+            only — each BrowserFrame's own chrome, shadow and hover treatment
+            are untouched — and it collapses back to a plain stack on mobile,
+            where a vertical offset would just read as inconsistent spacing.
+            `items-start` keeps the offset from stretching either column. */}
+        <div className="grid gap-8 md:grid-cols-2 md:items-start">
+          {WEBSITE_PROJECT.prototypes.map((prototype, i) => (
+            <div key={prototype.slug} className={i === 1 ? "md:mt-16" : ""}>
+              <WebsiteCard prototype={prototype} />
+            </div>
           ))}
         </div>
       </Reveal>

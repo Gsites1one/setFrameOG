@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AboutPipe } from "./AboutPipe";
 import { LogoMark } from "./LogoMark";
 import { Reveal } from "./Reveal";
@@ -20,6 +21,9 @@ export function About() {
           <SectionNumber number="04" title="What SetFrame is." />
         </Reveal>
 
+        {/* Teaser only (Iteration 6, Task 7). The full studio description now
+            lives on /about; this keeps the two opening paragraphs and hands
+            off rather than printing the same text on both pages. */}
         <Reveal delay={0.1}>
           <div className="space-y-4 text-lg leading-relaxed text-foreground/80">
             <p>
@@ -32,11 +36,19 @@ export function About() {
               booked calls, and stop the leads, replies and paperwork that
               quietly slip through the cracks.
             </p>
-            <p>
-              Every project is built to keep working after launch, fast,
-              accessible and fully owned by the business it serves.
-            </p>
           </div>
+
+          <Link
+            href="/about"
+            className="group mt-8 inline-flex items-center gap-1.5 font-display text-base font-semibold text-foreground transition-colors hover:text-accent"
+          >
+            <span className="border-b border-transparent pb-0.5 transition-colors group-hover:border-accent">
+              Read more about SetFrame
+            </span>
+            <span aria-hidden="true" className="text-accent">
+              →
+            </span>
+          </Link>
         </Reveal>
       </div>
     </section>

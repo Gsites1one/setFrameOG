@@ -8,10 +8,17 @@ import { SectionNumber } from "./SectionNumber";
 // most important), which these three are not. In one row they carry equal
 // weight.
 //
-// The three artworks have different native aspect ratios and baked-in legend
-// text that must never be cropped, so each sits object-contain inside one
-// shared aspect box; the art's own dark background blends into the letterbox
-// so the boxes read as equal without cropping any text.
+// The three artworks have different native aspect ratios (1.50 / 1.38 / 1.00),
+// so object-contain letterboxed each one differently — one bar top/bottom, one
+// left/right — and the panels read as three mismatched frames. They now fill
+// one shared 4:3 box with object-cover and are centre-cropped, so all three
+// present an identical rectangle.
+//
+// This used to be object-contain because an earlier generation of these
+// artworks had legend text baked into the image that cropping would have cut.
+// The current files (supplied in 4.1) are plain cinematic photographs with no
+// text in them, so that constraint no longer applies. Verified by opening each
+// file before switching.
 //
 // Copy meaning and pain-first order are locked; wording is tuned for rhythm.
 // The movement art already labels the four outcomes (time / leads / costs /
@@ -31,7 +38,7 @@ const PILLARS = [
   {
     slug: "tailored",
     image: "/pillars/tailored.webp",
-    alt: "A tailor measuring a client beside a bespoke suit on a stand, a rack of identical suits behind them, labelled conversation, understanding, built for you, feedback until it fits.",
+    alt: "A tailor measuring a client beside a bespoke suit on a stand, a rack of identical off-the-peg suits behind them, a copper thread of light running from the workbench to the suit.",
     heading: "Built for your business, not from a template.",
     body: [
       "It starts with a conversation, not a pitch, and every project is shaped around one specific business.",
@@ -41,7 +48,7 @@ const PILLARS = [
   {
     slug: "preview",
     image: "/pillars/preview.webp",
-    alt: "A glowing dashboard behind a sealed, unsigned envelope and a fountain pen on red velvet, with a plaque reading a working preview before anything is signed.",
+    alt: "A glowing dashboard screen behind a sealed, unsigned envelope and a fountain pen resting on red velvet.",
     heading: "See it working before you commit.",
     body: [
       "A working preview exists before anything is signed, so you judge the result with your own eyes instead of a promise.",
@@ -58,8 +65,20 @@ export function Foundation() {
       </Reveal>
 
       <div className="grid gap-8 md:grid-cols-3 md:gap-6 lg:gap-8">
+        {/* Staggered scroll-in entrance (Iteration 6, Task 4): 120ms between
+            panels. The rest of the requested spec was already in place via the
+            shared Reveal system — translateY(24px), 0.5s, ease-out, fires once
+            (the observer unobserves on reveal, so scrolling back never
+            replays), and prefers-reduced-motion jumps straight to the final
+            state. Only the stagger was off spec (80ms).
+
+            Deliberately NOT rebuilt on Framer Motion whileInView: Reveal was
+            converted OFF Framer precisely to cut hydration cost, and Foundation
+            is a server component today. Reintroducing it here would mean
+            shipping JS and a "use client" boundary for an effect that already
+            runs in CSS, with no visual difference. */}
         {PILLARS.map((pillar, i) => (
-          <Reveal key={pillar.slug} delay={i * 0.08}>
+          <Reveal key={pillar.slug} delay={i * 0.12}>
             <div className="flex h-full flex-col">
               <ArtFrame className="aspect-[4/3]">
                 {/* All three pillars lazy-load. The section sits ~1080px down
@@ -76,7 +95,7 @@ export function Foundation() {
                   alt={pillar.alt}
                   sizes="(max-width: 768px) 100vw, 360px"
                   loading="lazy"
-                  className="object-contain"
+                  className="object-cover object-center"
                 />
               </ArtFrame>
               <h3 className="mt-6 font-display text-xl font-bold leading-snug sm:text-2xl">

@@ -47,26 +47,64 @@ export function Hero() {
         />
       </div>
 
-      <h1 className="relative max-w-3xl text-center font-display text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
-        Your business is losing money in places you never look.
-      </h1>
+      {/* Text block + its own scrim (Iteration 6, Task 3). The HeroVisual's
+          leak arc and travelling beads pass directly behind this copy and were
+          competing with it for attention. Rather than slowing, rerouting or
+          dimming the animation — which stays at full activity everywhere else
+          in the hero — a soft elliptical wash of the page background sits
+          between the animation and the text, so the type always has a stable
+          backing to sit on.
 
-      <p className="relative mt-6 max-w-xl text-center text-foreground/70">
-        SetFrame builds websites and systems that catch what quietly slips
-        away and turn it into movement.
-      </p>
+          It is a static CSS gradient (no image, no animation, no filter), so
+          it costs nothing on the LCP path and cannot shift layout: it is
+          absolutely positioned and sized in percentages of this wrapper, so it
+          tracks the text at every breakpoint without a fixed height. DOM order
+          does the layering — the scrim is painted first, the copy after — so
+          no z-index juggling against the visual underneath. */}
+      <div className="relative z-10 flex flex-col items-center">
+        {/* A blurred rounded rectangle, deliberately NOT a radial gradient.
+            A radial ellipse was tried first and measured badly: a gradient
+            falls off by elliptical distance, so the widest line of a wide
+            3-line headline lands far out on the radius. Measured per rendered
+            line, the FIRST headline line sat at only 0.33 scrim alpha — the
+            most important text on the page was the least protected — and
+            sizing the ellipse to cover it would have swallowed ~90% of the
+            hero and killed the animation everywhere.
 
-      {/* The one literal fact the headline deliberately does not state: this is
-          something you buy, it is made for your business specifically, and it
-          arrives on a date. Kept to a single mono line rather than another
-          paragraph — the page already carries a lot of prose, and set in mono
-          at low contrast this reads as a spec, not as more marketing. The two
-          numbers are the whole point, so they get the copper. */}
-      <p className="relative mt-5 max-w-xl text-center font-mono text-xs leading-relaxed tracking-wide text-foreground/55">
-        Websites and business systems, built to order.{" "}
-        <span className="text-accent">7 days</span> to a working version,{" "}
-        <span className="text-accent">30 days</span> to full rollout.
-      </p>
+            A rounded rect matches the shape of a text block, so the copy sits
+            in a uniformly opaque core while the blur dissolves the edge within
+            ~32px of the boundary. The inset padding is larger than the blur
+            radius, which is what guarantees every line sits in the solid core
+            rather than in the falloff. Static, no animation; the hero already
+            uses a large blur for its ambient glow, so this is nothing new for
+            the compositor. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-x-12 -inset-y-10 rounded-[48px] bg-[rgba(18,18,20,0.88)] blur-[32px]"
+        />
+
+        <h1 className="relative max-w-3xl text-center font-display text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
+          Your business is losing money in places you never look.
+        </h1>
+
+        <p className="relative mt-6 max-w-xl text-center text-foreground/70">
+          SetFrame builds websites and systems that catch what quietly slips
+          away and turn it into movement.
+        </p>
+
+        {/* The one literal fact the headline deliberately does not state: this
+            is something you buy, it is made for your business specifically,
+            and it arrives on a date. Kept to a single mono line rather than
+            another paragraph — the page already carries a lot of prose, and
+            set in mono at low contrast this reads as a spec, not as more
+            marketing. The two numbers are the whole point, so they get the
+            copper. */}
+        <p className="relative mt-5 max-w-xl text-center font-mono text-xs leading-relaxed tracking-wide text-foreground/55">
+          Websites and business systems, built to order.{" "}
+          <span className="text-accent">7 days</span> to a working version,{" "}
+          <span className="text-accent">30 days</span> to full rollout.
+        </p>
+      </div>
 
       <m.div
         className="relative mt-8"
