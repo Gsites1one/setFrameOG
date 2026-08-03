@@ -1115,3 +1115,110 @@ is already instant (136ms), TBT 20ms, CLS 0.
   observed 0.136s), TBT 20ms, CLS 0, Speed Index 3.3s (down from field 4.8s).
 Authoritative after-numbers should come from PageSpeed Insights on the live
 HTTPS site; local Lighthouse absolute values are not directly comparable.
+
+---
+
+## Iteration 6 — polish pass + /services and /about
+
+### T1 Pillar framing
+object-contain -> object-cover in one shared 4:3 ArtFrame. Native ratios were
+1.50 / 1.38 / 1.00, so contain letterboxed each panel differently. Verified
+identical after: 347x260 box, 1px border, 12px radius on all three.
+The contain was originally required because an EARLIER generation of this
+artwork had legend text baked into the image. Opened all three files first to
+check: the current ones are plain cinematic photographs with no text, so the
+constraint no longer applies. Stale alt text on pillars 2 and 3 (describing
+labels and a plaque that are not in the images) corrected at the same time.
+
+### T2 Uneven mono letters — brief's diagnosis was wrong
+All three hypotheses in the brief were disproven by measuring computed style:
+IBM Plex Mono resolved and was loaded on BOTH elements, weight was correct
+(400), font-feature-settings was `normal`, font-stretch `100%`.
+
+Actual causes:
+1. Tagline had `letter-spacing: 3px` (0.25em) on a MONOSPACE face at 12px —
+   10x the tracking of every other mono element on the site (0.3px), which is
+   why only this label showed it. Tracking is self-defeating on monospace:
+   every glyph already sits in an identical advance box, so narrow characters
+   carry large side bearings that extra tracking doubles. Now 0.1em.
+2. The nav pill rendered THREE typefaces at once — Syne 700 wordmark, IBM Plex
+   Mono links, Syne 600 CTA. The CTA is now mono and matches the links exactly.
+   The wordmark stays Syne; a logo is legitimately its own treatment.
+
+Before/after computed:
+- tagline: IBM Plex Mono 400 3px  ->  IBM Plex Mono 400 1.2px
+- nav CTA: Syne 600 normal        ->  IBM Plex Mono 500 0.3px (== nav links)
+
+### T3 Hero scrim — first implementation measured badly, replaced
+A radial-gradient ellipse was built first and then measured per RENDERED LINE
+rather than by eye. It failed: gradients fall off by elliptical distance, so
+the widest headline line (the FIRST one) sat at only 0.33 scrim alpha — the
+most important text on the page was the least protected. Sizing the ellipse to
+cover it would have needed ~90% of the hero and killed the animation.
+
+Replaced with a blurred rounded rectangle, which matches the shape of a text
+block. Result is strictly better on both axes: every line (13 at desktop, 20 at
+320px) sits in the solid core with >= 41px margin against a 32px blur, AND
+scrim coverage DROPPED from 54% to 39% of the hero. The animation itself is
+untouched — 14 animated elements still running, scrim is static, no change to
+its speed or path.
+
+### T4 Pillar stagger
+80ms -> 120ms. Everything else in the requested spec was already true via the
+shared CSS Reveal system (24px, 0.5s, ease-out, fires once, reduced-motion
+safe); verified including "does not replay on scroll-back". NOT rebuilt on
+Framer whileInView as the brief asked: Reveal was deliberately moved OFF Framer
+to cut hydration cost, and Foundation is a server component, so it would have
+been a pure perf regression for a visually identical result.
+
+### T5 Rhythm
+Section 03: connector thread between step markers, drawing in on scroll via the
+same shared observer (new `data-reveal="rule-y"` variant for the vertical
+case). Desktop spans the full grid and aligns to 0px against all three icon
+centres; mobile segments sit entirely inside the 40px grid gap so they never
+cross heading, body or image. Equal-height columns verified unchanged.
+Section 02: 64px depth offset on the second frame, stacking plainly on mobile.
+BrowserFrame internals untouched.
+
+### T6 /services
+Sales view of the same ten capabilities. Reuses the locked `headline` and
+`outcome` strings verbatim — no new per-capability copy — and hands off to
+/knowledge#slug instead of repeating its prose. All 10 anchors verified to
+resolve on /knowledge. CTA repeated at intervals inside the list. Own meta/OG,
+added to sitemap at priority 0.9.
+
+### T7 /about
+Studio-level expansion of section 04: five principles plus a "what working
+together looks like" panel, deliberately distinct from section 03's process
+steps. Verified: no first-person singular, no AI mention, no photo (only asset
+is the wordmark). Homepage section 04 trimmed to a two-paragraph teaser with a
+"Read more about SetFrame" link, so the text is not duplicated across pages.
+
+### T8 Nav
+Work / Services / About / FAQ. Moved into the ROOT LAYOUT — it had been mounted
+only on the homepage, so /services, /about, /knowledge and /contact previously
+had no navigation at all. Services and About are page links; Work and FAQ stay
+in-page anchors on the homepage and become /#work and /#faq from anywhere else,
+so no item is ever a dead anchor. Verified on all five pages.
+
+Two problems the acceptance checks caught rather than assumed:
+- With a fourth item the pill measured 326px at a 320px viewport and hung 3px
+  off BOTH edges. Now 285px with 17px margins; links drop to 11px on phones,
+  which also matches the CTA beside them.
+- Nav visibility depended solely on an IntersectionObserver — the same
+  "one mechanism fails and nothing recovers" shape as the reveal bug that once
+  left the page blank after back-navigation. Added a throttled geometry
+  fallback. It uses a timestamp, NOT requestAnimationFrame, because rAF is
+  suspended in exactly the background/occluded-tab case where the fallback
+  would be carrying the feature.
+Visibility is also derived from state rather than pushed from inside the
+effect, so no new setState-in-effect lint error was introduced (still the same
+2 pre-existing ones in template.tsx and IntroCurtain.tsx).
+
+### Environment note (recurring)
+The automation browser runs its tab occluded: `document.visibilityState` is
+"hidden", so CSS TRANSITIONS do not advance, IntersectionObserver does not
+deliver, rAF does not fire, and screenshots time out. Elements therefore read
+as stuck at their start values even when correct. Verify final state by
+injecting `transition:none !important` and reading computed style, and prove
+CSS correctness with a freshly-created probe element carrying the same classes.
