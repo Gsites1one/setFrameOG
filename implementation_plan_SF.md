@@ -1222,3 +1222,88 @@ deliver, rAF does not fire, and screenshots time out. Elements therefore read
 as stuck at their start values even when correct. Verify final state by
 injecting `transition:none !important` and reading computed style, and prove
 CSS correctness with a freshly-created probe element carrying the same classes.
+
+---
+
+## Iteration 7 — hero rebalance, CTA fixes, /about rebuild
+
+### T1 Hero widened back out (both sides), scrim kept
+The hero read as flat because the artwork and the copy were fighting for the
+same pixels. Measured: at 1440px the headline occupies viewBox x179..x621 while
+the system cluster sat at x620..700 and the leak arc ran x190..x640 — the
+animation was passing straight through the text, which is exactly what forced
+the Iteration 6 scrim, and with the scrim over the centre there was nothing
+left to look at.
+
+HeroVisual is now two clusters pinned to the left and right margins, middle
+left open. The left is not a rigid mirror: business glyph + three-node cluster
+on its own bead timing; the right keeps the four-node system cluster. Verified
+zero overlap with the text block at 320 / 768 / 1440.
+
+GEOMETRY LIMIT (stated rather than hidden): flanking needs margin to flank
+into. Free margin per side measures ~179 viewBox units at 1440px, ~25 at 768px,
+and at 320px the text block is TALLER than the whole SVG box. There is nowhere
+to put a cluster on a phone without it landing under the copy, so clusters show
+from lg up, and a slow 26s breathing wash (opacity only, nothing travels)
+carries the hero below that.
+
+### T2 CTA button — root cause was scrim bleed, not hover CSS
+Measured BEFORE the fix:
+- scrim bottom edge sat 8px BELOW the button's top edge
+- with its 32px blur the veil covered 87% of the button's height
+- text wrapper z-10 vs button wrapper z-auto, so the 0.88-alpha dark layer
+  painted OVER the button
+The hover brightening was happening underneath that veil, which is why it read
+as going darker. Fixed at BOTH layers so neither has to hold alone: scrim
+bottom inset pulled in and the CTA moved down (16px clearance past the blur at
+all three widths), plus z-20 on the CTA wrapper. Headline protection
+unaffected — every text line still sits in the solid core (worst margin 35px
+against a 32px blur).
+
+Hover now brightens on four channels instead of two: background luminance
+0 -> 0.079, text 0.529 -> 0.665, border to solid copper, plus an outward copper
+glow. Verified from the generated CSS, not assumed.
+
+Brackets removed from the HERO instance only, via a `brackets` prop defaulting
+to true — every other bracket on the site is untouched.
+
+BUTTON FONT — the brief's premise was partly wrong. The hero CTA and the
+contact submit button were ALREADY font-display (Syne). The only monospace one
+was the nav CTA, which Iteration 6 Task 2 deliberately set to mono to stop the
+nav pill rendering three typefaces at once. It is Syne again per this
+iteration's sitewide rule, so the pill now carries two faces (Syne wordmark +
+Syne CTA, mono section links between them). That is a deliberate trade the
+owner asked for, not a regression.
+
+### T3 /about rebuilt around the two supplied images
+Running text cut from ~780 words to ~200. Structure: one opening sentence with
+Image A (compass), three one-sentence principles, closing block with Image B
+(blueprint) on breadth + selective scoping — deliberately distinct from the
+homepage approach banner, which is about finding the one gap.
+
+Framing: both images use ArtFrame at one shared 3:4 ratio with object-cover,
+verified identical to the pillar treatment (1px border, 12px radius, same
+shadow). 3:4 rather than the pillars' 4:3 because both sources are portrait
+(0.80 and 0.64) and a landscape box would have cropped the blueprint's roof
+off. Verified 0.750 on both at 320 / 768 / 1440.
+
+MOVED, not cut: the durability standard ("anything that needs babysitting gets
+abandoned in the first busy week") now lives on /knowledge beside the step
+about a system that keeps running.
+CUT as redundant: everything else removed already existed almost verbatim
+elsewhere — fixed scope/price and post-launch ownership in the FAQ, direct
+contact in the contact page reasons, feedback-until-it-fits and
+see-it-before-you-commit in the homepage pillars. Nothing unique was deleted.
+FAQ_ITEMS untouched, so FAQPage JSON-LD is unchanged.
+
+### Two verification traps hit this iteration (worth remembering)
+1. A stale `next start` kept holding port 3100 after a rebuild, so it served
+   OLD html referencing a CSS hash the new build no longer had — the stylesheet
+   came back as 9 BYTES and every Tailwind utility appeared "not applied"
+   (position:static, aspect-ratio:auto, 0px border). It looked exactly like a
+   broken page. Always confirm the served CSS is non-trivial before concluding
+   a styling bug, and kill the old server by PID rather than trusting pkill.
+2. Iterating document.styleSheets to look for `:hover` rules found ZERO while
+   the raw CSS text contained 26 — the CSSOM walk missed Tailwind v4's nested
+   output. Fetch and grep the stylesheet text; do not trust a CSSOM traversal
+   to prove a rule is missing.
