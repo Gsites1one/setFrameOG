@@ -28,6 +28,16 @@ export function Hero() {
         className="anim-gate pointer-events-none absolute inset-0"
       >
         <div className="ambient-glow absolute left-1/2 top-1/3 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent blur-[120px]" />
+        {/* Slow breathing wash across the full hero (Iteration 7, Task 1).
+            Brightness only — nothing travels — so the hero stops reading as
+            flat behind the scrim without pulling the eye off the headline. */}
+        <div
+          className="hero-breathe absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(70% 55% at 50% 40%, rgba(199,123,63,0.07), transparent 72%), radial-gradient(45% 40% at 12% 78%, rgba(79,179,201,0.05), transparent 70%)",
+          }}
+        />
       </div>
       <HeroVisual />
 
@@ -78,9 +88,23 @@ export function Hero() {
             rather than in the falloff. Static, no animation; the hero already
             uses a large blur for its ambient glow, so this is nothing new for
             the compositor. */}
+        {/* Iteration 7, Task 2 — the scrim was bleeding onto the CTA.
+            Measured before the fix: the scrim's bottom edge sat 8px BELOW the
+            button's top edge, and with its 32px blur the veil covered 87% of
+            the button. Because this wrapper is z-10 and the button's wrapper
+            was z-auto, that veil painted OVER the button, so the button's
+            hover brightening happened underneath a 0.88-alpha dark layer and
+            read as going darker instead of brighter. It was never a hover-CSS
+            bug.
+
+            Two changes, so neither has to hold alone: the bottom inset is
+            pulled in (the top keeps its generous inset, since that is where
+            the headline needs cover) and the button is given a higher stacking
+            order below. Geometry keeps them apart; z-index guarantees it even
+            if the copy reflows at a width nobody measured. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -inset-x-12 -inset-y-10 rounded-[48px] bg-[rgba(18,18,20,0.88)] blur-[32px]"
+          className="pointer-events-none absolute -inset-x-12 -top-10 -bottom-8 rounded-[48px] bg-[rgba(18,18,20,0.88)] blur-[32px]"
         />
 
         <h1 className="relative max-w-3xl text-center font-display text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
@@ -106,15 +130,18 @@ export function Hero() {
         </p>
       </div>
 
+      {/* z-20 puts the CTA above the headline scrim's stacking context (z-10),
+          and the larger top margin clears the scrim's blurred edge outright.
+          No interactive element may sit under that veil. */}
       <m.div
-        className="relative mt-8"
+        className="relative z-20 mt-20"
         initial={shouldReduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={
           shouldReduceMotion ? { duration: 0 } : { duration: 0.4, ease: "easeOut" }
         }
       >
-        <CtaButton size="lg" />
+        <CtaButton size="lg" brackets={false} />
       </m.div>
 
       <div

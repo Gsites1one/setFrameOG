@@ -169,6 +169,24 @@ export default function KnowledgePage() {
             </li>
           ))}
         </ol>
+
+        {/* Relocated from /about (Iteration 7, Task 3). When that page was cut
+            back to three one-sentence principles, this was the one idea with
+            no home anywhere else on the site — the rest of what was removed
+            already existed almost verbatim in the homepage pillars, the FAQ
+            and the contact page. It belongs here, next to the step about a
+            system that keeps running. */}
+        <div className="mt-12 rounded-xl border border-white/10 bg-surface/40 p-6">
+          <h3 className="font-display text-base font-semibold">
+            Why it is built to run unattended
+          </h3>
+          <p className="mt-3 leading-relaxed text-foreground/70">
+            Anything that needs babysitting gets abandoned in the first busy
+            week, and a system abandoned in month two was never worth building.
+            So the standard is durability: fast, accessible, understandable by
+            whoever comes next, and owned outright by the business it serves.
+          </p>
+        </div>
       </section>
 
       {/* Closing CTA. */}

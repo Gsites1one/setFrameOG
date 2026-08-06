@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import { ArtFrame } from "@/components/ArtFrame";
 import { CtaButton } from "@/components/CtaButton";
 import { Eyebrow } from "@/components/Eyebrow";
 import { LogoMark } from "@/components/LogoMark";
@@ -9,7 +11,7 @@ import { SITE_URL } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "About — SetFrame",
   description:
-    "SetFrame is a studio that builds websites and the systems behind them for businesses that run on inquiries, appointments and follow-up. How the work is approached, and what working together looks like.",
+    "SetFrame is a studio that builds websites and the systems behind them for businesses that run on inquiries, appointments and follow-up. Built for one business at a time, and only where it is actually needed.",
   alternates: { canonical: "/about" },
   openGraph: {
     title: "About — SetFrame",
@@ -22,123 +24,133 @@ export const metadata: Metadata = {
 };
 
 // Studio-level only. No founder, no name, no photo, no personal history — a
-// deliberate, standing decision, not an oversight: the site sells a way of
-// working, and personal branding would change what is being promised.
+// standing decision, not an oversight: the site sells a way of working, and
+// personal branding would change what is being promised.
 //
-// This page is the long form of homepage section 04, not a copy of it. The
-// homepage keeps a short teaser and links here. It is also NOT a restatement
-// of section 03 (the three process steps): section 03 is the sequence of what
-// happens, this is why the work is shaped that way.
+// Iteration 7 rebuilt this page around two supplied images and cut the running
+// text roughly in half. It had grown into ~780 words of five two-paragraph
+// principles plus a "how we work together" panel, most of which restated the
+// homepage pillars, the FAQ and the contact page's reasons almost line for
+// line. Each principle is now a single sentence compressed from that same
+// already-approved language — no new claims about the business are introduced
+// here.
+//
+// Both images use ArtFrame at one shared 3:4 ratio with object-cover, matching
+// the pillar treatment. 3:4 rather than the pillars' 4:3 because both source
+// files are portrait (0.80 and 0.64) — a landscape box would have cropped the
+// blueprint's roof off. 3:4 keeps the crop off both subjects.
 const PRINCIPLES = [
   {
-    title: "The result is the product, not the software.",
-    body: [
-      "A system is only worth what changes after it ships. A dashboard that nobody opens, an automation that saves four minutes a month, a redesign that moves nothing — all of it is cost dressed as progress.",
-      "So every project is written down as a change before it is built: what the business does today, what it should do instead, and how that gets measured. If a build cannot be described that way, it is the wrong build.",
-    ],
+    label: "Built for you",
+    line: "Every project is shaped around one specific business, never copied from the last one.",
   },
   {
-    title: "Nothing is reused from the last client.",
-    body: [
-      "Two businesses that look identical from the outside almost never leak in the same place. One is losing people at the first reply, another has plenty of enquiries and no way to keep track of them, a third is fine until the person holding it together takes a week off.",
-      "A template answers all three the same way. The work here starts from a conversation instead, and what gets built follows from what that conversation finds.",
-    ],
+    label: "Feedback until it fits",
+    line: "Revisions run until the goal is reached, because that is the job, not an extra.",
   },
   {
-    title: "You see it before you owe anything.",
-    body: [
-      "Proposals are easy to agree with and hard to judge. A working version is neither — it either does the thing or it does not, and you can tell in a minute without knowing anything about how it was made.",
-      "That is why a preview comes before a signature. It removes the part of the decision that runs on trust alone.",
-    ],
-  },
-  {
-    title: "The tools stay out of the conversation.",
-    body: [
-      "Which stack, which service, which model — those are implementation details, and treating them as selling points asks you to evaluate something you have no reason to have an opinion about.",
-      "What matters is the reply that goes out at 11pm, the paperwork that files itself, the enquiry that becomes a booked call. The machinery behind that is the studio's problem to get right.",
-    ],
-  },
-  {
-    title: "It has to keep working without attention.",
-    body: [
-      "Anything that needs babysitting gets abandoned in the first busy week, and a system abandoned in month two was never worth building.",
-      "So the standard is durability: fast, accessible, understandable by whoever comes next, and owned outright by the business it serves. Nothing is held hostage — the code, the content and the accounts are yours.",
-    ],
+    label: "The result is the pitch",
+    line: "The tools stay invisible; what counts is what changes once they are running.",
   },
 ];
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto min-h-screen max-w-3xl px-6 py-16">
+    <main className="mx-auto min-h-screen max-w-4xl px-6 py-16">
       <PageHeader />
 
-      <h1 className="max-w-2xl font-display text-3xl font-bold leading-tight sm:text-4xl">
-        What SetFrame is.
-      </h1>
-      <div className="mt-6 max-w-2xl space-y-4 text-lg leading-relaxed text-foreground/80">
-        <p>
-          <LogoMark className="text-foreground" /> is a studio that builds
-          websites and the systems behind them for businesses that run on
-          inquiries, appointments and follow-up.
-        </p>
-        <p>
-          The focus is narrow on purpose: turn the trust a business already
-          earns into booked calls, and stop the leads, replies and paperwork
-          that quietly slip through the cracks in between.
-        </p>
-      </div>
+      {/* Opening: the philosophy in one breath, paired with Image A. */}
+      <section className="grid items-center gap-10 md:grid-cols-2 md:gap-14">
+        <ArtFrame className="aspect-[3/4] w-full">
+          <Image
+            src="/about/approach-compass.webp"
+            alt="A brass drafting compass drawing a precise circle on an aged blueprint, warm light pooling where its point meets the paper."
+            fill
+            sizes="(max-width: 768px) 100vw, 420px"
+            priority
+            className="object-cover object-center"
+          />
+        </ArtFrame>
 
-      <section className="mt-20">
+        <div>
+          <Eyebrow>What SetFrame is</Eyebrow>
+          <h1 className="mt-6 font-display text-3xl font-bold leading-tight sm:text-4xl">
+            A system is only worth what changes after it ships.
+          </h1>
+          <p className="mt-6 text-lg leading-relaxed text-foreground/75">
+            <LogoMark className="text-foreground" /> is a studio that builds
+            websites and the systems behind them for businesses that run on
+            inquiries, appointments and follow-up.
+          </p>
+        </div>
+      </section>
+
+      {/* Three principles, one sentence each. */}
+      <section className="mt-24">
         <Eyebrow>How the work is approached</Eyebrow>
-
-        <div className="mt-10 space-y-14">
+        <div className="mt-10 grid gap-10 sm:grid-cols-3 sm:gap-8">
           {PRINCIPLES.map((principle) => (
-            <article key={principle.title}>
-              <h2 className="font-display text-xl font-bold leading-snug sm:text-2xl">
-                {principle.title}
+            <div key={principle.label}>
+              <div aria-hidden="true" className="h-px w-10 bg-accent/60" />
+              <h2 className="mt-5 font-display text-lg font-semibold leading-snug">
+                {principle.label}
               </h2>
-              <div className="mt-4 space-y-4 leading-relaxed text-foreground/70">
-                {principle.body.map((line) => (
-                  <p key={line}>{line}</p>
-                ))}
-              </div>
-            </article>
+              <p className="mt-3 leading-relaxed text-foreground/70">
+                {principle.line}
+              </p>
+            </div>
           ))}
         </div>
       </section>
 
-      <section className="mt-20 rounded-2xl border border-white/10 bg-surface/40 p-8 sm:p-10">
-        <Eyebrow>What working together looks like</Eyebrow>
-        <div className="mt-6 space-y-4 leading-relaxed text-foreground/75">
-          <p>
-            You talk to the person doing the work. There is no account layer in
-            between, so nothing gets lost on the way to whoever is actually
-            building it, and questions get answered by someone who knows the
-            answer.
-          </p>
-          <p>
-            Scope and price are agreed before anything starts, and they do not
-            move while the work is underway. Feedback runs until the thing does
-            what it was supposed to do — that is part of the project, not an
-            extra.
-          </p>
-          <p>
-            After launch you are not locked in. Ongoing improvement is
-            available if it is useful, and if your own team would rather take
-            it over, everything is documented well enough for them to do that.
-          </p>
+      {/* Closing: breadth, and scoping to what is needed — paired with Image B.
+          Order is flipped from the opening block (text first on desktop) so the
+          page does not read as two identical rows. Copy is deliberately about
+          BREADTH and selective scoping, distinct from the homepage approach
+          banner, which is about diagnosing the one specific gap. */}
+      <section className="mt-24 grid items-center gap-10 md:grid-cols-2 md:gap-14">
+        <div className="md:order-2">
+          <ArtFrame className="aspect-[3/4] w-full">
+            <Image
+              src="/about/range-blueprint.webp"
+              alt="A hand holding a house blueprint whose rooms are drawn as interlocking puzzle pieces; three rooms are lit warm and stamped, the rest are still pencil outlines."
+              fill
+              sizes="(max-width: 768px) 100vw, 420px"
+              loading="lazy"
+              className="object-cover object-center"
+            />
+          </ArtFrame>
         </div>
-        <p className="mt-8 font-mono text-xs leading-relaxed text-foreground/55">
-          Step by step, that runs as{" "}
-          <Link href="/#how" className="text-accent hover:opacity-80">
-            three stages
+
+        <div className="md:order-1">
+          <Eyebrow>What gets built</Eyebrow>
+          <h2 className="mt-6 font-display text-2xl font-bold leading-snug sm:text-3xl">
+            The whole range exists. Only part of it is yours.
+          </h2>
+          <p className="mt-6 leading-relaxed text-foreground/75">
+            Websites, replies and booking, paperwork, outreach, storefronts,
+            dashboards. A business rarely needs all of it, and paying for rooms
+            you will not walk into is its own kind of leak.
+          </p>
+          <p className="mt-4 leading-relaxed text-foreground/75">
+            So the plan gets drawn in full, and only the parts that earn their
+            place get built.
+          </p>
+          <Link
+            href="/services"
+            className="group mt-8 inline-flex items-center gap-1.5 font-display text-base font-semibold text-foreground transition-colors hover:text-accent"
+          >
+            <span className="border-b border-transparent pb-0.5 transition-colors group-hover:border-accent">
+              See the full range
+            </span>
+            <span aria-hidden="true" className="text-accent">
+              →
+            </span>
           </Link>
-          : a conversation, a working preview, then a system that keeps
-          running.
-        </p>
+        </div>
       </section>
 
-      <section className="py-20 text-center">
+      <section className="py-24 text-center">
         <h2 className="mx-auto max-w-xl font-display text-2xl font-bold leading-snug sm:text-3xl">
           The first step costs nothing and tells you the most.
         </h2>
@@ -149,14 +161,6 @@ export default function AboutPage() {
         <div className="mt-8">
           <CtaButton size="lg" />
         </div>
-        <p className="mt-8 font-mono text-xs text-foreground/50">
-          <Link
-            href="/services"
-            className="transition-colors hover:text-accent"
-          >
-            Or see everything that gets built →
-          </Link>
-        </p>
       </section>
     </main>
   );

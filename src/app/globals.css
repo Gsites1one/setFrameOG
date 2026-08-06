@@ -285,6 +285,33 @@ body {
   animation: hero-rise 3.8s ease-out infinite;
 }
 
+/* Very slow brightness drift across the whole hero (Iteration 7, Task 1).
+   With the headline scrim occupying the centre and the flanking clusters
+   hidden below lg, the hero could read as flat — this keeps it alive without
+   moving anything: opacity only, 26s, no shape travels, so it never competes
+   with the copy for attention. It is also the only ambient life the hero has
+   on phones, where there is no room to flank the text. */
+@keyframes hero-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.hero-breathe {
+  animation: hero-breathe 26s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-breathe {
+    animation: none !important;
+    opacity: 0.5 !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-bead {
     animation: none !important;

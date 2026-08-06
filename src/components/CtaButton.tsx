@@ -7,6 +7,13 @@ import { m, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
 type CtaButtonProps = {
   size?: "sm" | "lg";
   className?: string;
+  /**
+   * Whether to wrap the label in the [ ] motif. Default true — the brackets
+   * stay everywhere they already appear. The hero passes false (Iteration 7,
+   * Task 2): at hero scale the brackets read as decoration around the single
+   * most important action on the site, so that one instance is set plain.
+   */
+  brackets?: boolean;
 };
 
 const SIZE_CLASSES: Record<NonNullable<CtaButtonProps["size"]>, string> = {
@@ -16,7 +23,11 @@ const SIZE_CLASSES: Record<NonNullable<CtaButtonProps["size"]>, string> = {
 
 const MAGNET_STRENGTH = 0.3; // fraction of cursor offset the button follows
 
-export function CtaButton({ size = "lg", className = "" }: CtaButtonProps) {
+export function CtaButton({
+  size = "lg",
+  className = "",
+  brackets = true,
+}: CtaButtonProps) {
   const ref = useRef<HTMLDivElement>(null);
   const rectRef = useRef<DOMRect | null>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -52,11 +63,17 @@ export function CtaButton({ size = "lg", className = "" }: CtaButtonProps) {
       style={{ x: springX, y: springY }}
       className="inline-block"
     >
+      {/* The label is set in font-display (Syne), matching every other button
+          on the site. Hover now brightens on four channels at once — border,
+          fill, text and an outward copper glow — because the previous state
+          only changed border and fill, which was easy to miss and was being
+          swallowed entirely while the hero scrim overlapped this button.
+          transition covers box-shadow too, or the glow would snap on. */}
       <Link
         href="/contact"
-        className={`inline-flex items-center justify-center rounded-full border border-accent/50 font-display font-semibold tracking-wide text-accent transition-colors hover:border-accent hover:bg-accent/10 ${SIZE_CLASSES[size]} ${className}`}
+        className={`inline-flex items-center justify-center rounded-full border border-accent/50 font-display font-semibold tracking-wide text-accent transition-[color,background-color,border-color,box-shadow] duration-300 hover:border-accent hover:bg-accent/15 hover:text-[#e0a068] hover:shadow-[0_0_26px_-4px_rgba(199,123,63,0.6)] ${SIZE_CLASSES[size]} ${className}`}
       >
-        [ Start a conversation ]
+        {brackets ? "[ Start a conversation ]" : "Start a conversation"}
       </Link>
     </m.div>
   );

@@ -143,17 +143,17 @@ export function FloatingNav() {
             one. aria-label carries the complete wording either way, so the
             accessible name never changes with the breakpoint.
 
-            font-mono, not font-display (Iteration 6, Task 2). The nav was
-            rendering three typefaces in one pill — Syne 700 wordmark, IBM Plex
-            Mono links, Syne 600 CTA — and a geometric display face sitting
-            inline against a monospace face at the same 12px is what made the
-            bar look unevenly set. The links and the CTA now share one face, so
-            the pill reads as a single system; the wordmark stays Syne because
-            a logo is legitimately its own treatment. The [ ] motif is kept. */}
+            Back to font-display (Iteration 7, Task 2): button labels are Syne
+            sitewide. This had been switched to mono in Iteration 6 to stop the
+            nav pill rendering three typefaces at once, so the pill now carries
+            two again — Syne wordmark and Syne CTA, with mono only on the
+            section links between them. That is a deliberate trade the owner
+            asked for: buttons read warmer in the brand face. The [ ] motif is
+            kept here; only the hero instance drops it. */}
         <Link
           href="/contact"
           aria-label="Start a conversation"
-          className="whitespace-nowrap font-mono text-[11px] font-medium tracking-wide text-accent transition-opacity hover:opacity-80 sm:text-xs"
+          className="whitespace-nowrap font-display text-[11px] font-semibold tracking-wide text-accent transition-opacity hover:opacity-80 sm:text-xs"
         >
           <span aria-hidden="true" className="sm:hidden">
             [ Start ]
