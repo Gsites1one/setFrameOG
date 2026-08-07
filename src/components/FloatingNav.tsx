@@ -11,7 +11,8 @@ import { NavWordmark } from "./NavWordmark";
 // navigate home WITH the hash so the visitor lands on the right section
 // instead of at the top of the homepage.
 const NAV_LINKS = [
-  { label: "Work", hash: "#work" },
+  // Work became a real page in Iteration 8, so only FAQ is still an anchor.
+  { label: "Work", href: "/work" },
   { label: "Services", href: "/services" },
   { label: "About", href: "/about" },
   { label: "FAQ", hash: "#faq" },
@@ -156,10 +157,10 @@ export function FloatingNav() {
           className="whitespace-nowrap font-display text-[11px] font-semibold tracking-wide text-accent transition-opacity hover:opacity-80 sm:text-xs"
         >
           <span aria-hidden="true" className="sm:hidden">
-            [ Start ]
+            Start
           </span>
           <span aria-hidden="true" className="hidden sm:inline">
-            [ Start a conversation ]
+            Start a conversation
           </span>
         </Link>
       </div>

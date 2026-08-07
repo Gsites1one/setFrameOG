@@ -7,7 +7,7 @@ import { CONTACT_EMAIL, LOCATION } from "@/lib/constants";
 // anchor, which is now a real page. "Systems" keeps pointing at /knowledge,
 // which stays the deeper technical reference reachable by contextual links.
 const NAV_LINKS = [
-  { href: "/#work", label: "Work" },
+  { href: "/work", label: "Work" },
   { href: "/services", label: "Services" },
   { href: "/about", label: "About" },
   { href: "/#faq", label: "FAQ" },

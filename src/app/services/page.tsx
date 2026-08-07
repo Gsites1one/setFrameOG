@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CtaButton } from "@/components/CtaButton";
 import { Eyebrow } from "@/components/Eyebrow";
 import { PageHeader } from "@/components/PageHeader";
+import { ServiceCard } from "@/components/ServiceCard";
 import { CAPABILITIES } from "@/lib/projects";
 import { SITE_URL } from "@/lib/constants";
 
@@ -57,50 +58,15 @@ export default function ServicesPage() {
       {/* The menu. A hairline-separated list rather than a card grid: this page
           is for scanning ten things in order, and ten cards would read as a
           second marquee. */}
-      <ol className="mt-16 border-t border-white/10">
+      <ol className="mt-16 space-y-5">
         {CAPABILITIES.map((capability, i) => (
-          <li
-            key={capability.slug}
-            id={capability.slug}
-            className="scroll-mt-24 border-b border-white/10"
-          >
-            <div className="group flex gap-5 py-8">
-              <span
-                aria-hidden="true"
-                className="shrink-0 pt-1 font-mono text-xs text-foreground/30"
-              >
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div className="min-w-0">
-                <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-accent/80">
-                  {capability.name}
-                </p>
-                {/* Locked pain-first headline — reused verbatim, never reworded. */}
-                <h2 className="mt-2 font-display text-lg font-semibold leading-snug sm:text-xl">
-                  {capability.headline}
-                </h2>
-                {/* Locked outcome line — also verbatim. */}
-                <p className="mt-2 leading-relaxed text-foreground/70">
-                  {capability.outcome}
-                </p>
-                <Link
-                  href={`/knowledge#${capability.slug}`}
-                  className="mt-4 inline-flex items-center gap-1.5 font-mono text-xs text-foreground/60 transition-colors hover:text-accent"
-                >
-                  <span className="border-b border-transparent pb-0.5 transition-colors group-hover:border-accent/40">
-                    Learn how it works
-                  </span>
-                  <span aria-hidden="true" className="text-accent">
-                    →
-                  </span>
-                </Link>
-              </div>
-            </div>
+          <li key={capability.slug} id={capability.slug} className="scroll-mt-24">
+            <ServiceCard capability={capability} index={i} />
 
             {/* CTA breaks, placed inside the list so they interrupt the scan
                 rather than waiting at the bottom of ten entries. */}
             {(i === 3 || i === 7) && (
-              <div className="border-t border-white/10 bg-surface/30 px-5 py-8 text-center">
+              <div className="mt-5 rounded-2xl border border-white/10 bg-surface/30 px-5 py-8 text-center">
                 <p className="font-display text-base font-semibold">
                   {i === 3
                     ? "Recognise one of these already?"

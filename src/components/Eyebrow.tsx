@@ -2,14 +2,14 @@
 // grey mono line that read as unfinished. Anatomy: copper hairline(s), a
 // small copper node, and the label in mono caps, brighter than before.
 //
-// Tracking is 0.1em, down from 0.25em (Iteration 6, Task 2). The label looked
-// like it was rendering with broken, uneven letter widths. It was not a font
-// bug — IBM Plex Mono loads correctly here — it is that 0.25em on a MONOSPACE
-// face is self-defeating: every glyph already sits in an identical advance
-// box, so narrow characters (I, T, L) carry big built-in side bearings that
-// extra tracking then doubles, while wide ones (W, M) stay tight. The result
-// reads as random letter spacing. It was also 10x the tracking of every other
-// mono element on the site, which is why only this label showed it.
+// Tracking is 0.1em, down from 0.25em (Iteration 6, Task 2): 0.25em on a
+// MONOSPACE face is self-defeating, because every glyph already sits in an
+// identical advance box, so narrow characters carry big built-in side bearings
+// that extra tracking then doubles while wide ones stay tight.
+//
+// That reduced the problem but did not remove it — the remaining unevenness
+// was IBM Plex Mono's own letterforms, so Iteration 8 replaced the mono token
+// with Space Mono sitewide rather than keep tuning around the typeface.
 // Two variants:
 //  - "center": hairlines flank the label symmetrically (strip subheadings)
 //  - "left":   short hairline + node leads into the label (card eyebrows)

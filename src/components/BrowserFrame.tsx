@@ -13,16 +13,24 @@ import Image from "next/image";
 // URL pill, a faint diagonal screen reflection, and a slight lift on hover.
 // The copper cursor spotlight is retained; its rect is cached on pointer
 // enter so pointermove never reads layout.
+// Iteration 8, Task 3: the frame now also hosts coded UI mockups, not just
+// screenshots. Pass `image`/`alt` for a captured screenshot, or `children` for
+// a mockup built out of real components. Everything outside the screen area —
+// chrome bar, halo, spotlight, shadow, ring, hover lift — is untouched and
+// shared, which is the point: a system panel and a website prototype are the
+// same object in the gallery, so neither can read as the lesser one.
 export function BrowserFrame({
   displayUrl,
   label,
   image,
   alt,
+  children,
 }: {
   displayUrl: string;
   label: string;
-  image: string;
-  alt: string;
+  image?: string;
+  alt?: string;
+  children?: React.ReactNode;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const rectRef = useRef<DOMRect | null>(null);
@@ -79,15 +87,23 @@ export function BrowserFrame({
           </span>
         </div>
 
-        {/* screenshot */}
+        {/* screen: a captured screenshot, or a coded mockup */}
         <div className="relative aspect-video overflow-hidden">
-          <Image
-            src={image}
-            alt={alt}
-            fill
-            sizes="(max-width: 768px) 100vw, 480px"
-            className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-          />
+          {image ? (
+            <Image
+              src={image}
+              alt={alt ?? ""}
+              fill
+              sizes="(max-width: 768px) 100vw, 480px"
+              className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            // Mockups get the same hover scale as the screenshots so the two
+            // kinds of panel behave identically under the pointer.
+            <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
+              {children}
+            </div>
+          )}
           {/* faint diagonal screen reflection */}
           <div
             aria-hidden="true"

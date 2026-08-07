@@ -141,7 +141,7 @@ export function Hero() {
           shouldReduceMotion ? { duration: 0 } : { duration: 0.4, ease: "easeOut" }
         }
       >
-        <CtaButton size="lg" brackets={false} />
+        <CtaButton size="lg" />
       </m.div>
 
       <div

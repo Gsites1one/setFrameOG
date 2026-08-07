@@ -106,7 +106,7 @@ export function HowWeWork() {
                 <step.Icon className="h-6 w-6 shrink-0 text-accent" />
                 <span
                   aria-hidden="true"
-                  className="font-mono text-2xl font-medium leading-none text-foreground/[0.18]"
+                  className="font-mono text-2xl font-normal leading-none text-foreground/[0.18]"
                 >
                   {step.number}
                 </span>

@@ -36,7 +36,9 @@ export function FinalCta() {
             worth.
           </p>
           <div className="mt-10">
-            <CtaButton size="lg" />
+            {/* The closing band asks plainly rather than repeating the hero's
+                wording — by this point the visitor has read the whole page. */}
+            <CtaButton size="lg" label="Contact us" />
           </div>
         </div>
       </Reveal>

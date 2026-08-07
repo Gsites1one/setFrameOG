@@ -20,7 +20,7 @@ export function SectionNumber({ number, title }: SectionNumberProps) {
     <div className="mb-10">
       <span
         aria-hidden="true"
-        className="block select-none font-mono text-5xl font-medium leading-none text-foreground/[0.12] sm:text-6xl"
+        className="block select-none font-mono text-5xl font-normal leading-none text-foreground/[0.12] sm:text-6xl"
       >
         {number}
       </span>

@@ -155,7 +155,7 @@ export default function KnowledgePage() {
         <ol className="mt-8 space-y-8">
           {STEPS.map((step) => (
             <li key={step.number} className="flex gap-5">
-              <span className="shrink-0 font-mono text-2xl font-medium text-foreground/25">
+              <span className="shrink-0 font-mono text-2xl font-normal text-foreground/25">
                 {step.number}
               </span>
               <div>

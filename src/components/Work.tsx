@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { WEBSITE_PROJECT } from "@/lib/projects";
 import { Reveal } from "./Reveal";
 import { SectionNumber } from "./SectionNumber";
@@ -40,6 +41,20 @@ export function Work() {
             </div>
           ))}
         </div>
+
+        {/* The homepage keeps these two as its proof; /work is the full gallery
+            with the system prototypes alongside them (Iteration 8, Task 3). */}
+        <Link
+          href="/work"
+          className="group mt-12 inline-flex items-center gap-1.5 font-display text-base font-semibold text-foreground transition-colors hover:text-accent"
+        >
+          <span className="border-b border-transparent pb-0.5 transition-colors group-hover:border-accent">
+            See the system prototypes too
+          </span>
+          <span aria-hidden="true" className="text-accent">
+            →
+          </span>
+        </Link>
       </Reveal>
     </section>
   );

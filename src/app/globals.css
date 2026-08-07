@@ -14,7 +14,10 @@
 
   --font-display: var(--font-syne);
   --font-sans: var(--font-inter);
-  --font-mono: var(--font-ibm-plex-mono);
+  /* One token, one swap. Every font-mono utility on the site resolves through
+     here, so changing the face is this line plus the loader in layout.tsx —
+     no per-instance overrides anywhere. */
+  --font-mono: var(--font-space-mono);
 }
 
 /* No global scroll-behavior: smooth. With it set on <html>, every route

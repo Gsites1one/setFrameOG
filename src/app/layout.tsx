@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Syne, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Syne, Inter, Space_Mono } from "next/font/google";
 import { FloatingNav } from "@/components/FloatingNav";
 import { IntroCurtain } from "@/components/IntroCurtain";
 import { LifeBackground } from "@/components/LifeBackground";
@@ -21,10 +21,20 @@ const inter = Inter({
   display: "swap",
 });
 
-const ibmPlexMono = IBM_Plex_Mono({
+// Space Mono replaces IBM Plex Mono sitewide (Iteration 8, Task 1). Two earlier
+// iterations tried to fix the uneven letter rendering as a loading or CSS bug
+// and both times measurement cleared the loading path — the font resolved, the
+// weight was right, there were no stray feature-settings. The unevenness was
+// the typeface's own letterforms (the oversized Q in "FAQ" being the clearest
+// tell), so the fix is to change the face rather than keep debugging it.
+//
+// Space Mono ships 400 and 700 only — there is no 500, so nothing anywhere
+// should ask for `font-medium` on this token or the browser has to pick a
+// neighbour. The three ghost numerals that did were moved to font-normal.
+const spaceMono = Space_Mono({
   subsets: ["latin"],
-  variable: "--font-ibm-plex-mono",
-  weight: ["400", "500"],
+  variable: "--font-space-mono",
+  weight: ["400", "700"],
   display: "swap",
 });
 
@@ -81,7 +91,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${syne.variable} ${inter.variable} ${ibmPlexMono.variable}`}
+      className={`${syne.variable} ${inter.variable} ${spaceMono.variable}`}
     >
       <body className="font-sans bg-background text-foreground antialiased">
         {/* Marks JS as available before body content parses, so scroll reveals
