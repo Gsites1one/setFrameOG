@@ -1307,3 +1307,73 @@ FAQ_ITEMS untouched, so FAQPage JSON-LD is unchanged.
    the raw CSS text contained 26 — the CSSOM walk missed Tailwind v4's nested
    output. Fetch and grep the stylesheet text; do not trust a CSSOM traversal
    to prove a rule is missing.
+
+---
+
+## Iteration 8 — Space Mono, bracket cleanup, /work, /services cards
+
+### T1 Mono typeface replaced at the token
+`--font-mono` now points at Space Mono. One token change plus the loader, so
+all 18 files using `font-mono` inherited it — no per-instance overrides, no
+mixed state. Verified: zero IBM Plex references in the codebase, and zero
+elements resolving to a non-Space-Mono stack across / /work /services /about at
+320 / 768 / 1440.
+
+Why replace rather than debug again: Iterations 6 and 7 both cleared the
+loading path by measurement (font resolved, weight correct, no stray
+feature-settings, font-stretch 100%). The unevenness was the typeface's own
+letterforms. Objective check on the new face — every glyph
+(F A Q W I M L O 0 1 8 9) measures an identical 24.48px advance, where a
+proportional control returns 11 different widths. An oversized Q is now
+structurally impossible.
+
+GOTCHA: Space Mono ships 400 and 700 only — there is no 500. The three ghost
+numerals that used `font-medium` were moved to `font-normal` so nothing asks
+for a weight the family cannot serve.
+
+### T2 Brackets removed from CTA buttons; closing band reworded
+The [ ] motif is now reserved for the brand mark. The brief named three
+instances, but `CtaButton` actually renders in SEVEN places once /services
+(x3), /about and /knowledge are counted — bracketing those while the named
+three went plain would have read as a bug, so the brackets came out of the
+component. LogoMark and the nav [S] wordmark keep theirs.
+Homepage closing band now reads "Contact us" via a new `label` prop; hero and
+nav keep "Start a conversation".
+LEFT ALONE (flagged, not forgotten): the contact form's "[ Send message ]" —
+not named in the brief and a different label.
+
+### T3 /work — proof only, shows rather than explains
+`BrowserFrame` now takes either a screenshot or coded children, so a system
+panel and a website prototype are literally the same component. Verified:
+identical frame signature across all 11 panels, every screen 16:9 at the same
+534px width — no panel is a lesser afterthought.
+
+Two website prototypes plus NINE coded UI mockups covering every remaining
+marquee category: inbox/booking, document intake, contacts, outreach, orders,
+dashboard, task runner, workflow, system map. Built from real components over a
+small shared primitive set (Shell / TopBar / NavItem / Pill / Avatar / Line) so
+nine screens stay one visual family; each renders 20-38 elements of real
+interface. ZERO interactive elements — static by design for now.
+
+Honesty framing: badged Prototype 01-11 continuing the existing convention,
+captioned only with locked capability names and outcome lines, plus an explicit
+on-page note that every screen is demonstration data. No client is implied and
+no number is presented as a measured result. No /services or /knowledge
+explanatory copy is duplicated here.
+
+Nav + footer Work now point at /work; /work is in the sitemap with its own
+meta/OG. The homepage KEEPS its two prototypes as proof and links out to the
+fuller gallery rather than losing the section.
+
+### T4 /services entries elevated to cards
+Bordered panel, thumbnail reusing the existing marquee illustration, index
+promoted to the section-01 ghost numeral treatment, and "Learn how it works"
+rebuilt as a real secondary pill in the site's button language (border, pill
+shape, copper hover glow) one step down from the main CTA.
+
+The animation constraint was the load-bearing part — ten cards must not animate
+at once. The side accent is driven per card by the shared RevealObserver, so
+each card's hairline draws only when THAT card enters view, then rests; hover
+adds a copper wash on top. Measured: 1 of 10 revealed at page top, progressing
+1 -> 4 -> 7 -> 9 -> 10 on scroll, with 0 cards carrying any
+infinite-iteration animation. No per-card JS, no permanent loop.
