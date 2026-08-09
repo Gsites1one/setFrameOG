@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useForm, ValidationError } from "@formspree/react";
 import { useReducedMotion } from "framer-motion";
+// FIELD_CLASSES lives in lib/formStyles so /webcriticapp's form uses the
+// identical treatment instead of a second copy of the same class string.
+import { FIELD_CLASSES } from "@/lib/formStyles";
 
 const FORMSPREE_ID = "mjgnbdbg";
-
-const FIELD_CLASSES =
-  "w-full rounded-lg border border-white/10 bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted outline-none transition-colors focus:border-accent/60";
 
 // Rotating placeholder hints for the message field (Task 5). This is a
 // hint only — the persistent, visible <label htmlFor="message"> below

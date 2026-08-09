@@ -308,6 +308,34 @@ body {
   animation: hero-breathe 26s ease-in-out infinite;
 }
 
+/* Audit spinner (/webcriticapp). A copper arc on a faint track, rotating
+   linearly — rotation is the one place ease-in-out is wrong, because an eased
+   spin reads as stuttering. The slow breathing ring behind it reuses the same
+   opacity language as the ambient glows so it belongs to this site rather than
+   looking like a stock library spinner. */
+@keyframes audit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.audit-spin {
+  animation: audit-spin 1.1s linear infinite;
+}
+
+.audit-ring-pulse {
+  animation: pulse-glow 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Static ring, no rotation. The status text still rotates, so the visitor
+     can still tell the request is alive. */
+  .audit-spin,
+  .audit-ring-pulse {
+    animation: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-breathe {
     animation: none !important;

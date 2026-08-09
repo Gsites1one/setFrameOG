@@ -13,7 +13,21 @@ type CtaButtonProps = {
    * asks plainly instead of repeating the hero's wording.
    */
   label?: string;
+  /**
+   * Render a real <button type="submit"> instead of a link to /contact.
+   * Added for /webcriticapp's form: that page needs the site's primary button
+   * to submit a form rather than navigate, and cloning the class string into a
+   * second component is exactly how two buttons drift apart. Everything else —
+   * shape, magnet, hover glow, Syne label — is shared.
+   */
+  submit?: boolean;
+  disabled?: boolean;
 };
+
+// One source of truth for the primary button's look. Both the link form and
+// the submit form render this identical string.
+const BUTTON_CLASSES =
+  "inline-flex items-center justify-center rounded-full border border-accent/50 font-display font-semibold tracking-wide text-accent transition-[color,background-color,border-color,box-shadow] duration-300 hover:border-accent hover:bg-accent/15 hover:text-[#e0a068] hover:shadow-[0_0_26px_-4px_rgba(199,123,63,0.6)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-accent/50 disabled:hover:bg-transparent disabled:hover:text-accent disabled:hover:shadow-none";
 
 const SIZE_CLASSES: Record<NonNullable<CtaButtonProps["size"]>, string> = {
   sm: "px-4 py-1.5 text-xs",
@@ -32,6 +46,8 @@ export function CtaButton({
   size = "lg",
   className = "",
   label = "Start a conversation",
+  submit = false,
+  disabled = false,
 }: CtaButtonProps) {
   const ref = useRef<HTMLDivElement>(null);
   const rectRef = useRef<DOMRect | null>(null);
@@ -69,17 +85,27 @@ export function CtaButton({
       className="inline-block"
     >
       {/* The label is set in font-display (Syne), matching every other button
-          on the site. Hover now brightens on four channels at once — border,
-          fill, text and an outward copper glow — because the previous state
-          only changed border and fill, which was easy to miss and was being
+          on the site. Hover brightens on four channels at once — border, fill,
+          text and an outward copper glow — because an earlier state only
+          changed border and fill, which was easy to miss and was being
           swallowed entirely while the hero scrim overlapped this button.
           transition covers box-shadow too, or the glow would snap on. */}
-      <Link
-        href="/contact"
-        className={`inline-flex items-center justify-center rounded-full border border-accent/50 font-display font-semibold tracking-wide text-accent transition-[color,background-color,border-color,box-shadow] duration-300 hover:border-accent hover:bg-accent/15 hover:text-[#e0a068] hover:shadow-[0_0_26px_-4px_rgba(199,123,63,0.6)] ${SIZE_CLASSES[size]} ${className}`}
-      >
-        {label}
-      </Link>
+      {submit ? (
+        <button
+          type="submit"
+          disabled={disabled}
+          className={`${BUTTON_CLASSES} ${SIZE_CLASSES[size]} ${className}`}
+        >
+          {label}
+        </button>
+      ) : (
+        <Link
+          href="/contact"
+          className={`${BUTTON_CLASSES} ${SIZE_CLASSES[size]} ${className}`}
+        >
+          {label}
+        </Link>
+      )}
     </m.div>
   );
 }
