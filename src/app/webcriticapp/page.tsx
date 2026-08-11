@@ -27,7 +27,10 @@ export const metadata: Metadata = {
 // position the rest of the site takes — the tools stay invisible.
 export default function WebCriticPage() {
   return (
-    <main className="mx-auto min-h-screen max-w-4xl px-6 py-16">
+    // Wider than the other standalone pages: the report is a two-column
+    // layout, and at max-w-4xl the preview and the report would each be too
+    // narrow to read as panels in an app.
+    <main className="mx-auto min-h-screen max-w-6xl px-6 py-16">
       <PageHeader />
 
       <Eyebrow>Free tool</Eyebrow>

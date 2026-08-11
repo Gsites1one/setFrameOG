@@ -308,6 +308,28 @@ body {
   animation: hero-breathe 26s ease-in-out infinite;
 }
 
+/* Score ring draw-in (/webcriticapp). The arc sweeps from empty to its value
+   once. Done in CSS with the circumference passed in as a custom property,
+   rather than a state flag flipped in an effect — that would have been a
+   setState-in-effect cascade for something the compositor does on its own.
+   Under reduced motion the animation is dropped and the element simply renders
+   at its final stroke-dashoffset. */
+@keyframes score-ring-draw {
+  from {
+    stroke-dashoffset: var(--ring-circumference);
+  }
+}
+
+.score-ring-draw {
+  animation: score-ring-draw 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .score-ring-draw {
+    animation: none !important;
+  }
+}
+
 /* Audit spinner (/webcriticapp). A copper arc on a faint track, rotating
    linearly — rotation is the one place ease-in-out is wrong, because an eased
    spin reads as stuttering. The slow breathing ring behind it reuses the same

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { m, useReducedMotion } from "framer-motion";
 import { CtaButton } from "@/components/CtaButton";
+import { RecentAudits } from "./RecentAudits";
 import {
   FIELD_CLASSES,
   FIELD_ERROR_CLASSES,
@@ -232,13 +233,17 @@ export function AuditApp() {
         <m.form
           onSubmit={onSubmit}
           noValidate
-          className="mt-12 max-w-md space-y-5"
+          // Compact: the two fields sit side by side from sm up so the whole
+          // "before" state is one shallow band rather than a tall stack, which
+          // leaves room for the recent-audits strip underneath.
+          className="mt-10 rounded-2xl border border-white/10 bg-surface/40 p-5 sm:p-6"
           initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={
             shouldReduceMotion ? { duration: 0 } : { duration: 0.35, ease: "easeOut" }
           }
         >
+          <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="websiteUrl" className={FIELD_LABEL_CLASSES}>
               Website address
@@ -285,16 +290,22 @@ export function AuditApp() {
               </span>
             )}
           </div>
-
-          <div className="pt-1">
-            <CtaButton submit label="Run Audit" />
           </div>
 
-          <p className="text-xs leading-relaxed text-foreground/40">
-            One report per address. Your email is used to send the report and
-            nothing else.
-          </p>
+          <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <CtaButton submit label="Run Audit" />
+            <p className="max-w-xs text-xs leading-relaxed text-foreground/40">
+              Your email is used to send the report and nothing else.
+            </p>
+          </div>
         </m.form>
+      )}
+
+      {phase === "idle" && (
+        // Not gated behind running an audit — this is the first thing a
+        // returning visitor sees, and it makes the page read as a tool with
+        // history rather than an empty form.
+        <RecentAudits />
       )}
 
       {phase === "loading" && <LoadingState />}

@@ -42,6 +42,13 @@ export const TONE_BAR: Record<ScoreTone, string> = {
   low: "bg-[#CE6B5F]",
 };
 
+/** Raw values for the SVG score ring, which needs a stroke rather than a class. */
+export const TONE_HEX: Record<ScoreTone, string> = {
+  good: "#8CA882",
+  mid: "#C77B3F",
+  low: "#CE6B5F",
+};
+
 export function toneForScore(score: number): ScoreTone {
   if (score >= 8) return "good";
   if (score >= 5) return "mid";
