@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { AuditApp } from "@/components/webcritic/AuditApp";
-import { Eyebrow } from "@/components/Eyebrow";
 import { PageHeader } from "@/components/PageHeader";
 import { SITE_URL } from "@/lib/constants";
 
@@ -33,16 +32,9 @@ export default function WebCriticPage() {
     <main className="mx-auto min-h-screen max-w-6xl px-6 py-16">
       <PageHeader />
 
-      <Eyebrow>Free tool</Eyebrow>
-      <h1 className="mt-6 max-w-2xl font-display text-3xl font-bold leading-tight sm:text-4xl">
-        Website Critic
-      </h1>
-      <p className="mt-4 max-w-xl leading-relaxed text-foreground/70">
-        Point it at any page and get a scored, prioritised breakdown of what is
-        costing you conversions — desktop and mobile — with the fixes worth
-        doing first.
-      </p>
-
+      {/* The h1 and description now live inside AuditApp's persistent header
+          bar, alongside the form, so the title and the control that acts on it
+          stay together in one band. */}
       <AuditApp />
     </main>
   );

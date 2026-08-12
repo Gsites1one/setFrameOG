@@ -1,77 +1,122 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { BrowserFrame } from "@/components/BrowserFrame";
 import { ScoreRing } from "./ScoreRing";
 import {
   TONE_BADGE,
-  TONE_BAR,
   TONE_TEXT,
   toneForPriority,
   toneForScore,
 } from "@/lib/auditScore";
 import type { AuditResult } from "@/lib/auditTypes";
 
-// Two-column report (redesign pass). Left: the captured page in a preview panel
-// with a Desktop/Mobile toggle. Right: the written report — summary, score
-// ring, category grid, prioritised fixes.
+// Results view, rebuilt to the dashboard structure: a wide left column holding
+// the capture and the score, and a narrower right column holding the written
+// report.
 //
-// Copy note: this panel is titled "Audit Report", not "AI Audit Report". The
-// standing constraint on this site is that the word never appears in visible
-// copy — the output has to read as expert judgement, not as machine output —
-// and that rule does not stop applying because the panel is new.
+// Deliberately NOT carried over from the reference: the account sidebar, the
+// upgrade card, the export/share actions and the thumbnail strip. There are no
+// accounts here and none of those were in the spec, so they would be dead
+// controls. Colour, type and framing all come from the existing tokens — the
+// reference's purple/green and its icon set are not used anywhere.
+//
+// Copy note: the right panel is titled "Audit report", not "AI Audit Report".
+// The word is a standing sitewide prohibition; the output has to read as expert
+// judgement. One string, easy to flip if that call is overruled.
 
 type View = "desktop" | "mobile";
+
+/* ── icons: drawn in the site's own thin-line style, not the reference's ──── */
+
+function IconDesktop({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <rect x="2.5" y="4" width="19" height="13" rx="2" />
+      <path d="M9 20.5h6M12 17.5v3" />
+    </svg>
+  );
+}
+
+function IconMobile({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <rect x="7" y="2.5" width="10" height="19" rx="2.5" />
+      <path d="M11 18.5h2" />
+    </svg>
+  );
+}
+
+/* ── shared panel shell, matching the /services card language ────────────── */
 
 function Panel({
   title,
   action,
   children,
   className = "",
+  bodyClassName = "",
 }: {
   title: string;
   action?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
+  bodyClassName?: string;
 }) {
-  // Same panel language as the /services cards: rounded-2xl, hairline border,
-  // surface tint.
   return (
     <section
-      className={`rounded-2xl border border-white/10 bg-surface/40 p-5 sm:p-6 ${className}`}
+      className={`overflow-hidden rounded-2xl border border-white/10 bg-surface/40 ${className}`}
     >
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">
+      <div className="flex items-center justify-between gap-4 border-b border-white/[0.07] px-5 py-3.5">
+        <h2 className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/55">
           {title}
         </h2>
         {action}
       </div>
-      {children}
+      <div className={`p-5 ${bodyClassName}`}>{children}</div>
     </section>
   );
 }
 
-function ToggleButton({
+function ViewToggle({
   active,
   onClick,
+  label,
   children,
 }: {
   active: boolean;
   onClick: () => void;
+  label: string;
   children: React.ReactNode;
 }) {
-  // Scaled-down version of the site's secondary pill (border, pill shape,
-  // copper on hover) with an active state that fills rather than glows, so the
-  // selected view is unmistakable without competing with the primary CTA.
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`rounded-full border px-3 py-1 font-display text-[11px] font-semibold transition-[color,background-color,border-color] duration-200 ${
+      aria-label={label}
+      title={label}
+      className={`inline-flex h-7 w-8 items-center justify-center rounded-md border transition-[color,background-color,border-color] duration-200 ${
         active
-          ? "border-accent/60 bg-accent/15 text-accent"
-          : "border-white/15 text-foreground/50 hover:border-accent/40 hover:text-accent"
+          ? "border-accent/50 bg-accent/15 text-accent"
+          : "border-white/10 text-foreground/40 hover:border-accent/30 hover:text-accent"
       }`}
     >
       {children}
@@ -82,15 +127,18 @@ function ToggleButton({
 export function AuditReport({
   result,
   hostname,
+  generatedAt,
   onReset,
 }: {
   result: AuditResult;
   hostname: string;
+  generatedAt: Date;
   onReset: () => void;
 }) {
   const hasDesktop = Boolean(result.desktopBase64);
   const hasMobile = Boolean(result.mobileBase64);
   const [view, setView] = useState<View>(hasDesktop ? "desktop" : "mobile");
+  const [priorityFilter, setPriorityFilter] = useState("all");
 
   const active = view === "desktop" ? result.desktopBase64 : result.mobileBase64;
   const src = active
@@ -99,157 +147,234 @@ export function AuditReport({
       : `data:image/png;base64,${active}`
     : null;
 
+  const priorities = useMemo(() => {
+    const seen = new Set<string>();
+    for (const item of result.top_improvements) {
+      const p = item.priority.trim();
+      if (p) seen.add(p);
+    }
+    return [...seen];
+  }, [result.top_improvements]);
+
+  const visible = useMemo(
+    () =>
+      priorityFilter === "all"
+        ? result.top_improvements
+        : result.top_improvements.filter(
+            (i) => i.priority.trim().toLowerCase() === priorityFilter
+          ),
+    [result.top_improvements, priorityFilter]
+  );
+
+  const generatedLabel = `${generatedAt.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })} · ${generatedAt.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}`;
+
   return (
-    <div className="mt-12">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
-        {/* ── left: preview ─────────────────────────────────────────────── */}
-        <Panel
-          title="Website preview"
-          className="lg:sticky lg:top-24"
-          action={
-            <div className="flex gap-2">
-              {hasDesktop && (
-                <ToggleButton
-                  active={view === "desktop"}
-                  onClick={() => setView("desktop")}
-                >
-                  Desktop
-                </ToggleButton>
-              )}
-              {hasMobile && (
-                <ToggleButton
-                  active={view === "mobile"}
-                  onClick={() => setView("mobile")}
-                >
-                  Mobile
-                </ToggleButton>
-              )}
-            </div>
-          }
-        >
-          <div className="group">
-            <BrowserFrame
-              displayUrl={hostname}
-              label={view === "desktop" ? "Desktop" : "Mobile"}
-            >
-              {src && (
-                // A plain <img>: these are per-request base64 data URIs, so
-                // there is nothing for next/image to fetch or optimise.
-                //
-                // The fit differs by view out of necessity, not inconsistency.
-                // The frame is 16:9; a desktop capture fills it from the top,
-                // but a tall mobile capture would show only a sliver, so it is
-                // contained and centred instead. Same frame either way.
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  key={view}
-                  src={src}
-                  alt={`${view === "desktop" ? "Desktop" : "Mobile"} view of ${hostname}`}
-                  className={`h-full w-full ${
-                    view === "desktop"
-                      ? "object-cover object-top"
-                      : "object-contain"
-                  }`}
-                />
-              )}
-            </BrowserFrame>
-          </div>
-        </Panel>
-
-        {/* ── right: report ─────────────────────────────────────────────── */}
+    <div className="mt-8">
+      {/* ~60 / ~40 split, stacking below lg. */}
+      <div className="grid gap-6 lg:grid-cols-[3fr_2fr] lg:items-start">
+        {/* ── LEFT ──────────────────────────────────────────────────────── */}
         <div className="space-y-6">
-          <Panel title="Audit report">
-            {/* summary, highlighted */}
-            {result.executive_summary && (
-              <div className="rounded-xl border border-accent/20 bg-accent/[0.06] p-4">
-                <p className="leading-relaxed text-foreground/85">
-                  {result.executive_summary}
-                </p>
+          <Panel
+            title="Website preview"
+            action={
+              <div className="flex gap-1.5">
+                {hasDesktop && (
+                  <ViewToggle
+                    active={view === "desktop"}
+                    onClick={() => setView("desktop")}
+                    label="Show desktop screenshot"
+                  >
+                    <IconDesktop className="h-4 w-4" />
+                  </ViewToggle>
+                )}
+                {hasMobile && (
+                  <ViewToggle
+                    active={view === "mobile"}
+                    onClick={() => setView("mobile")}
+                    label="Show mobile screenshot"
+                  >
+                    <IconMobile className="h-4 w-4" />
+                  </ViewToggle>
+                )}
               </div>
-            )}
-
-            {/* score ring */}
-            <div className="mt-7 flex justify-center">
-              <ScoreRing score={result.overall_score} />
+            }
+          >
+            <div className="group">
+              <BrowserFrame
+                displayUrl={hostname}
+                label={view === "desktop" ? "Desktop" : "Mobile"}
+              >
+                {src && (
+                  // Plain <img>: per-request base64 data URIs, nothing for the
+                  // image optimiser to fetch or resize. The fit differs by view
+                  // out of necessity — a tall mobile capture in a 16:9 frame
+                  // would otherwise show only a sliver.
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    key={view}
+                    src={src}
+                    alt={`${view === "desktop" ? "Desktop" : "Mobile"} view of ${hostname}`}
+                    className={`h-full w-full ${
+                      view === "desktop"
+                        ? "object-cover object-top"
+                        : "object-contain"
+                    }`}
+                  />
+                )}
+              </BrowserFrame>
             </div>
+          </Panel>
 
-            {/* categories */}
-            {result.categories.length > 0 && (
-              <div className="mt-8">
-                <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-foreground/40">
-                  By category
-                </p>
-                <div className="mt-4 grid gap-x-5 gap-y-3.5 sm:grid-cols-2">
+          <Panel title="Overall score">
+            <div className="flex flex-col items-center gap-7 sm:flex-row sm:items-center sm:gap-8">
+              <ScoreRing score={result.overall_score} rating={result.rating} />
+
+              {/* 3-up category grid — the nine scores at a glance. */}
+              {result.categories.length > 0 && (
+                <div className="grid w-full flex-1 grid-cols-2 gap-2.5 sm:grid-cols-3">
                   {result.categories.map((category) => {
                     const tone = toneForScore(category.score);
                     return (
-                      <div key={category.name}>
-                        <div className="flex items-baseline justify-between gap-2">
-                          <span className="truncate text-xs text-foreground/70">
-                            {category.name}
-                          </span>
+                      <div
+                        key={category.name}
+                        className="rounded-xl border border-white/[0.08] bg-background/40 px-3 py-2.5"
+                      >
+                        <p className="truncate font-mono text-[9.5px] uppercase tracking-[0.08em] text-foreground/45">
+                          {category.name}
+                        </p>
+                        <p className="mt-1.5 flex items-baseline gap-1">
                           <span
-                            className={`shrink-0 font-display text-xs font-bold ${TONE_TEXT[tone]}`}
+                            className={`font-display text-lg font-bold leading-none ${TONE_TEXT[tone]}`}
                           >
                             {category.score.toFixed(1)}
                           </span>
-                        </div>
-                        <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                          <div
-                            className={`h-full rounded-full ${TONE_BAR[tone]}`}
-                            style={{
-                              width: `${Math.max(0, Math.min(100, category.score * 10))}%`,
-                            }}
-                          />
-                        </div>
+                          <span className="font-mono text-[9px] text-foreground/30">
+                            /10
+                          </span>
+                        </p>
                       </div>
                     );
                   })}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </Panel>
+        </div>
+
+        {/* ── RIGHT ─────────────────────────────────────────────────────── */}
+        <Panel
+          title="Audit report"
+          action={
+            <span className="shrink-0 font-mono text-[10px] text-foreground/40">
+              Generated {generatedLabel}
+            </span>
+          }
+        >
+          {result.executive_summary && (
+            <div className="rounded-xl border border-accent/20 bg-accent/[0.06] p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-accent/80">
+                Summary
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-foreground/85">
+                {result.executive_summary}
+              </p>
+            </div>
+          )}
 
           {result.top_improvements.length > 0 && (
-            <Panel title="Fix these first">
-              <ol className="space-y-4">
-                {result.top_improvements.map((item, i) => {
+            <div className="mt-7">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-display text-sm font-semibold">
+                  Top improvements
+                </h3>
+                {priorities.length > 1 && (
+                  <select
+                    aria-label="Filter improvements by priority"
+                    value={priorityFilter}
+                    onChange={(e) => setPriorityFilter(e.target.value)}
+                    className="rounded-lg border border-white/10 bg-surface px-2.5 py-1 font-mono text-[10px] text-foreground/70 outline-none transition-colors focus:border-accent/60"
+                  >
+                    <option value="all">All priorities</option>
+                    {priorities.map((p) => (
+                      <option key={p} value={p.toLowerCase()}>
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <ol className="mt-4 space-y-2.5">
+                {visible.map((item, i) => {
                   const tone = toneForPriority(item.priority);
                   return (
-                    <li key={`${item.title}-${i}`} className="flex gap-3.5">
-                      <span
-                        aria-hidden="true"
-                        className="shrink-0 font-mono text-lg font-normal leading-tight text-foreground/[0.22]"
-                      >
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2.5">
-                          <h3 className="font-display text-sm font-semibold leading-snug">
-                            {item.title}
-                          </h3>
-                          <span
-                            className={`rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest ${TONE_BADGE[tone]}`}
-                          >
-                            {item.priority}
-                          </span>
+                    <li
+                      key={`${item.title}-${i}`}
+                      className="rounded-xl border border-white/[0.07] bg-background/40 p-3.5"
+                    >
+                      <div className="flex gap-3">
+                        {/* ranked numeral, toned by priority */}
+                        <span
+                          aria-hidden="true"
+                          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-mono text-[10px] ${TONE_BADGE[tone]}`}
+                        >
+                          {i + 1}
+                        </span>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
+                            <div className="flex min-w-0 flex-wrap items-center gap-2">
+                              <h4 className="font-display text-[13px] font-semibold leading-snug">
+                                {item.title}
+                              </h4>
+                              <span
+                                className={`shrink-0 rounded-full border px-1.5 py-px font-mono text-[9px] uppercase tracking-wider ${TONE_BADGE[tone]}`}
+                              >
+                                {item.priority}
+                              </span>
+                            </div>
+
+                            {/* Impact tag, right-aligned. Rendered only when
+                                the workflow sends one — never inferred. */}
+                            {item.impact && (
+                              <span
+                                className={`shrink-0 rounded-full border px-2 py-px font-mono text-[9px] uppercase tracking-wider ${TONE_BADGE[tone]}`}
+                              >
+                                {item.impact}
+                              </span>
+                            )}
+                          </div>
+
+                          {item.description && (
+                            <p className="mt-1.5 text-xs leading-relaxed text-foreground/60">
+                              {item.description}
+                            </p>
+                          )}
                         </div>
-                        {item.description && (
-                          <p className="mt-1.5 text-sm leading-relaxed text-foreground/65">
-                            {item.description}
-                          </p>
-                        )}
                       </div>
                     </li>
                   );
                 })}
               </ol>
-            </Panel>
+
+              {visible.length === 0 && (
+                <p className="mt-4 font-mono text-xs text-foreground/40">
+                  Nothing at that priority.
+                </p>
+              )}
+            </div>
           )}
-        </div>
+        </Panel>
       </div>
 
-      <div className="mt-10 flex flex-col items-start gap-4 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-8 flex flex-col items-start gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="font-mono text-xs leading-relaxed text-foreground/45">
           A copy of this report is on its way to your inbox.
         </p>
@@ -258,7 +383,7 @@ export function AuditReport({
           onClick={onReset}
           className="shrink-0 rounded-full border border-white/15 px-4 py-2 font-display text-xs font-semibold text-foreground/75 transition-[color,background-color,border-color,box-shadow] duration-300 hover:border-accent/60 hover:bg-accent/10 hover:text-accent hover:shadow-[0_0_20px_-6px_rgba(199,123,63,0.6)]"
         >
-          Run another audit
+          Clear results
         </button>
       </div>
     </div>

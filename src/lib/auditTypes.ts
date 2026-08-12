@@ -11,6 +11,10 @@ export type AuditImprovement = {
   priority: string;
   title: string;
   description: string;
+  /** Optional "High/Medium/Low Impact" tag. Rendered only when the workflow
+   *  actually sends it — never derived, because impact is a judgement the
+   *  report makes, not something the UI is entitled to invent. */
+  impact: string | null;
 };
 
 export type AuditResult = {
@@ -18,9 +22,21 @@ export type AuditResult = {
   mobileBase64: string | null;
   executive_summary: string;
   overall_score: number;
+  /** Poor / Fair / Good / Excellent. Falls back to a band derived from the
+   *  score if the workflow omits it — that is a restatement of a number we
+   *  already have, not a new claim. */
+  rating: string;
   categories: AuditCategory[];
   top_improvements: AuditImprovement[];
 };
+
+/** Used only when the payload has no `rating` of its own. */
+export function ratingForScore(score: number): string {
+  if (score >= 8) return "Excellent";
+  if (score >= 6.5) return "Good";
+  if (score >= 5) return "Fair";
+  return "Poor";
+}
 
 function asNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -104,6 +120,7 @@ export function normaliseAudit(raw: unknown): AuditResult | null {
         priority: asString(item.priority) || "Medium",
         title,
         description: asString(item.description),
+        impact: asString(item.impact) || null,
       };
     })
     .filter((c): c is AuditImprovement => c !== null);
@@ -121,11 +138,14 @@ export function normaliseAudit(raw: unknown): AuditResult | null {
     return null;
   }
 
+  const score = clamp10(overall ?? 0);
+
   return {
     desktopBase64: desktop,
     mobileBase64: mobile,
     executive_summary: summary,
-    overall_score: clamp10(overall ?? 0),
+    overall_score: score,
+    rating: asString(node.rating) || ratingForScore(score),
     categories,
     top_improvements: improvements,
   };

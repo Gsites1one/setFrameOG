@@ -145,25 +145,22 @@ export function AuditApp() {
   const [errors, setErrors] = useState<{ url?: string; email?: string }>({});
   const [failure, setFailure] = useState("");
   const [result, setResult] = useState<AuditResult | null>(null);
+  const [generatedAt, setGeneratedAt] = useState<Date | null>(null);
   const [auditedHost, setAuditedHost] = useState("");
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  // Returns the page to its initial state, not just the previous phase: the
-  // fields are cleared too. That is the right behaviour after a finished
-  // report ("Run another audit" means a different site), and it is what the
-  // spec asks for after a failure. The cost is that retrying the same address
-  // after a transient failure means retyping it — flip the two setters below
-  // if that trade should go the other way.
+  // Clears the results and returns to the empty state. The header form keeps
+  // its values on purpose now that it is persistent: the address stays in the
+  // field after a run (the spec asks for it pre-filled), and the email is
+  // retained so a second audit is one click rather than a re-type.
   const reset = () => {
     abortRef.current?.abort();
     setPhase("idle");
     setErrors({});
     setFailure("");
     setResult(null);
-    setWebsiteUrl("");
-    setRecipientEmail("");
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -214,6 +211,9 @@ export function AuditApp() {
       }
 
       setResult(normalised);
+      // Stamped when the report lands rather than during render, so the
+      // "Generated" line is stable and never shifts on re-render.
+      setGeneratedAt(new Date());
       setPhase("done");
     } catch {
       // Covers both the abort and any network failure. Deliberately one calm
@@ -227,98 +227,138 @@ export function AuditApp() {
     }
   };
 
+
+  const hasRun = phase === "done" && result !== null;
+
   return (
     <>
-      {phase === "idle" && (
-        <m.form
-          onSubmit={onSubmit}
-          noValidate
-          // Compact: the two fields sit side by side from sm up so the whole
-          // "before" state is one shallow band rather than a tall stack, which
-          // leaves room for the recent-audits strip underneath.
-          className="mt-10 rounded-2xl border border-white/10 bg-surface/40 p-5 sm:p-6"
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={
-            shouldReduceMotion ? { duration: 0 } : { duration: 0.35, ease: "easeOut" }
-          }
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="websiteUrl" className={FIELD_LABEL_CLASSES}>
-              Website address
-            </label>
-            <input
-              id="websiteUrl"
-              name="websiteUrl"
-              type="text"
-              inputMode="url"
-              autoComplete="url"
-              placeholder="yourbusiness.com"
-              value={websiteUrl}
-              onChange={(e) => setWebsiteUrl(e.target.value)}
-              aria-invalid={errors.url ? true : undefined}
-              aria-describedby={errors.url ? "websiteUrl-error" : undefined}
-              className={FIELD_CLASSES}
-            />
-            {errors.url && (
-              <span id="websiteUrl-error" className={FIELD_ERROR_CLASSES}>
-                {errors.url}
-              </span>
-            )}
-          </div>
+      {/* ── persistent header bar ──────────────────────────────────────────
+          Title and description on the left, the whole form on the right. The
+          form does NOT unmount between phases: after a run the address stays
+          in the field, the email is retained, and the button becomes "Run New
+          Audit", so a second audit is one click.
 
-          <div>
-            <label htmlFor="recipientEmail" className={FIELD_LABEL_CLASSES}>
-              Where to send it
-            </label>
-            <input
-              id="recipientEmail"
-              name="recipientEmail"
-              type="email"
-              autoComplete="email"
-              placeholder="you@company.com"
-              value={recipientEmail}
-              onChange={(e) => setRecipientEmail(e.target.value)}
-              aria-invalid={errors.email ? true : undefined}
-              aria-describedby={errors.email ? "recipientEmail-error" : undefined}
-              className={FIELD_CLASSES}
-            />
-            {errors.email && (
-              <span id="recipientEmail-error" className={FIELD_ERROR_CLASSES}>
-                {errors.email}
-              </span>
-            )}
-          </div>
-          </div>
-
-          <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <CtaButton submit label="Run Audit" />
-            <p className="max-w-xs text-xs leading-relaxed text-foreground/40">
-              Your email is used to send the report and nothing else.
+          The email sits inline rather than in a popover. A popover would mean
+          building focus trapping and dismissal for a single text field, and it
+          would hide a required input behind an extra click — inline keeps both
+          requirements visible and costs one more column on wide screens. */}
+      <div className="mt-10 rounded-2xl border border-white/10 bg-surface/40 p-5 sm:p-6">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div className="min-w-0">
+            <h1 className="font-display text-2xl font-bold leading-tight sm:text-3xl">
+              Website Critic
+            </h1>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-foreground/60">
+              A scored, prioritised breakdown of what is costing you
+              conversions — desktop and mobile.
             </p>
           </div>
-        </m.form>
-      )}
 
-      {phase === "idle" && (
-        // Not gated behind running an audit — this is the first thing a
-        // returning visitor sees, and it makes the page read as a tool with
-        // history rather than an empty form.
-        <RecentAudits />
-      )}
+          <m.form
+            onSubmit={onSubmit}
+            noValidate
+            className="w-full xl:w-auto xl:shrink-0"
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { duration: 0.35, ease: "easeOut" }
+            }
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+              <div className="sm:w-52">
+                <label htmlFor="websiteUrl" className={FIELD_LABEL_CLASSES}>
+                  Website address
+                </label>
+                <input
+                  id="websiteUrl"
+                  name="websiteUrl"
+                  type="text"
+                  inputMode="url"
+                  autoComplete="url"
+                  placeholder="yourbusiness.com"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  aria-invalid={errors.url ? true : undefined}
+                  aria-describedby={errors.url ? "websiteUrl-error" : undefined}
+                  className={FIELD_CLASSES}
+                />
+              </div>
 
+              <div className="sm:w-52">
+                <label htmlFor="recipientEmail" className={FIELD_LABEL_CLASSES}>
+                  Send it to
+                </label>
+                <input
+                  id="recipientEmail"
+                  name="recipientEmail"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@company.com"
+                  value={recipientEmail}
+                  onChange={(e) => setRecipientEmail(e.target.value)}
+                  aria-invalid={errors.email ? true : undefined}
+                  aria-describedby={
+                    errors.email ? "recipientEmail-error" : undefined
+                  }
+                  className={FIELD_CLASSES}
+                />
+              </div>
+
+              <div className="sm:self-end sm:pb-px">
+                <CtaButton
+                  submit
+                  disabled={phase === "loading"}
+                  label={
+                    phase === "loading"
+                      ? "Running…"
+                      : hasRun
+                        ? "Run New Audit"
+                        : "Run Audit"
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Validation messages sit under the row so the inputs stay
+                aligned whether or not either one is in error. */}
+            {(errors.url || errors.email) && (
+              <div className="mt-2 space-y-1">
+                {errors.url && (
+                  <span id="websiteUrl-error" className={FIELD_ERROR_CLASSES}>
+                    {errors.url}
+                  </span>
+                )}
+                {errors.email && (
+                  <span id="recipientEmail-error" className={FIELD_ERROR_CLASSES}>
+                    {errors.email}
+                  </span>
+                )}
+              </div>
+            )}
+          </m.form>
+        </div>
+      </div>
+
+      {/* ── results area ─────────────────────────────────────────────────── */}
       {phase === "loading" && <LoadingState />}
 
       {phase === "error" && <ErrorState message={failure} onReset={reset} />}
 
-      {phase === "done" && result && (
+      {hasRun && generatedAt && (
         <AuditReportLazy
           result={result}
           hostname={auditedHost}
+          generatedAt={generatedAt}
           onReset={reset}
         />
       )}
+
+      {/* ── recent audits ────────────────────────────────────────────────
+          Always mounted, including before the first run — it is what makes the
+          empty state read as a tool with history rather than a bare form. */}
+      <RecentAudits />
     </>
   );
 }

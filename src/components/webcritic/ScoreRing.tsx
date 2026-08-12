@@ -15,10 +15,13 @@ import { TONE_HEX, toneForScore } from "@/lib/auditScore";
 // and the priority pills can never disagree about what "good" looks like.
 export function ScoreRing({
   score,
-  size = 148,
-  stroke = 10,
+  rating,
+  size = 168,
+  stroke = 11,
 }: {
   score: number;
+  /** Poor / Fair / Good / Excellent, shown under the numeral. */
+  rating?: string;
   size?: number;
   stroke?: number;
 }) {
@@ -65,14 +68,22 @@ export function ScoreRing({
 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span
-          className="font-display text-4xl font-bold leading-none"
+          className="font-display text-[2.75rem] font-bold leading-none"
           style={{ color: TONE_HEX[tone] }}
         >
           {score.toFixed(1)}
         </span>
-        <span className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-foreground/40">
-          out of 10
+        <span className="mt-1 font-mono text-[10px] tracking-[0.1em] text-foreground/40">
+          /10
         </span>
+        {rating && (
+          <span
+            className="mt-2 font-display text-xs font-semibold"
+            style={{ color: TONE_HEX[tone] }}
+          >
+            {rating}
+          </span>
+        )}
       </div>
     </div>
   );

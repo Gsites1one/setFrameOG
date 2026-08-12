@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TONE_TEXT, toneForScore } from "@/lib/auditScore";
+import { TONE_BADGE, toneForScore } from "@/lib/auditScore";
 
 // Recent audits strip. Fetched on page load, independent of running an audit.
 //
@@ -100,18 +100,22 @@ export function RecentAudits() {
   if (audits.length === 0) return null;
 
   return (
-    <section className="mt-14">
+    <section className="mt-10">
       <h2 className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">
         Recent audits
       </h2>
 
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {/* A horizontal strip, not a sidebar: the cards scroll sideways on narrow
+          screens rather than stacking into a tall column, so this stays a
+          footnote to the page instead of competing with the report. The
+          scrollbar is hidden the same way the homepage marquee hides its own. */}
+      <ul className="-mx-6 mt-4 flex snap-x gap-3 overflow-x-auto px-6 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {audits.map((audit, i) => {
           const tone = audit.score === null ? null : toneForScore(audit.score);
           return (
             <li
               key={`${audit.domain}-${i}`}
-              className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-surface/40 px-4 py-3"
+              className="flex w-56 shrink-0 snap-start items-center justify-between gap-3 rounded-xl border border-white/10 bg-surface/40 px-4 py-3"
             >
               <div className="min-w-0">
                 <p className="truncate font-display text-sm font-semibold">
@@ -125,7 +129,7 @@ export function RecentAudits() {
               </div>
               {audit.score !== null && tone && (
                 <span
-                  className={`shrink-0 font-display text-lg font-bold ${TONE_TEXT[tone]}`}
+                  className={`shrink-0 rounded-lg border px-2 py-1 font-display text-sm font-bold ${TONE_BADGE[tone]}`}
                 >
                   {audit.score.toFixed(1)}
                 </span>
