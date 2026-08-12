@@ -19,21 +19,33 @@ const AuditReportLazy = dynamic(
   { ssr: false }
 );
 
-// The workflow runs 15-40s end to end. The status line has to stay alive across
-// that whole window rather than running out of things to say at 12s, so the
-// last phrase holds instead of the list looping back to "Capturing
-// screenshots…" while the report is nearly finished.
+// The real workflow runs ~2 minutes, so the status line has to stay credible
+// for that long. Two rules make it read as progress rather than a stuck or
+// looping spinner:
+//   1. The phrases advance in order and NEVER wrap back to the first — seeing
+//      "Capturing screenshots…" again after 90s would read as a restart.
+//   2. The final phrase is open-ended ("Almost there…") and simply holds, so a
+//      long tail looks like waiting rather than like the list ran out.
+// Eight steps at 11s covers ~90s before it settles on the last one.
 const STATUS_STEPS = [
   "Capturing screenshots…",
-  "Reviewing the page…",
+  "Loading the page as a visitor…",
+  "Reviewing the layout…",
+  "Checking the mobile experience…",
   "Scoring categories…",
-  "Building your report…",
+  "Ranking what to fix first…",
+  "Writing your report…",
+  "Almost there…",
 ] as const;
-const STATUS_INTERVAL_MS = 6000;
+const STATUS_INTERVAL_MS = 11_000;
 
-// Sits above the API route's own 55s upstream timeout, so a slow workflow
-// surfaces the route's clean message rather than this generic one.
-const CLIENT_TIMEOUT_MS = 60_000;
+/** How often the client asks whether the job has finished. */
+const POLL_INTERVAL_MS = 4000;
+/** Ceiling on the whole wait. Well past the ~2 minute job, under the 10 minute
+ *  server-side TTL, so a job that dies quietly still ends in a clean error. */
+const POLL_CEILING_MS = 4 * 60 * 1000;
+/** The start call only triggers the job; it should never hang. */
+const START_TIMEOUT_MS = 30_000;
 
 type Phase = "idle" | "loading" | "done" | "error";
 
@@ -148,8 +160,25 @@ export function AuditApp() {
   const [generatedAt, setGeneratedAt] = useState<Date | null>(null);
   const [auditedHost, setAuditedHost] = useState("");
   const abortRef = useRef<AbortController | null>(null);
+  const pollRef = useRef<number | null>(null);
+  const deadlineRef = useRef<number>(0);
 
-  useEffect(() => () => abortRef.current?.abort(), []);
+  const stopPolling = () => {
+    if (pollRef.current !== null) {
+      window.clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  };
+
+  // Both the in-flight start request and the polling loop have to be torn down
+  // on unmount, or a finished poll would setState on a dead component.
+  useEffect(
+    () => () => {
+      abortRef.current?.abort();
+      stopPolling();
+    },
+    []
+  );
 
   // Clears the results and returns to the empty state. The header form keeps
   // its values on purpose now that it is persistent: the address stays in the
@@ -157,10 +186,72 @@ export function AuditApp() {
   // retained so a second audit is one click rather than a re-type.
   const reset = () => {
     abortRef.current?.abort();
+    stopPolling();
     setPhase("idle");
     setErrors({});
     setFailure("");
     setResult(null);
+  };
+
+  const failWith = (message: string) => {
+    stopPolling();
+    setFailure(message);
+    setPhase("error");
+  };
+
+  const finishWith = (raw: unknown) => {
+    const normalised = normaliseAudit(raw);
+    if (!normalised) {
+      failWith("The report came back empty. Please try again.");
+      return;
+    }
+    stopPolling();
+    setResult(normalised);
+    // Stamped when the report lands rather than during render, so the
+    // "Generated" line is stable and never shifts on re-render.
+    setGeneratedAt(new Date());
+    setPhase("done");
+  };
+
+  // Polls until the job completes, fails, or the ceiling is reached. Kept on a
+  // plain interval rather than a self-scheduling chain so `stopPolling` is the
+  // single, unambiguous way it ends.
+  const startPolling = (jobId: string) => {
+    stopPolling();
+    deadlineRef.current = Date.now() + POLL_CEILING_MS;
+
+    pollRef.current = window.setInterval(async () => {
+      if (Date.now() > deadlineRef.current) {
+        failWith(
+          "This is taking longer than expected. The report may still arrive by email — you can try again in a moment."
+        );
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/audit-status?jobId=${encodeURIComponent(jobId)}`,
+          { cache: "no-store" }
+        );
+        if (!response.ok) return; // transient; the next tick retries
+        const record = (await response.json()) as {
+          status?: string;
+          data?: unknown;
+          error?: string;
+        };
+
+        if (record.status === "complete") {
+          finishWith(record.data);
+        } else if (record.status === "failed") {
+          failWith(record.error || "The audit could not be completed.");
+        }
+        // "processing" and "not_found" both just keep waiting: a job written
+        // moments ago can briefly read as absent, and letting the ceiling
+        // decide avoids failing on a momentary miss.
+      } catch {
+        // Network blip — say nothing and let the next tick try again.
+      }
+    }, POLL_INTERVAL_MS);
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -179,49 +270,42 @@ export function AuditApp() {
     setAuditedHost(hostnameOf(websiteUrl));
     setPhase("loading");
     setFailure("");
+    setResult(null);
+
+    // crypto.randomUUID needs a secure context; every deployment of this site
+    // is HTTPS, but fall back rather than throw on an http:// preview.
+    const jobId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now().toString(16).padStart(12, "0").slice(-8)}-0000-4000-8000-${Math.random().toString(16).slice(2, 14).padEnd(12, "0")}`;
 
     const controller = new AbortController();
     abortRef.current = controller;
-    const timer = window.setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
+    const timer = window.setTimeout(() => controller.abort(), START_TIMEOUT_MS);
 
     try {
-      const response = await fetch("/api/audit", {
+      const response = await fetch("/api/audit-start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ websiteUrl, recipientEmail }),
+        body: JSON.stringify({ websiteUrl, recipientEmail, jobId }),
         signal: controller.signal,
       });
 
       const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
-        setFailure(
+        failWith(
           (payload as { error?: string } | null)?.error ??
-            "The audit could not be completed. Please try again."
+            "The audit could not be started. Please try again."
         );
-        setPhase("error");
         return;
       }
 
-      const normalised = normaliseAudit(payload);
-      if (!normalised) {
-        setFailure("The report came back empty. Please try again.");
-        setPhase("error");
-        return;
-      }
-
-      setResult(normalised);
-      // Stamped when the report lands rather than during render, so the
-      // "Generated" line is stable and never shifts on re-render.
-      setGeneratedAt(new Date());
-      setPhase("done");
+      startPolling(jobId);
     } catch {
-      // Covers both the abort and any network failure. Deliberately one calm
-      // message either way — the distinction is not useful to the visitor.
-      setFailure(
-        "We could not reach the audit service, or it took too long. Please try again."
+      failWith(
+        "We could not reach the audit service. Please try again in a moment."
       );
-      setPhase("error");
     } finally {
       window.clearTimeout(timer);
     }

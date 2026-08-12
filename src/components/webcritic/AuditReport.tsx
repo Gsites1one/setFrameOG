@@ -140,12 +140,23 @@ export function AuditReport({
   const [view, setView] = useState<View>(hasDesktop ? "desktop" : "mobile");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
+  const toSrc = (raw: string) =>
+    raw.startsWith("data:") ? raw : `data:image/png;base64,${raw}`;
+
   const active = view === "desktop" ? result.desktopBase64 : result.mobileBase64;
-  const src = active
-    ? active.startsWith("data:")
-      ? active
-      : `data:image/png;base64,${active}`
-    : null;
+  const src = active ? toSrc(active) : null;
+
+  // The captures, in strip order. Only the ones that actually came back are
+  // listed, so a missing mobile capture leaves one thumbnail rather than a
+  // broken tile.
+  const captures = [
+    result.desktopBase64
+      ? { key: "desktop" as View, label: "Desktop", src: toSrc(result.desktopBase64) }
+      : null,
+    result.mobileBase64
+      ? { key: "mobile" as View, label: "Mobile", src: toSrc(result.mobileBase64) }
+      : null,
+  ].filter((c): c is { key: View; label: string; src: string } => c !== null);
 
   const priorities = useMemo(() => {
     const seen = new Set<string>();
@@ -230,6 +241,64 @@ export function AuditReport({
                 )}
               </BrowserFrame>
             </div>
+
+            {/* Captured-screenshots strip. Clicking a thumbnail promotes it to
+                the main preview — the same state the header toggles drive, so
+                the two controls can never disagree. Two captures today; the
+                strip lays out the same way if more are added later. */}
+            {captures.length > 0 && (
+              <div className="mt-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-foreground/40">
+                  Screenshots captured ({captures.length})
+                </p>
+                <div className="mt-2.5 flex gap-2.5">
+                  {captures.map((capture) => {
+                    const selected = view === capture.key;
+                    return (
+                      <button
+                        key={capture.key}
+                        type="button"
+                        onClick={() => setView(capture.key)}
+                        aria-pressed={selected}
+                        aria-label={`Show the ${capture.label.toLowerCase()} screenshot`}
+                        className={`group/thumb relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border transition-[border-color,box-shadow] duration-200 ${
+                          selected
+                            ? "border-accent/60 shadow-[0_0_16px_-6px_rgba(199,123,63,0.7)]"
+                            : "border-white/10 hover:border-accent/40"
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={capture.src}
+                          alt=""
+                          className="h-full w-full object-cover object-top"
+                        />
+                        {/* Unselected thumbnails sit back so the active one
+                            reads as the current preview at a glance. */}
+                        <span
+                          aria-hidden="true"
+                          className={`absolute inset-0 transition-colors duration-200 ${
+                            selected
+                              ? "bg-transparent"
+                              : "bg-background/55 group-hover/thumb:bg-background/25"
+                          }`}
+                        />
+                        <span
+                          aria-hidden="true"
+                          className={`absolute bottom-1 left-1 rounded px-1 py-px font-mono text-[8px] uppercase tracking-wider backdrop-blur-sm ${
+                            selected
+                              ? "bg-accent/20 text-accent"
+                              : "bg-background/70 text-foreground/55"
+                          }`}
+                        >
+                          {capture.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </Panel>
 
           <Panel title="Overall score">
