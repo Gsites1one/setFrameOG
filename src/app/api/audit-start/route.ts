@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import {
+  DAILY_COUNT_TTL_SECONDS,
   JOB_TTL_SECONDS,
+  dailyCountKey,
   getRedis,
   isValidJobId,
   jobKey,
+  maxAuditsPerDay,
 } from "@/lib/auditStore";
 
 // Starts an audit job and returns immediately.
@@ -49,6 +52,18 @@ function isEmail(raw: string): boolean {
   return v.length <= 254 && /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v);
 }
 
+/** Constant-time comparison so the code cannot be recovered by timing the
+ *  response. Trimmed and case-insensitive, because visitors paste it from a
+ *  message and a stray space should not read as "wrong code". */
+function codeMatches(provided: string, expected: string): boolean {
+  const a = provided.trim().toLowerCase();
+  const b = expected.trim().toLowerCase();
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 export async function POST(request: Request) {
   const webhookUrl = process.env.AUDIT_WEBHOOK_URL;
   if (!webhookUrl) {
@@ -69,11 +84,28 @@ export async function POST(request: Request) {
     return fail(400, "We could not read that request.");
   }
 
-  const { websiteUrl, recipientEmail, jobId } = (body ?? {}) as {
+  const { websiteUrl, recipientEmail, jobId, accessCode } = (body ?? {}) as {
     websiteUrl?: unknown;
     recipientEmail?: unknown;
     jobId?: unknown;
+    accessCode?: unknown;
   };
+
+  // ── access gate ───────────────────────────────────────────────────────────
+  // Checked FIRST, before any Redis write and before n8n is contacted, so a
+  // wrong code costs nothing: no job key, no counter increment, no workflow
+  // run. The expected value lives only in the environment; it is never
+  // referenced literally anywhere in this repo.
+  const expectedCode = process.env.SITE_ACCESS_CODE;
+  if (!expectedCode) {
+    // Fail closed. An unset code must not mean "let everyone in" on a tool that
+    // costs money to run.
+    console.error("[audit-start] SITE_ACCESS_CODE is not set");
+    return fail(503, "The audit service is not available right now.");
+  }
+  if (typeof accessCode !== "string" || !codeMatches(accessCode, expectedCode)) {
+    return fail(403, "Invalid access code.");
+  }
 
   // Re-validated server-side; the client's checks are a convenience, not a gate.
   if (typeof websiteUrl !== "string" || typeof recipientEmail !== "string") {
@@ -88,6 +120,45 @@ export async function POST(request: Request) {
   }
   if (!isEmail(recipientEmail)) {
     return fail(400, "That does not look like a valid email address.");
+  }
+
+  // ── global daily cap ──────────────────────────────────────────────────────
+  // A backstop for the access code leaking. One counter for the whole site —
+  // not per IP or per identity, which would need tracking this tool has no
+  // business doing.
+  //
+  // INCR is atomic, so two simultaneous requests cannot both read the same
+  // value and slip past the limit. The TTL is only set when the counter is
+  // created (value === 1); setting it on every increment would slide the window
+  // forward forever and the key would never expire.
+  try {
+    const key = dailyCountKey();
+    const count = await redis.incr(key);
+
+    // Guard the type explicitly. A non-numeric result would make the
+    // comparison below false and the cap would fail open without a single log
+    // line — found exactly that while testing against a store whose INCR
+    // returned null. Loud, because a silently-disabled spend limit is the
+    // worst version of this bug.
+    if (typeof count !== "number" || !Number.isFinite(count)) {
+      console.error("[audit-start] daily counter returned a non-number", count);
+      throw new Error("counter unavailable");
+    }
+
+    if (count === 1) await redis.expire(key, DAILY_COUNT_TTL_SECONDS);
+
+    if (count > maxAuditsPerDay()) {
+      console.warn("[audit-start] daily cap reached", count);
+      return fail(
+        429,
+        "Daily audit limit reached, please try again tomorrow."
+      );
+    }
+  } catch (error) {
+    // The counter is a safety net, not the feature. If Redis hiccups on this
+    // one call, let the audit through rather than blocking a legitimate run —
+    // the access code is still the primary gate.
+    console.error("[audit-start] could not update the daily counter", error);
   }
 
   // Mark the job as in flight BEFORE handing off, so a fast callback can never

@@ -155,7 +155,16 @@ export function AuditApp() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [recipientEmail, setRecipientEmail] = useState("");
-  const [errors, setErrors] = useState<{ url?: string; email?: string }>({});
+  const [accessCode, setAccessCode] = useState("");
+  const [errors, setErrors] = useState<{
+    url?: string;
+    email?: string;
+    code?: string;
+  }>({});
+  // The form collapses to a one-line summary once a report is showing, and
+  // re-expands on request. Kept separate from `phase` because the visitor can
+  // re-open the form while still looking at the previous result.
+  const [formExpanded, setFormExpanded] = useState(true);
   const [failure, setFailure] = useState("");
   const [result, setResult] = useState<AuditResult | null>(null);
   const [generatedAt, setGeneratedAt] = useState<Date | null>(null);
@@ -195,6 +204,7 @@ export function AuditApp() {
     setErrors({});
     setFailure("");
     setResult(null);
+    setFormExpanded(true);
   };
 
   const failWith = (message: string) => {
@@ -215,6 +225,9 @@ export function AuditApp() {
     // "Generated" line is stable and never shifts on re-render.
     setGeneratedAt(new Date());
     setPhase("done");
+    // Hand the screen over to the report: the form shrinks to a single row so
+    // the results fit the viewport without the page scrolling.
+    setFormExpanded(false);
   };
 
   // Polls until the job completes, fails, or the ceiling is reached. Kept on a
@@ -261,12 +274,17 @@ export function AuditApp() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const next: { url?: string; email?: string } = {};
+    const next: { url?: string; email?: string; code?: string } = {};
     if (!looksLikeUrl(websiteUrl)) {
       next.url = "Enter a full website address, like setframe.net";
     }
     if (!looksLikeEmail(recipientEmail)) {
       next.email = "Enter an email address we can send the report to";
+    }
+    // Presence only. Whether the code is correct is the server's call — the
+    // client never knows the value.
+    if (!accessCode.trim()) {
+      next.code = "An access code is required to run an audit";
     }
     setErrors(next);
     if (Object.keys(next).length > 0) return;
@@ -291,7 +309,7 @@ export function AuditApp() {
       const response = await fetch("/api/audit-start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ websiteUrl, recipientEmail, jobId }),
+        body: JSON.stringify({ websiteUrl, recipientEmail, jobId, accessCode }),
         signal: controller.signal,
       });
 
@@ -325,6 +343,7 @@ export function AuditApp() {
     // report under a focused, ready form would read as though it applied to
     // whatever gets typed next.
     if (phase === "done" || phase === "error") reset();
+    setFormExpanded(true);
     formBandRef.current?.scrollIntoView({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
         ? "auto"
@@ -335,7 +354,23 @@ export function AuditApp() {
     window.setTimeout(() => urlInputRef.current?.focus(), 350);
   };
 
+  // "Compact" is the post-run state: a report is showing and the form has been
+  // collapsed to a single row.
+  const compact = hasRun && !formExpanded;
+
   const handleHistory = () => {
+    // In the fixed-height state the strip is not mounted, so "Audit History"
+    // has to expand the page back out before it has anything to scroll to.
+    // The scroll is deferred a frame so the section exists when it runs.
+    if (compact) {
+      setFormExpanded(true);
+      window.setTimeout(() => scrollToHistory(), 60);
+      return;
+    }
+    scrollToHistory();
+  };
+
+  const scrollToHistory = () => {
     const target = document.getElementById("recent-audits");
     // The strip renders nothing when the list is empty, so fall back to the
     // bottom of the page rather than doing nothing at all.
@@ -356,10 +391,22 @@ export function AuditApp() {
   return (
     // Sidebar rail beside the content from lg up; above it on narrower
     // screens, where a fixed left column would eat most of the width.
-    <div className="mt-10 flex flex-col gap-6 lg:flex-row lg:gap-8">
+    <div
+      className={`mt-10 flex flex-col gap-6 lg:flex-row lg:gap-8 ${
+        // Fixed-height mode: once the report has the screen, the results area
+        // fills what is left of the viewport and each column scrolls inside
+        // itself instead of the page growing. Desktop only — on a phone,
+        // nested scroll panes are worse than a normal long page.
+        // 17.5rem is measured, not guessed: at 15rem the page still overflowed
+        // by 33px once the page padding, PageHeader and collapsed row were
+        // accounted for. min-h keeps it usable on short viewports, where a
+        // little page scroll is better than columns squeezed to nothing.
+        compact ? "lg:h-[calc(100vh-17.5rem)] lg:min-h-[30rem] lg:overflow-hidden" : ""
+      }`}
+    >
       <WebCriticSidebar onNewAudit={handleNewAudit} onHistory={handleHistory} />
 
-      <div className="min-w-0 flex-1">
+      <div className={`min-w-0 flex-1 ${compact ? "lg:flex lg:min-h-0 lg:flex-col" : ""}`}>
       {/* ── persistent header bar ──────────────────────────────────────────
           Title and description on the left, the whole form on the right. The
           form does NOT unmount between phases: after a run the address stays
@@ -370,8 +417,37 @@ export function AuditApp() {
           building focus trapping and dismissal for a single text field, and it
           would hide a required input behind an extra click — inline keeps both
           requirements visible and costs one more column on wide screens. */}
+      {/* Collapsed state: one row, just the audited domain and a way back to
+          the form. The title and description are dropped here on purpose —
+          once a report is on screen they have done their job and the space is
+          worth more to the results. */}
+      {compact && (
+        <div
+          ref={formBandRef}
+          className="flex shrink-0 items-center justify-between gap-4 rounded-2xl border border-white/10 bg-surface/40 px-5 py-3 scroll-mt-24"
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <span
+              aria-hidden="true"
+              className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent"
+            />
+            <p className="truncate font-display text-sm font-semibold">
+              {auditedHost}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleNewAudit}
+            className="shrink-0 rounded-full border border-accent/50 px-4 py-1.5 font-display text-xs font-semibold tracking-wide text-accent transition-[color,background-color,border-color,box-shadow] duration-300 hover:border-accent hover:bg-accent/15 hover:text-[#e0a068] hover:shadow-[0_0_20px_-6px_rgba(199,123,63,0.6)]"
+          >
+            Run New Audit
+          </button>
+        </div>
+      )}
+
       <div
-        ref={formBandRef}
+        ref={compact ? undefined : formBandRef}
+        hidden={compact}
         className="scroll-mt-24 rounded-2xl border border-white/10 bg-surface/40 p-5 sm:p-6"
       >
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
@@ -397,8 +473,8 @@ export function AuditApp() {
                 : { duration: 0.35, ease: "easeOut" }
             }
           >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-              <div className="sm:w-52">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
+              <div className="sm:w-48">
                 <label htmlFor="websiteUrl" className={FIELD_LABEL_CLASSES}>
                   Website address
                 </label>
@@ -418,7 +494,7 @@ export function AuditApp() {
                 />
               </div>
 
-              <div className="sm:w-52">
+              <div className="sm:w-48">
                 <label htmlFor="recipientEmail" className={FIELD_LABEL_CLASSES}>
                   Send it to
                 </label>
@@ -434,6 +510,28 @@ export function AuditApp() {
                   aria-describedby={
                     errors.email ? "recipientEmail-error" : undefined
                   }
+                  className={FIELD_CLASSES}
+                />
+              </div>
+
+              {/* Access code. type="text", not "password": this is a shared
+                  code pasted from a message, not a personal secret, and masking
+                  it would only make paste errors harder to spot. */}
+              <div className="sm:w-36">
+                <label htmlFor="accessCode" className={FIELD_LABEL_CLASSES}>
+                  Access code
+                </label>
+                <input
+                  id="accessCode"
+                  name="accessCode"
+                  type="text"
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="Your code"
+                  value={accessCode}
+                  onChange={(e) => setAccessCode(e.target.value)}
+                  aria-invalid={errors.code ? true : undefined}
+                  aria-describedby={errors.code ? "accessCode-error" : undefined}
                   className={FIELD_CLASSES}
                 />
               </div>
@@ -455,8 +553,13 @@ export function AuditApp() {
 
             {/* Validation messages sit under the row so the inputs stay
                 aligned whether or not either one is in error. */}
-            {(errors.url || errors.email) && (
+            {(errors.url || errors.email || errors.code) && (
               <div className="mt-2 space-y-1">
+                {errors.code && (
+                  <span id="accessCode-error" className={FIELD_ERROR_CLASSES}>
+                    {errors.code}
+                  </span>
+                )}
                 {errors.url && (
                   <span id="websiteUrl-error" className={FIELD_ERROR_CLASSES}>
                     {errors.url}
@@ -484,13 +587,16 @@ export function AuditApp() {
           hostname={auditedHost}
           generatedAt={generatedAt}
           onReset={reset}
+          fillHeight={compact}
         />
       )}
 
       {/* ── recent audits ────────────────────────────────────────────────
           Always mounted, including before the first run — it is what makes the
-          empty state read as a tool with history rather than a bare form. */}
-      <RecentAudits />
+          empty state read as a tool with history rather than a bare form.
+          Hidden in the fixed-height state: the whole point is that nothing
+          sits below the fold, and the sidebar's Audit History expands it. */}
+      {!compact && <RecentAudits />}
       </div>
     </div>
   );

@@ -73,24 +73,36 @@ function Panel({
   children,
   className = "",
   bodyClassName = "",
+  dense = false,
 }: {
   title: string;
   action?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
   bodyClassName?: string;
+  /** Tighter padding for the panels competing for vertical space. A real prop
+   *  rather than an override appended to bodyClassName: two padding utilities
+   *  on one element resolve by stylesheet order, not by which was written
+   *  last, so an "override" class is a coin flip. */
+  dense?: boolean;
 }) {
   return (
     <section
       className={`overflow-hidden rounded-2xl border border-white/10 bg-surface/40 ${className}`}
     >
-      <div className="flex items-center justify-between gap-4 border-b border-white/[0.07] px-5 py-3.5">
+      <div
+        className={`flex items-center justify-between gap-4 border-b border-white/[0.07] ${
+          dense ? "px-4 py-2.5" : "px-5 py-3.5"
+        }`}
+      >
         <h2 className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/55">
           {title}
         </h2>
         {action}
       </div>
-      <div className={`p-5 ${bodyClassName}`}>{children}</div>
+      <div className={`${dense ? "p-3.5" : "p-5"} ${bodyClassName}`}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -129,11 +141,15 @@ export function AuditReport({
   hostname,
   generatedAt,
   onReset,
+  fillHeight = false,
 }: {
   result: AuditResult;
   hostname: string;
   generatedAt: Date;
   onReset: () => void;
+  /** Fixed-height mode: fill the space left by the collapsed header and let
+   *  each column scroll inside itself instead of growing the page. */
+  fillHeight?: boolean;
 }) {
   const hasDesktop = Boolean(result.desktopBase64);
   const hasMobile = Boolean(result.mobileBase64);
@@ -187,12 +203,34 @@ export function AuditReport({
   })}`;
 
   return (
-    <div className="mt-8">
+    <div
+      className={
+        fillHeight
+          ? "mt-4 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col"
+          : "mt-8"
+      }
+    >
       {/* ~60 / ~40 split, stacking below lg. */}
-      <div className="grid gap-6 lg:grid-cols-[3fr_2fr] lg:items-start">
+      <div
+        className={`grid gap-6 lg:grid-cols-[3fr_2fr] ${
+          // In fixed-height mode the columns stretch to the row height and
+          // each one scrolls internally; otherwise they sit at their natural
+          // height as before.
+          fillHeight
+            ? "lg:min-h-0 lg:flex-1 lg:items-stretch lg:overflow-hidden"
+            : "lg:items-start"
+        }`}
+      >
         {/* ── LEFT ──────────────────────────────────────────────────────── */}
-        <div className="space-y-6">
+        <div
+          className={
+            fillHeight
+              ? "space-y-4 lg:min-h-0 lg:overflow-y-auto lg:pr-1 [scrollbar-width:thin]"
+              : "space-y-6"
+          }
+        >
           <Panel
+            dense
             title="Website preview"
             action={
               <div className="flex gap-1.5">
@@ -301,7 +339,7 @@ export function AuditReport({
             )}
           </Panel>
 
-          <Panel title="Overall score">
+          <Panel dense title="Overall score">
             <div className="flex flex-col items-center gap-7 sm:flex-row sm:items-center sm:gap-8">
               <ScoreRing score={result.overall_score} rating={result.rating} />
 
@@ -339,6 +377,10 @@ export function AuditReport({
 
         {/* ── RIGHT ─────────────────────────────────────────────────────── */}
         <Panel
+          className={fillHeight ? "lg:flex lg:min-h-0 lg:flex-col" : undefined}
+          bodyClassName={
+            fillHeight ? "lg:min-h-0 lg:flex-1 lg:overflow-y-auto" : undefined
+          }
           title="Audit report"
           action={
             <span className="shrink-0 font-mono text-[10px] text-foreground/40">

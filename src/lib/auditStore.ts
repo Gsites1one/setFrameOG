@@ -36,6 +36,22 @@ export const JOB_TTL_SECONDS = 600;
 
 export const jobKey = (jobId: string) => `audit:${jobId}`;
 
+/** Global run counter, one key per UTC day. UTC rather than server-local so the
+ *  window cannot shift between regions or across a DST change. */
+export function dailyCountKey(now = new Date()): string {
+  return `audit-count:${now.toISOString().slice(0, 10)}`;
+}
+
+/** 25h, so the key always outlives the day it counts and expires on its own. */
+export const DAILY_COUNT_TTL_SECONDS = 25 * 60 * 60;
+
+export const DEFAULT_MAX_AUDITS_PER_DAY = 20;
+
+export function maxAuditsPerDay(): number {
+  const raw = Number.parseInt(process.env.MAX_AUDITS_PER_DAY ?? "", 10);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_MAX_AUDITS_PER_DAY;
+}
+
 export type JobRecord =
   | { status: "processing" }
   | { status: "complete"; data: Record<string, unknown> }
