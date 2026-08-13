@@ -77,8 +77,12 @@ export function ScoreRing({
           /10
         </span>
         {rating && (
+          // Space Mono, not the heading face: the digits carry the display
+          // weight here and the rating word is a label about them. Measured
+          // before changing — the numerals were already Syne 700, but this word
+          // was not, which is the only part that did not match.
           <span
-            className="mt-2 font-display text-xs font-semibold"
+            className="mt-2 font-mono text-[10px] uppercase tracking-[0.1em]"
             style={{ color: TONE_HEX[tone] }}
           >
             {rating}

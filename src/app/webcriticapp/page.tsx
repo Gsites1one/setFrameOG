@@ -28,8 +28,9 @@ export default function WebCriticPage() {
   return (
     // Wider than the other standalone pages: the report is a two-column
     // layout, and at max-w-4xl the preview and the report would each be too
-    // narrow to read as panels in an app.
-    <main className="mx-auto min-h-screen max-w-6xl px-6 py-16">
+    // narrow to read as panels in an app. Widened again for the sidebar rail,
+    // which takes ~12rem out of the content width from lg up.
+    <main className="mx-auto min-h-screen max-w-7xl px-6 py-16">
       <PageHeader />
 
       {/* The h1 and description now live inside AuditApp's persistent header

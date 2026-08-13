@@ -100,7 +100,8 @@ export function RecentAudits() {
   if (audits.length === 0) return null;
 
   return (
-    <section className="mt-10">
+    // id + scroll-mt are the sidebar's "Audit History" target.
+    <section id="recent-audits" className="mt-10 scroll-mt-24">
       <h2 className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">
         Recent audits
       </h2>

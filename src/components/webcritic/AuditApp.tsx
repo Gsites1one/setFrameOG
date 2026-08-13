@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { m, useReducedMotion } from "framer-motion";
 import { CtaButton } from "@/components/CtaButton";
 import { RecentAudits } from "./RecentAudits";
+import { WebCriticSidebar } from "./WebCriticSidebar";
 import {
   FIELD_CLASSES,
   FIELD_ERROR_CLASSES,
@@ -162,6 +163,9 @@ export function AuditApp() {
   const abortRef = useRef<AbortController | null>(null);
   const pollRef = useRef<number | null>(null);
   const deadlineRef = useRef<number>(0);
+  // Targets for the sidebar's New Audit action.
+  const urlInputRef = useRef<HTMLInputElement | null>(null);
+  const formBandRef = useRef<HTMLDivElement | null>(null);
 
   const stopPolling = () => {
     if (pollRef.current !== null) {
@@ -314,8 +318,48 @@ export function AuditApp() {
 
   const hasRun = phase === "done" && result !== null;
 
+  // Sidebar actions. Both are in-page moves, not navigation — there is only
+  // one page here.
+  const handleNewAudit = () => {
+    // Clearing a showing result is the point of "New Audit": leaving the old
+    // report under a focused, ready form would read as though it applied to
+    // whatever gets typed next.
+    if (phase === "done" || phase === "error") reset();
+    formBandRef.current?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "start",
+    });
+    // Focus after the scroll starts, so the browser does not fight it.
+    window.setTimeout(() => urlInputRef.current?.focus(), 350);
+  };
+
+  const handleHistory = () => {
+    const target = document.getElementById("recent-audits");
+    // The strip renders nothing when the list is empty, so fall back to the
+    // bottom of the page rather than doing nothing at all.
+    const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (target) {
+      target.scrollIntoView({
+        behavior: smooth ? "smooth" : "auto",
+        block: "start",
+      });
+    } else {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: smooth ? "smooth" : "auto",
+      });
+    }
+  };
+
   return (
-    <>
+    // Sidebar rail beside the content from lg up; above it on narrower
+    // screens, where a fixed left column would eat most of the width.
+    <div className="mt-10 flex flex-col gap-6 lg:flex-row lg:gap-8">
+      <WebCriticSidebar onNewAudit={handleNewAudit} onHistory={handleHistory} />
+
+      <div className="min-w-0 flex-1">
       {/* ── persistent header bar ──────────────────────────────────────────
           Title and description on the left, the whole form on the right. The
           form does NOT unmount between phases: after a run the address stays
@@ -326,7 +370,10 @@ export function AuditApp() {
           building focus trapping and dismissal for a single text field, and it
           would hide a required input behind an extra click — inline keeps both
           requirements visible and costs one more column on wide screens. */}
-      <div className="mt-10 rounded-2xl border border-white/10 bg-surface/40 p-5 sm:p-6">
+      <div
+        ref={formBandRef}
+        className="scroll-mt-24 rounded-2xl border border-white/10 bg-surface/40 p-5 sm:p-6"
+      >
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="min-w-0">
             <h1 className="font-display text-2xl font-bold leading-tight sm:text-3xl">
@@ -356,6 +403,7 @@ export function AuditApp() {
                   Website address
                 </label>
                 <input
+                  ref={urlInputRef}
                   id="websiteUrl"
                   name="websiteUrl"
                   type="text"
@@ -443,6 +491,7 @@ export function AuditApp() {
           Always mounted, including before the first run — it is what makes the
           empty state read as a tool with history rather than a bare form. */}
       <RecentAudits />
-    </>
+      </div>
+    </div>
   );
 }
