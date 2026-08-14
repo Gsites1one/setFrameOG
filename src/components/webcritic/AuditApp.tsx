@@ -359,12 +359,16 @@ export function AuditApp() {
   const compact = hasRun && !formExpanded;
 
   const handleHistory = () => {
-    // In the fixed-height state the strip is not mounted, so "Audit History"
-    // has to expand the page back out before it has anything to scroll to.
-    // The scroll is deferred a frame so the section exists when it runs.
+    // Reveal the section (it is CSS-hidden, not unmounted, so its data is
+    // already loaded), then scroll once React has committed the unhide.
+    //
+    // A timer, NOT requestAnimationFrame. rAF does not fire in a backgrounded
+    // or occluded tab, so an rAF-scheduled scroll can simply never run — I
+    // measured exactly that here. A user-initiated action must not depend on
+    // frames being produced; timers still fire when frames do not.
     if (compact) {
       setFormExpanded(true);
-      window.setTimeout(() => scrollToHistory(), 60);
+      window.setTimeout(() => scrollToHistory(), 50);
       return;
     }
     scrollToHistory();
@@ -372,27 +376,41 @@ export function AuditApp() {
 
   const scrollToHistory = () => {
     const target = document.getElementById("recent-audits");
-    // The strip renders nothing when the list is empty, so fall back to the
-    // bottom of the page rather than doing nothing at all.
+    // The strip renders nothing when the list is genuinely empty, so fall back
+    // to the bottom of the page rather than doing nothing at all.
     const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (target) {
-      target.scrollIntoView({
-        behavior: smooth ? "smooth" : "auto",
-        block: "start",
-      });
-    } else {
+
+    if (!target) {
       window.scrollTo({
         top: document.body.scrollHeight,
         behavior: smooth ? "smooth" : "auto",
       });
+      return;
     }
+
+    target.scrollIntoView({
+      behavior: smooth ? "smooth" : "auto",
+      block: "start",
+    });
+
+    // Smooth scrolling is frame-driven, so it does not run at all in a
+    // backgrounded or occluded tab — measured here: the call returns, the
+    // timer fires, and the page never moves. Check shortly afterwards and
+    // finish the job instantly if nothing happened. Landing without the
+    // animation is fine; not landing is not.
+    if (!smooth) return;
+    window.setTimeout(() => {
+      const rect = target.getBoundingClientRect();
+      const arrived = rect.top < window.innerHeight && rect.bottom > 0;
+      if (!arrived) target.scrollIntoView({ behavior: "auto", block: "start" });
+    }, 500);
   };
 
   return (
     // Sidebar rail beside the content from lg up; above it on narrower
     // screens, where a fixed left column would eat most of the width.
     <div
-      className={`mt-10 flex flex-col gap-6 lg:flex-row lg:gap-8 ${
+      className={`flex flex-col gap-6 lg:flex-row lg:gap-8 ${compact ? "mt-6" : "mt-10"} ${
         // Fixed-height mode: once the report has the screen, the results area
         // fills what is left of the viewport and each column scrolls inside
         // itself instead of the page growing. Desktop only — on a phone,
@@ -401,7 +419,14 @@ export function AuditApp() {
         // by 33px once the page padding, PageHeader and collapsed row were
         // accounted for. min-h keeps it usable on short viewports, where a
         // little page scroll is better than columns squeezed to nothing.
-        compact ? "lg:h-[calc(100vh-17.5rem)] lg:min-h-[30rem] lg:overflow-hidden" : ""
+        // The offset and the negative bottom margin are measured together.
+        // `main` carries py-16, and in this mode 64px of bottom padding is
+        // dead space under a viewport-locked panel — -mb-10 reclaims most of
+        // it and hands it to the panes instead. Verified to leave the page at
+        // zero overflow at both 1440x900 and 1366x768.
+        compact
+          ? "lg:-mb-10 lg:h-[calc(100vh-15rem)] lg:min-h-[30rem] lg:overflow-hidden"
+          : ""
       }`}
     >
       <WebCriticSidebar onNewAudit={handleNewAudit} onHistory={handleHistory} />
@@ -592,11 +617,17 @@ export function AuditApp() {
       )}
 
       {/* ── recent audits ────────────────────────────────────────────────
-          Always mounted, including before the first run — it is what makes the
-          empty state read as a tool with history rather than a bare form.
-          Hidden in the fixed-height state: the whole point is that nothing
-          sits below the fold, and the sidebar's Audit History expands it. */}
-      {!compact && <RecentAudits />}
+          ALWAYS MOUNTED, hidden with CSS in the fixed-height state rather than
+          unmounted. It used to be `{!compact && <RecentAudits />}`, which meant
+          clicking Audit History mounted it for the first time and only then
+          started its fetch — a request that takes ~6s in production. For those
+          6s the component renders null, so the scroll had no target, landed on
+          nothing, and the section finally appeared below the fold long after
+          the visitor had given up. Mounting it on page load means the data is
+          already there the moment the section is revealed. */}
+      <div className={compact ? "hidden" : undefined}>
+        <RecentAudits />
+      </div>
       </div>
     </div>
   );

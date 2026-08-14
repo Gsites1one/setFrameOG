@@ -81,23 +81,32 @@ function normalise(raw: unknown): RecentAudit[] {
 
 export function RecentAudits() {
   const [audits, setAudits] = useState<RecentAudit[]>([]);
+  // The upstream call takes ~6s in production, so "no rows yet" and "no rows at
+  // all" have to be distinguishable. Without this the section renders nothing
+  // while loading, which is what made Audit History scroll into empty space.
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     fetch("/api/recent-audits")
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
-        if (!cancelled && json) setAudits(normalise(json));
+        if (cancelled) return;
+        if (json) setAudits(normalise(json));
+        setLoaded(true);
       })
       .catch(() => {
-        /* fails quiet by design — see the note above */
+        // Fails quiet by design, but still mark it settled so the placeholder
+        // does not spin forever.
+        if (!cancelled) setLoaded(true);
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  if (audits.length === 0) return null;
+  // Only disappear once we know there is genuinely nothing to show.
+  if (loaded && audits.length === 0) return null;
 
   return (
     // id + scroll-mt are the sidebar's "Audit History" target.
@@ -110,6 +119,19 @@ export function RecentAudits() {
           screens rather than stacking into a tall column, so this stays a
           footnote to the page instead of competing with the report. The
           scrollbar is hidden the same way the homepage marquee hides its own. */}
+      {!loaded && (
+        <div className="mt-4 flex gap-3">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              // Matches the real card exactly — same width, radius, border and
+              // fill — so the strip does not visibly re-draw when the rows land.
+              className="h-[62px] w-56 shrink-0 animate-pulse rounded-xl border border-white/10 bg-surface/40"
+            />
+          ))}
+        </div>
+      )}
+
       <ul className="-mx-6 mt-4 flex snap-x gap-3 overflow-x-auto px-6 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {audits.map((audit, i) => {
           const tone = audit.score === null ? null : toneForScore(audit.score);

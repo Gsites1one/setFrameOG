@@ -91,7 +91,7 @@ function Panel({
       className={`overflow-hidden rounded-2xl border border-white/10 bg-surface/40 ${className}`}
     >
       <div
-        className={`flex items-center justify-between gap-4 border-b border-white/[0.07] ${
+        className={`flex items-center justify-between gap-4 border-b border-white/[0.08] ${
           dense ? "px-4 py-2.5" : "px-5 py-3.5"
         }`}
       >
@@ -285,11 +285,11 @@ export function AuditReport({
                 the two controls can never disagree. Two captures today; the
                 strip lays out the same way if more are added later. */}
             {captures.length > 0 && (
-              <div className="mt-4">
+              <div className="mt-3">
                 <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-foreground/40">
                   Screenshots captured ({captures.length})
                 </p>
-                <div className="mt-2.5 flex gap-2.5">
+                <div className="mt-2 flex gap-2">
                   {captures.map((capture) => {
                     const selected = view === capture.key;
                     return (
@@ -299,7 +299,7 @@ export function AuditReport({
                         onClick={() => setView(capture.key)}
                         aria-pressed={selected}
                         aria-label={`Show the ${capture.label.toLowerCase()} screenshot`}
-                        className={`group/thumb relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border transition-[border-color,box-shadow] duration-200 ${
+                        className={`group/thumb relative h-12 w-[72px] shrink-0 overflow-hidden rounded-lg border transition-[border-color,box-shadow] duration-200 ${
                           selected
                             ? "border-accent/60 shadow-[0_0_16px_-6px_rgba(199,123,63,0.7)]"
                             : "border-white/10 hover:border-accent/40"
@@ -377,6 +377,9 @@ export function AuditReport({
 
         {/* ── RIGHT ─────────────────────────────────────────────────────── */}
         <Panel
+          // Dense to match the two panels it sits beside — they are adjacent at
+          // lg and up, so differing header/body padding reads as a mistake.
+          dense
           className={fillHeight ? "lg:flex lg:min-h-0 lg:flex-col" : undefined}
           bodyClassName={
             fillHeight ? "lg:min-h-0 lg:flex-1 lg:overflow-y-auto" : undefined
@@ -422,13 +425,13 @@ export function AuditReport({
                 )}
               </div>
 
-              <ol className="mt-4 space-y-2.5">
+              <ol className="mt-3 space-y-2">
                 {visible.map((item, i) => {
                   const tone = toneForPriority(item.priority);
                   return (
                     <li
                       key={`${item.title}-${i}`}
-                      className="rounded-xl border border-white/[0.07] bg-background/40 p-3.5"
+                      className="rounded-xl border border-white/[0.08] bg-background/40 p-3"
                     >
                       <div className="flex gap-3">
                         {/* ranked numeral, toned by priority */}
@@ -464,7 +467,7 @@ export function AuditReport({
                           </div>
 
                           {item.description && (
-                            <p className="mt-1.5 text-xs leading-relaxed text-foreground/60">
+                            <p className="mt-1 text-xs leading-snug text-foreground/60">
                               {item.description}
                             </p>
                           )}
@@ -492,7 +495,7 @@ export function AuditReport({
         <button
           type="button"
           onClick={onReset}
-          className="shrink-0 rounded-full border border-white/15 px-4 py-2 font-display text-xs font-semibold text-foreground/75 transition-[color,background-color,border-color,box-shadow] duration-300 hover:border-accent/60 hover:bg-accent/10 hover:text-accent hover:shadow-[0_0_20px_-6px_rgba(199,123,63,0.6)]"
+          className="shrink-0 rounded-full border border-white/10 px-4 py-2 font-display text-xs font-semibold text-foreground/75 transition-[color,background-color,border-color,box-shadow] duration-300 hover:border-accent/60 hover:bg-accent/10 hover:text-accent hover:shadow-[0_0_20px_-6px_rgba(199,123,63,0.6)]"
         >
           Clear results
         </button>

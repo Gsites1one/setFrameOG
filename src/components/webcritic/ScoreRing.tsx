@@ -16,8 +16,8 @@ import { TONE_HEX, toneForScore } from "@/lib/auditScore";
 export function ScoreRing({
   score,
   rating,
-  size = 168,
-  stroke = 11,
+  size = 136,
+  stroke = 9,
 }: {
   score: number;
   /** Poor / Fair / Good / Excellent, shown under the numeral. */
@@ -68,7 +68,7 @@ export function ScoreRing({
 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span
-          className="font-display text-[2.75rem] font-bold leading-none"
+          className="font-display text-4xl font-bold leading-none"
           style={{ color: TONE_HEX[tone] }}
         >
           {score.toFixed(1)}
