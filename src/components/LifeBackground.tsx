@@ -105,6 +105,51 @@ export function LifeBackground() {
     };
   }, [isAurora]);
 
+  // bg=scroll only: publish scroll progress as --sp on :root, 0 at the top of
+  // the document and 1 at the bottom. Everything that reacts to it is plain
+  // CSS reading the variable, so this writes ONE custom property per frame and
+  // never touches layout.
+  //
+  // Throttled on a TIMESTAMP, not requestAnimationFrame, matching the pattern
+  // FloatingNav's scroll fallback already documents: rAF is throttled or
+  // suspended outright in background/occluded tabs, which is exactly the case
+  // where this would be carrying the feature. An rAF version was written first
+  // and measured doing nothing — --sp held at 0.0000 across a full 5983px
+  // scroll because the frames never came. A plain clock check keeps one cheap
+  // write per frame-ish interval without depending on frames being produced.
+  //
+  // The listener is not attached at all unless this variant is active, and not
+  // under reduced motion, where --sp is left unset and the CSS resolves through
+  // its own 0 fallback to a calm top-of-page state.
+  useEffect(() => {
+    if (bg !== "scroll") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const root = document.documentElement;
+    let last = 0;
+
+    const write = () => {
+      last = Date.now();
+      const max = root.scrollHeight - root.clientHeight;
+      const sp = max > 0 ? Math.min(1, Math.max(0, root.scrollTop / max)) : 0;
+      root.style.setProperty("--sp", sp.toFixed(4));
+    };
+
+    const onScroll = () => {
+      if (Date.now() - last < 16) return;
+      write();
+    };
+
+    write();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      root.style.removeProperty("--sp");
+    };
+  }, [bg]);
+
   return (
     <div
       aria-hidden="true"
@@ -157,16 +202,60 @@ export function LifeBackground() {
           in every variant, per the brief. */}
       {isAurora && (
         <>
-          {AURORA_BLOBS.map((b, i) => (
-            <div
-              key={b.cls}
-              className={`${b.cls} ${b.pos} ${
-                bg === "scroll" && i === 0 ? "scroll-lift" : ""
-              } ${bg === "scroll" && i === 2 ? "scroll-sink" : ""} absolute rounded-full blur-[130px]`}
-              style={{ backgroundColor: b.tint }}
-            />
-          ))}
+          {AURORA_BLOBS.map((b, i) => {
+            // The scroll transform goes on a WRAPPER, never on the blob: the
+            // blob's aurora keyframes already animate transform, and an
+            // animated transform always beats a declared one, so sharing an
+            // element would silently drop one of the two. Nesting composes
+            // them, so these blobs drift AND respond to scroll.
+            const scrollCls =
+              bg === "scroll" && i === 0
+                ? "scroll-lift"
+                : bg === "scroll" && i === 2
+                  ? "scroll-sink"
+                  : "";
+            const blob = (
+              <div
+                className={`${b.cls} ${scrollCls ? "absolute inset-0" : `${b.pos} absolute`} rounded-full blur-[130px]`}
+                style={{ backgroundColor: b.tint }}
+              />
+            );
+            return scrollCls ? (
+              <div key={b.cls} className={`${scrollCls} ${b.pos} absolute`}>
+                {blob}
+              </div>
+            ) : (
+              <div key={b.cls} className="contents">
+                {blob}
+              </div>
+            );
+          })}
 
+          {/* Temperature shift, bg=scroll only. Two washes crossfading against
+              each other: copper at the top of the page, teal by the bottom.
+              This is the part that is actually felt — two blobs drifting across
+              a ~6900px page is close to invisible on its own, which is exactly
+              what the first version got wrong. Opacity only. */}
+          {bg === "scroll" && (
+            <>
+              <div
+                className="scroll-warm absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(75% 60% at 50% 8%, rgba(199,123,63,0.10), transparent 72%)",
+                }}
+              />
+              <div
+                className="scroll-cool absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(80% 65% at 50% 92%, rgba(79,179,201,0.10), transparent 74%)",
+                }}
+              />
+            </>
+          )}
+
+          <div className={bg === "scroll" ? "scroll-particles absolute inset-0" : "contents"}>
           {PARTICLES.map((d) => (
             <span
               key={`${d.x}-${d.y}`}
@@ -186,6 +275,7 @@ export function LifeBackground() {
               }
             />
           ))}
+          </div>
         </>
       )}
 

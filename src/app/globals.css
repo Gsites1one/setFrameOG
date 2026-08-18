@@ -922,54 +922,77 @@ body {
 }
 
 /* ── bg=scroll only: scroll-driven depth ────────────────────────────────────
-   Native CSS scroll-driven animation, tried first per the brief. Two blobs
-   get a slow vertical offset and opacity ramp tied to document scroll
-   progress; everything else stays on its own time-based loop, so the layer
-   reads as depth rather than parallax.
+   Driven by --sp (scroll progress, 0 at the top of the document, 1 at the
+   bottom), written to :root by LifeBackground. The brief said to try native
+   animation-timeline: scroll(root) first, and that was built first — but it
+   could not be verified, and unverifiable is not shippable here.
 
-   @supports is doing real work here, not decoration: without native support
-   `animation-timeline` is ignored but `animation-name` is NOT, so the
-   scroll-keyframes would run as an ordinary time-based animation and the two
-   blobs would drift on their own unrelated schedule. Scoping the whole rule
-   to the feature query means unsupported browsers simply get the aurora base,
-   which the brief requires to look complete on its own anyway. */
-@keyframes scroll-lift {
-  from {
-    transform: translate3d(0, 4%, 0) scale(1);
-    opacity: 0.85;
-  }
-  to {
-    transform: translate3d(0, -12%, 0) scale(1.15);
-    opacity: 0.35;
-  }
+   What the measurement showed: EVERY css-declared scroll/view timeline form
+   reports an inactive timeline (Animation.currentTime === null) in this
+   environment — scroll(root), bare scroll(), the full longhand form with
+   animation-duration:auto, and view() alike — while a JS-constructed
+   ScrollTimeline on the very same scroller reports a healthy 20.04%. The root
+   scroller is fine (scrollHeight 6889 vs clientHeight 900, scrollingElement is
+   documentElement, nothing else scrolls). So the CSS was correct and simply
+   never activated, which matches the same non-compositing tab that makes
+   screenshots fail here. The brief's own fallback clause covers exactly this.
+
+   Everything below is still transform/opacity only; --sp just replaces the
+   timeline as the progress source, so the compositor work is identical.
+
+   The scroll transform lives on a WRAPPER around each blob, never on the blob
+   itself. A blob already carries an aurora keyframe animation, and an animated
+   transform always beats a declared one — so putting both on one element would
+   silently drop whichever lost. Nesting composes them instead, which is why
+   the blobs keep drifting AND respond to scroll. */
+
+.scroll-lift {
+  transform: translate3d(0, calc(var(--sp, 0) * -34vh), 0)
+    scale(calc(1 + var(--sp, 0) * 0.28));
+  opacity: calc(1 - var(--sp, 0) * 0.55);
 }
 
-@keyframes scroll-sink {
-  from {
-    transform: translate3d(0, -6%, 0) scale(1.08);
-    opacity: 0.4;
-  }
-  to {
-    transform: translate3d(0, 8%, 0) scale(0.95);
-    opacity: 0.9;
-  }
+.scroll-sink {
+  transform: translate3d(0, calc(var(--sp, 0) * 26vh), 0)
+    scale(calc(1.18 - var(--sp, 0) * 0.24));
+  opacity: calc(0.45 + var(--sp, 0) * 0.55);
 }
 
-@supports (animation-timeline: scroll(root)) {
-  .scroll-lift {
-    animation: scroll-lift linear both;
-    animation-timeline: scroll(root);
-  }
-  .scroll-sink {
-    animation: scroll-sink linear both;
-    animation-timeline: scroll(root);
-  }
+/* Particle field counter-drifts slightly against the blobs, which is what
+   makes the movement read as depth rather than as the whole layer sliding. */
+.scroll-particles {
+  transform: translate3d(0, calc(var(--sp, 0) * -12vh), 0);
+}
+
+/* Temperature shift: copper at the top of the page, teal by the bottom. This
+   is the part that is actually FELT — a slow drift of two blobs across a
+   6889px page is close to invisible on its own, which is what the first
+   version got wrong. Two stacked washes crossfading against each other reads
+   as the page cooling as you descend, and it is still only opacity. */
+.scroll-warm {
+  opacity: calc(1 - var(--sp, 0));
+}
+
+.scroll-cool {
+  opacity: var(--sp, 0);
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* LifeBackground also stops writing --sp entirely under reduced motion, so
+     these resolve through the 0 fallback and hold at the top-of-page state.
+     Declared anyway so the static result is guaranteed by CSS rather than by
+     the effect happening to not run. */
   .scroll-lift,
-  .scroll-sink {
-    animation: none !important;
+  .scroll-sink,
+  .scroll-particles {
     transform: none !important;
+  }
+  .scroll-lift,
+  .scroll-cool {
+    opacity: 0.6 !important;
+  }
+  .scroll-sink,
+  .scroll-warm {
+    opacity: 0.8 !important;
   }
 }

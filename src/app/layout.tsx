@@ -89,8 +89,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    // suppressHydrationWarning is scoped to this ONE element and is the
+    // standard fix for this exact pattern, not a blanket silencer. The inline
+    // script in <body> below runs classList.add("js") on <html> before React
+    // hydrates, so the server sends three font-variable classes and the client
+    // finds those three plus "js" — verified by diffing the two directly:
+    // server "syne... inter... space_mono...", client the same plus "js".
+    // React then reports an attribute mismatch on every route in dev. The
+    // mismatch is intentional and the class must be applied before body parses
+    // (that is the whole point — reveals only start hidden when something can
+    // reveal them), so the attribute is exactly what this prop exists for. It
+    // suppresses the warning for this element's own attributes only; children
+    // are still fully hydration-checked.
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${syne.variable} ${inter.variable} ${spaceMono.variable}`}
     >
       <body className="font-sans bg-background text-foreground antialiased">
