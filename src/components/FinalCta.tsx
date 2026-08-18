@@ -1,5 +1,6 @@
 import { Reveal } from "./Reveal";
 import { CtaButton } from "./CtaButton";
+import { TrustStrip } from "./TrustStrip";
 
 // Lively closing band (P7.2): a copper current sweeps along a full-width
 // hairline through a single pulsing node, then lands on the outcome headline
@@ -41,6 +42,19 @@ export function FinalCta() {
             <CtaButton size="lg" label="Contact us" />
           </div>
         </div>
+
+        {/* Below the button, not above it: the headline plus button is the ask,
+            and these three facts are what answers "and then what?" for a
+            visitor whose cursor is already hovering. Same component and same
+            wording as the strip above the contact form, so the promise does not
+            change between the page that makes it and the page that collects on
+            it.
+
+            Deliberately OUTSIDE the max-w-2xl column above. Measured inside it,
+            the three facts came to ~681px against a 672px measure and wrapped
+            with a single orphan on the second line; max-w-3xl gives them the
+            ~9px they were short of and they sit on one line from md up. */}
+        <TrustStrip className="relative mx-auto mt-8 max-w-3xl" />
       </Reveal>
     </section>
   );

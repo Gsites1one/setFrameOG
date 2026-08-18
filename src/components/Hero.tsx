@@ -112,12 +112,33 @@ export function Hero() {
             below, so the wrapper now ends at the subline and the veil no longer
             needs to reach as far down. The top inset is untouched — that is
             where the headline actually needs the backing. */}
+        {/* Iteration 10, Task 1 — opacity traded for depth. At 0.88 alpha on a
+            near-black fill this was functionally opaque: one dead, unmoving
+            rectangle sitting in the middle of a screen where the ambient glow
+            and hero-breathe wash visibly drift everywhere else. Note the
+            blur-[32px] never helped with that — it is a `filter`, so it
+            softens this box's OWN edges and does nothing to what is behind it.
+
+            Now the fill is translucent (0.5) and backdrop-blur-2xl diffuses the
+            glow through the panel, so the light keeps moving underneath rather
+            than being blocked. What is NOT reopened here: the rounded-rect
+            shape (a radial ellipse was measured and failed — first headline
+            line at 0.33 alpha, Iteration 6 Task 3), the insets, and the
+            z-10/z-20 stacking that keeps the CTA clear of the veil.
+
+            The alpha could only come down this far because .hero-text-shadow
+            below carries legibility independently. Measured after the change,
+            identical at 320/768/1440 because nothing here is breakpoint-
+            dependent: compositing the panel over the ambient glow AND the
+            breathe wash both held at their keyframe peaks gives a worst-case
+            surface of rgb(34,27,24), against which the headline reads 15.56:1
+            and the subline 9.26:1. AA needs 4.5:1. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -inset-x-12 -top-10 -bottom-6 rounded-[48px] bg-[rgba(18,18,20,0.88)] blur-[32px]"
+          className="pointer-events-none absolute -inset-x-12 -top-10 -bottom-6 rounded-[48px] bg-[rgba(18,18,20,0.5)] backdrop-blur-2xl blur-[32px]"
         />
 
-        <h1 className="relative max-w-3xl text-center font-display text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
+        <h1 className="hero-text-shadow relative max-w-3xl text-center font-display text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
           Your business is losing money in places you never look.
         </h1>
 
@@ -126,7 +147,7 @@ export function Hero() {
             short, scannable lines instead of running the full column width,
             then back to max-w-xl from sm up. text-pretty stops a single word
             being orphaned on the last line at any width. */}
-        <p className="relative mt-5 max-w-[19rem] text-pretty text-center leading-relaxed text-foreground/75 sm:mt-6 sm:max-w-xl">
+        <p className="hero-text-shadow relative mt-5 max-w-[19rem] text-pretty text-center leading-relaxed text-foreground/75 sm:mt-6 sm:max-w-xl">
           SetFrame builds websites and systems that catch what quietly slips
           away and turn it into movement.
         </p>

@@ -22,6 +22,15 @@ type CtaButtonProps = {
    */
   submit?: boolean;
   disabled?: boolean;
+  /**
+   * Stretch to the container's width. Needed by the contact form, whose submit
+   * button spans the form (Iteration 10, Task 2). It is a prop rather than a
+   * `className="w-full"` at the call site because the magnet wrapper below is
+   * `inline-block` and shrink-wraps — w-full on the button alone would resolve
+   * against a wrapper that is already only as wide as the label, so the button
+   * would not grow at all. Both elements have to change together.
+   */
+  fullWidth?: boolean;
 };
 
 // One source of truth for the primary button's look. Both the link form and
@@ -48,6 +57,7 @@ export function CtaButton({
   label = "Start a conversation",
   submit = false,
   disabled = false,
+  fullWidth = false,
 }: CtaButtonProps) {
   const ref = useRef<HTMLDivElement>(null);
   const rectRef = useRef<DOMRect | null>(null);
@@ -82,7 +92,7 @@ export function CtaButton({
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       style={{ x: springX, y: springY }}
-      className="inline-block"
+      className={fullWidth ? "block w-full" : "inline-block"}
     >
       {/* The label is set in font-display (Syne), matching every other button
           on the site. Hover brightens on four channels at once — border, fill,
@@ -94,14 +104,18 @@ export function CtaButton({
         <button
           type="submit"
           disabled={disabled}
-          className={`${BUTTON_CLASSES} ${SIZE_CLASSES[size]} ${className}`}
+          className={`${BUTTON_CLASSES} ${SIZE_CLASSES[size]} ${
+            fullWidth ? "w-full" : ""
+          } ${className}`}
         >
           {label}
         </button>
       ) : (
         <Link
           href="/contact"
-          className={`${BUTTON_CLASSES} ${SIZE_CLASSES[size]} ${className}`}
+          className={`${BUTTON_CLASSES} ${SIZE_CLASSES[size]} ${
+            fullWidth ? "w-full" : ""
+          } ${className}`}
         >
           {label}
         </Link>

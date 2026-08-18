@@ -308,6 +308,19 @@ body {
   animation: hero-breathe 26s ease-in-out infinite;
 }
 
+/* Hero copy shadow (Iteration 10, Task 1). Second line of defense for
+   legibility, so it never depends on the scrim panel alone — which is what
+   lets the panel's alpha come down from 0.88 to 0.5 without putting the
+   headline at risk. Two shadows: a wide soft one that lifts the glyphs off
+   whatever the ambient glow is doing behind them, and a tight one that keeps
+   the letterforms crisp at small sizes. Costs nothing (no layer, no
+   animation, no layout) so it stays clear of the LCP path. */
+.hero-text-shadow {
+  text-shadow:
+    0 2px 28px rgba(10, 10, 11, 0.85),
+    0 1px 3px rgba(10, 10, 11, 0.6);
+}
+
 /* Score ring draw-in (/webcriticapp). The arc sweeps from empty to its value
    once. Done in CSS with the circumference passed in as a custom property,
    rather than a state flag flipped in an effect — that would have been a

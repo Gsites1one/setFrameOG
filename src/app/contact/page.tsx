@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ContactForm } from "@/components/ContactForm";
 import { ContactReasons } from "@/components/ContactReasons";
+import { TrustStrip } from "@/components/TrustStrip";
 
 export const metadata: Metadata = {
   title: "Contact — SetFrame",
@@ -39,6 +40,13 @@ export default function ContactPage() {
         Tell us what you want to build or improve. You will hear back within
         one business day.
       </p>
+
+      {/* The three facts sit directly above the form rather than in the
+          rotating reasons card below the heading: the reasons card shows one
+          item at a time, so at any given moment two thirds of it is invisible,
+          which is fine for depth but useless as reassurance at the moment the
+          visitor decides whether to type. */}
+      <TrustStrip className="mt-8" />
 
       <ContactReasons />
 

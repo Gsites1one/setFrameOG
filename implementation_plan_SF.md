@@ -1377,3 +1377,574 @@ each card's hairline draws only when THAT card enters view, then rests; hover
 adds a copper wash on top. Measured: 1 of 10 revealed at page top, progressing
 1 -> 4 -> 7 -> 9 -> 10 on scroll, with 0 cards carrying any
 infinite-iteration animation. No per-card JS, no permanent loop.
+
+
+---
+
+## Iteration 9 — Hero CTA and trust-proof refresh
+
+Backfilled from the session that shipped it (commit `0322193`), so this is the
+record rather than a reconstruction — the earlier housekeeping note flagging
+this as a gap is resolved. Driven by an external OpenAI-based audit of
+setframe.net (design 8.5, ux 6.5, mobile 7, performance 9, seo 9,
+accessibility 10, trust 4.5, content 6, cta ~6, overall ~7.4). The low trust
+score reflects the deliberate absence of testimonials, client logos and
+founder identity, not a bug; adding fabricated proof, logos, testimonials,
+founder photos or "early clients" scarcity framing was explicitly considered
+and declined for that round. One file changed, `src/components/Hero.tsx`.
+
+**T1 — hero CTA reworded.** "Start a conversation" became **"Book a 15-minute
+call"**, passed as `label` to the shared `CtaButton` so the component default
+is untouched, with microcopy beneath: "A conversation, not a pitch — no
+obligation." That phrase is lifted verbatim from section 03 step 1 rather than
+reworded, so the promise at the button and the promise in the process section
+are the same sentence rather than two similar-sounding claims. The nav pill
+keeps "Start a conversation" and the closing band keeps "Contact us"; only the
+hero instance changed.
+
+**T2 — 7/30-day commitment promoted to a proof bar.** The delivery commitment
+was the most concrete, checkable thing on the page and was set as the least
+legible text in the hero: one 12px mono line at 55% opacity under the subline.
+Same words, promoted into a bordered two-cell strip on `bg-surface/70` —
+"7 days / to a working version" and "30 days / to full rollout" — with the
+figures in Space Mono 700 copper at 20px (24px from `sm`), matching the section
+numerals and FAQ numbering; Syne stays on headings and button labels.
+"Websites and business systems, built to order." was explicitly resolved rather
+than dropped: it stays as a standalone label line directly above the strip,
+because dropping it would leave two bare numbers with nothing to attach to. No
+new copy — every word was already in the old sentence.
+
+**T3 — secondary CTA.** "See recent builds →" → `/work`, reusing the existing
+arrow-link anatomy ("Discover the process →"): Syne label, transparent
+`border-b` that lights copper on hover, separate `aria-hidden` copper arrow.
+One size down and starting at 70% opacity so it stays subordinate to the button.
+
+**T4 — readability, measured not assumed.** Contrast against the actual
+painted backgrounds at 320px: "built to order" line **8.66:1** (up from
+5.80:1), stat labels 9.57:1, stat numbers 5.37:1 (20px bold copper on the
+strip), microcopy 8.66:1, secondary link 8.66:1. The weakest hero text is now
+8.66:1 where it was 5.80:1.
+
+**T5 — mobile hierarchy.** At 320×700 the sequence measures h1 (163–388),
+subline (408–512), label (552–591), proof strip (603–698), CTA (730),
+microcopy (787), secondary (831) — gaps of 12/40/12/32/12/24px, no oversized
+gap, and the whole proof strip above the fold. Room came from section padding
+(`py-24` → `py-16 sm:py-24`), the wordmark (`w-32` → `w-28 sm:w-32`) and its
+margin; the subline gained a ~34ch cap plus `text-pretty` on phones. The
+headline scrim's bottom inset tightened `-bottom-8` → `-bottom-6` now that the
+mono line had left that wrapper. The H1 was NOT touched — a `text-balance` was
+tried and reverted, since the iteration was scoped to the CTA and
+secondary/tertiary elements.
+
+**T6 — scroll cue removed, not upgraded.** The animated-chevron version was
+built first and the measurement killed it. The cue was pinned to the bottom of
+the SECTION, not the viewport, and with the proof bar and second CTA added the
+hero is now taller than the screen at every width checked — **918px against a
+700px viewport at 320px, 956px against 900px at 1440px** — so it sat below the
+fold on phone and desktop alike and could never do its job. At 320px it landed
+with a **0px gap** against the "See recent builds" link, and the only repairs
+were extra bottom padding (pushing the CTA further down, against T5) or a
+per-breakpoint hide. The chevron CSS was removed too, so `globals.css` came out
+net-unchanged. The hero overflowing the fold is now itself the cue, and the
+hero ends on an onward link instead of a dead end.
+
+Type-check clean; the two pre-existing `setState`-in-effect lint errors in
+`template.tsx` and `IntroCurtain.tsx` are unchanged and unrelated.
+
+---
+
+## Iteration 10 — Hero legibility, contact-page CTA/contact-method UX, and AI-audit score uplift
+
+**Origin:** a design/UX/SEO critique session run against the live site,
+combining a manual pass (screens of the hero, the contact form, and the
+site's own `/webcriticapp` self-audit tool showing 7.3/10 overall — Trust
+Signals 4.5, CTA Effectiveness 5.5, Content 6.0, UX/Usability 6.5, Mobile
+Experience 7.0 against Design 8.5, Performance 9.0, SEO 9.0, Accessibility
+10) with current (Aug 2026) research on hero-text legibility techniques,
+segmented-control UI patterns, and trust-signal design for solo studios.
+Sources for the external research are listed at the end of this section.
+
+Two items were named directly by the owner (T1, T2/T3 below); the rest (T4–T8)
+came out of re-auditing the rest of the site against the same weak categories,
+so a repeat AI audit has concrete, shipped changes to score against rather
+than the same gaps.
+
+**Hard guardrail for this whole iteration:** Accessibility currently scores
+10/10 and Performance 9.0. Nothing below may drop either — every new
+interactive element gets the same keyboard/focus/ARIA treatment already
+standard across the codebase (see `:focus-visible` in `globals.css:35` and
+the reduced-motion blocks throughout), and no new layer may sit on the LCP
+path the way the existing scrim already deliberately avoids (`Hero.tsx:72-73`
+notes it costs nothing on the LCP path — keep that property when touching it).
+
+### T1 — Hero headline scrim: from opaque black box to integrated frosted panel
+
+**The problem, as reported and as measured.** `Hero.tsx:115-118` renders the
+readability backing behind the H1/subline as:
+
+```tsx
+<div
+  aria-hidden="true"
+  className="pointer-events-none absolute -inset-x-12 -top-10 -bottom-6 rounded-[48px] bg-[rgba(18,18,20,0.88)] blur-[32px]"
+/>
+```
+
+0.88 alpha on a near-black fill is functionally opaque. Sitting on top of
+`LifeBackground`'s cursor-tracking glow and the hero's own `ambient-glow` +
+`hero-breathe` wash (which visibly pulses and drifts everywhere else on the
+page), the result is exactly what was flagged: one dead, flat, unmoving
+rectangle in the middle of an otherwise-alive screen. `blur-[32px]` here
+softens the box's own edges (it's a `filter`, applied to the element), it
+does not affect what's *behind* the box — so the interior reads as flat no
+matter how soft the edge is.
+
+This is the second time this exact region has been tuned (Iteration 6 Task 3
+introduced it, Iteration 7 Task 2 fixed a z-index bug where it painted over
+the CTA's hover state, Iteration 9 pulled the bottom inset in further). Worth
+being explicit about what is *not* being reopened: the rounded-rect shape
+(chosen over a radial ellipse after the ellipse measured badly — first
+headline line at 0.33 alpha, see Iteration 7 Task 2 for the numbers), the
+geometry/insets, and the z-10/z-20 stacking that keeps the CTA clear of the
+veil. Only the fill treatment changes.
+
+**Fix — swap opacity for depth.** Lower the alpha and add `backdrop-blur`, so
+the panel becomes a frosted-glass surface that *shows a soft, diffused hint
+of the glow moving behind it* rather than blocking it outright. This is
+standard current practice for keeping text legible over animated/photographic
+hero backgrounds without a flat card sitting on top of the scene (glass /
+blur-panel treatments are called out repeatedly in the 2026 hero-section
+trend pieces gathered for this pass — see Sources). Concretely:
+
+```tsx
+<div
+  aria-hidden="true"
+  className="pointer-events-none absolute -inset-x-12 -top-10 -bottom-6 rounded-[48px] bg-[rgba(18,18,20,0.5)] backdrop-blur-2xl blur-[32px]"
+/>
+```
+
+- `backdrop-blur-2xl` blurs the ambient glow *through* the panel — the light
+  keeps moving underneath, just diffused, so the panel reads as part of the
+  same scene instead of a sticker on top of it.
+- Alpha drops from 0.88 to ~0.5. Verify contrast after the change the same
+  way Iteration 7 did (measure the darkest and lightest text pixel against
+  the panel at every breakpoint) — 0.5 + backdrop-blur should still clear AA
+  comfortably since the backdrop is dimmed foreground glow, not full-brightness
+  page background, but this needs the same measurement discipline the rest of
+  this file uses, not an eyeball check.
+- Add a small text-shadow as a second line of defense so legibility never
+  depends on the panel alone — new utility in `globals.css`:
+
+  ```css
+  .hero-text-shadow {
+    text-shadow:
+      0 2px 28px rgba(10, 10, 11, 0.85),
+      0 1px 3px rgba(10, 10, 11, 0.6);
+  }
+  ```
+
+  Applied to the H1 (`Hero.tsx:120`) and the subline (`Hero.tsx:129`). This
+  is what lets the alpha come down further than it otherwise safely could.
+
+- `backdrop-blur` needs a browser that supports `backdrop-filter` — universal
+  in every evergreen browser at this point, and there is no functional
+  regression for the handful of browsers that don't support it: the fill
+  still renders, just without the frosted effect, so it degrades to
+  "translucent dark panel," not broken.
+
+**Optional follow-up, not part of this pass:** capping `hero-breathe`'s peak
+opacity (currently swings 0.35 → 0.85, `globals.css:297-309`) slightly lower
+would reduce how bright the wash gets directly behind the now-translucent
+panel. Only worth touching after T1's main fix ships and gets looked at — two
+variables changing at once makes it harder to tell which one fixed (or
+didn't fix) the "jarring" complaint.
+
+### T2 — Contact form submit button: drop the brackets, stop hand-rolling a second button
+
+**The bug, precisely.** Iteration 8 Task 2 deliberately removed the `[ ]`
+motif from every CTA except the logo — but flagged one exception at the time:
+*"LEFT ALONE (flagged, not forgotten): the contact form's '\[ Send message \]'
+— not named in the brief and a different label."* That flag is why it's still
+there. `ContactForm.tsx:267-273` renders its own raw `<button>` with its own
+copy of the pill/border/hover classes instead of using the shared
+`CtaButton` component every other primary action on the site goes through —
+so it drifted from the bracket-removal pass, and it will drift again the next
+time `CtaButton`'s hover treatment changes, because this button doesn't get
+that change for free.
+
+**Fix.** Delete the bespoke button and render `CtaButton` in its existing
+`submit` mode (`CtaButton.tsx:93-100` already supports this — it was built
+for exactly this kind of case per its own comment: *"the site's primary
+button to submit a form rather than navigate"*):
+
+```tsx
+<CtaButton
+  submit
+  size="lg"
+  label={state.submitting ? "Sending..." : "Send message"}
+  disabled={state.submitting}
+  className="w-full"
+/>
+```
+
+This is a strict improvement, not a wash: it removes the brackets (the
+literal ask), it makes the contact page's highest-intent button visually and
+behaviourally identical to every other CTA on the site (magnet-follow,
+four-channel hover brighten, copper glow — currently exclusive to
+`CtaButton` instances), and it deletes ~7 lines of duplicated class string
+that only existed because this button was never migrated. `disabled` and
+size classes are already wired through the shared component, so nothing else
+in the form needs to change.
+
+### T3 — "Preferred contact method": native `<select>` → segmented control
+
+**What was asked:** instead of one visible value with a dropdown to reveal
+the other two, show all three options together in the field and select by
+clicking directly. That's a textbook segmented control — and the option
+count is exactly in its sweet spot (best-practice guidance puts 3-5 options
+as the ideal range for a segmented control; 6+ should stay a dropdown,
+binary states should stay a toggle — this field has exactly 3).
+
+**Constraint that must not be lost.** `ContactForm.tsx:120-129` documents a
+real, previously-shipped bug: an `<option>` without an explicit `value`
+attribute takes its value from its own *text*, and Google Translate rewrites
+visible text but not attributes — so under Translate, `method` stopped
+matching `"Phone call"` and the phone field silently refused to appear. The
+current `<select>` avoids this only because every `<option>` carries an
+explicit `value=`. A button-based segmented control is naturally safe from
+the same failure mode as long as it keeps the same discipline: each
+segment's click handler must set state from a **hardcoded JS literal**, never
+from the button's own rendered text — which the implementation below does.
+
+**Implementation** (`ContactForm.tsx`, replacing the `<select>` block at
+lines 113-141):
+
+```tsx
+const CONTACT_METHODS = ["Email", "Phone call", "Video call"] as const;
+type ContactMethod = (typeof CONTACT_METHODS)[number];
+
+// Short forms only for the segmented control's own label — never read back
+// out of the DOM, so this is not the same hazard the select's `<option>`
+// text used to be.
+const METHOD_SHORT: Record<ContactMethod, string> = {
+  Email: "Email",
+  "Phone call": "Call",
+  "Video call": "Video",
+};
+```
+
+```tsx
+<div>
+  <span id="contactMethod-label" className={FIELD_LABEL_CLASSES}>
+    Preferred contact method
+  </span>
+  <div
+    role="radiogroup"
+    aria-labelledby="contactMethod-label"
+    className="grid grid-cols-3 gap-1 rounded-lg border border-white/10 bg-surface p-1"
+    onKeyDown={(e) => {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      e.preventDefault();
+      const i = CONTACT_METHODS.indexOf(method as ContactMethod);
+      const next =
+        e.key === "ArrowRight"
+          ? CONTACT_METHODS[(i + 1) % CONTACT_METHODS.length]
+          : CONTACT_METHODS[(i - 1 + CONTACT_METHODS.length) % CONTACT_METHODS.length];
+      setMethod(next);
+    }}
+  >
+    {CONTACT_METHODS.map((m) => (
+      <button
+        key={m}
+        type="button"
+        role="radio"
+        aria-checked={method === m}
+        tabIndex={method === m ? 0 : -1}
+        onClick={() => setMethod(m)}
+        className={`rounded-md px-2 py-2.5 text-xs font-mono tracking-wide transition-colors sm:text-sm ${
+          method === m
+            ? "border border-accent/50 bg-accent/15 text-accent"
+            : "border border-transparent text-foreground/60 hover:text-foreground/90"
+        }`}
+      >
+        <span className="sm:hidden">{METHOD_SHORT[m]}</span>
+        <span className="hidden sm:inline">{m}</span>
+      </button>
+    ))}
+  </div>
+  {/* The visual control above is presentational only (buttons carry no
+      `name`). This hidden input is what Formspree actually receives —
+      same field name the select used to submit, so nothing downstream
+      (the notification email, any Formspree rule) needs to change. */}
+  <input type="hidden" name="contactMethod" value={method} />
+</div>
+```
+
+Notes tying this to the rest of the file:
+
+- `role="radiogroup"` / `role="radio"` / `aria-checked` / roving `tabIndex`
+  (0 on the selected segment, -1 on the others) plus manual arrow-key
+  handling is the standard accessible pattern for this component — this is
+  what keeps Accessibility at 10 rather than trading the native `<select>`'s
+  free keyboard support for a mouse-only widget.
+- Mobile: labels shrink to "Email / Call / Video" below `sm`, matching the
+  exact technique `FloatingNav.tsx:159-164` already uses for its own
+  "Start" vs "Start a conversation" swap — `aria-label`-free here because the
+  short label is still real, readable text, not a truncation.
+- `wantsPhone` (`ContactForm.tsx:48`) already reads from `method` by string
+  comparison, so the email/phone field swap and the Translate-safe
+  always-mounted `[hidden]` rows (`ContactForm.tsx:143-166` and the
+  `field-enter` CSS) need **no changes** — they're downstream of `method`
+  and don't care how it got set.
+- Touch target: `py-2.5` plus the 44px+ overall row height at the `lg` field
+  sizing keeps each segment comfortably inside the 44px minimum tap target
+  guidance, which matters more here than on desktop-only components since
+  this sits directly under Mobile Experience's current 7.0.
+
+### T4 — Trust Signals (4.5/10 — the weakest category, and the one with the most headroom)
+
+This is the biggest score gap on the site, and re-reading `About.tsx` shows
+why: *"Impersonal studio description (owner decision): no founder framing, no
+location-as-personal-detail, no photo."* That's a deliberate brand choice,
+not an oversight — current research on solo-studio credibility agrees
+founder-forward framing is the single strongest trust lever available, so
+this is flagged as a decision for you, not something to override
+unilaterally. Two tracks below: things safe to ship without touching that
+decision, and one item that only you can call.
+
+**Safe to ship now — no conflict with the impersonal-brand decision:**
+
+- **Surface the proof that already exists, closer to the CTA.** The
+  `/work` gallery already carries "outcome lines" per its own honesty
+  framing (Iteration 8 Task 3: *"captioned only with locked capability names
+  and outcome lines... no client is implied and no number is presented as a
+  measured result"*). None of that currently appears on the homepage or the
+  contact page — the visitor has to click through to `/work` to see any of
+  it. Pull one or two outcome lines into a compact strip near the contact
+  form or under the hero proof bar. Zero new copywriting: reuse what
+  Iteration 8 already wrote and vetted for honesty.
+- **A concrete "what happens next" strip**, built entirely from copy that
+  already exists elsewhere on the site (the FAQ, the contact reasons, the
+  proof bar): e.g. "Fixed scope & price · Direct to the person who builds it
+  · Reply within 1 business day." This is exactly the "quantified /
+  specific over generic" pattern current trust-design guidance calls out —
+  it reads as three checkable facts instead of three adjectives, and every
+  one of them is already stated in prose somewhere on the site (`ContactReasons.tsx`,
+  the FAQ, `ContactForm.tsx`'s success state). Repackaging as a compact,
+  scannable line is copy-layout work, not new claims.
+- **A small lock/shield icon next to the existing privacy line**
+  (`ContactForm.tsx:280-287`, "Your details are used only to reply to your
+  message..."). The text is already right; current guidance notes a visible
+  security cue at the point of data collection measurably helps form
+  completion, and this is a one-icon change next to copy that's already
+  written.
+
+**Needs your call, not a code change:** `LOCATION` in `constants.ts:15`
+currently reads `"Poland · Netherlands · Worldwide"` — deliberately vague in
+the same way `CONTACT_EMAIL` is a placeholder pending the real mailbox (see
+the `// TODO` on the line above it). To an AI auditor and to a skeptical
+visitor, a location string with no city and no registration detail can read
+as evasive rather than global-reach-flexible, which is very likely part of
+what's dragging this category down. Whether to add a real city, a KVK/company
+registration number, or a LinkedIn link is a business-readiness decision
+(is the entity registered yet?), not a design one — flagged the same way the
+plan already flags the `hello@setframe.net` placeholder, so it surfaces
+again whenever that becomes available rather than getting lost.
+
+### T5 — CTA Effectiveness (5.5/10)
+
+- T2 and T3 both land here directly (a consistent, on-brand submit button
+  and a lower-friction contact-method field both reduce the last-mile drop
+  the AI grader is very likely penalizing).
+- **Button weight, flagged as a decision rather than shipped outright.**
+  Every CTA on the site (`CtaButton.tsx:29-30`) is an outline/pill —
+  transparent fill, accent border, brightening on hover. Outline buttons are
+  well-documented to read as lower-commitment/lower-visual-weight than a
+  solid fill, and "CTA effectiveness" graders lean heavily on exactly this
+  signal. The pill-with-border look is also clearly load-bearing brand
+  identity here (it's the shared anatomy across seven CTA instances plus the
+  logo motif), so a wholesale swap to solid fill is not proposed. A safer
+  middle ground worth testing: give only the **highest-intent instance**
+  (the hero's "Book a 15-minute call") a subtly higher resting fill opacity
+  than the rest (e.g. `bg-accent/10` at rest instead of fully transparent,
+  keeping the same border/hover language), so there's a visible hierarchy
+  between the one CTA that matters most and the six that repeat it, without
+  touching the shared component's default for the other six.
+- Proof-bar and CTA are already well-paired in the hero (T1 doesn't change
+  that relationship, only the panel behind the copy above it).
+
+### T6 — Content (6.0/10)
+
+- The single highest-leverage move for this category is the same one
+  T4 already proposes: turning `/work`'s existing outcome lines and the
+  FAQ's existing specifics into visible on-page content earlier in the
+  funnel, rather than writing new copy. A grader scoring "Content" is very
+  likely counting concrete, specific claims versus abstract ones — the site
+  already has the concrete claims, they're just gated one click deeper than
+  they need to be.
+- Once real client work exists, a short case-study format (problem → fix →
+  outcome, 3-4 sentences, still under the same "no number presented as a
+  measured result unless it's real" honesty rule Iteration 8 already set)
+  would move Content and Trust together. Not actionable yet if there's no
+  case study to write honestly — noted for when there is one.
+
+### T7 — UX/Usability (6.5/10)
+
+- T3's segmented control is the concrete fix here (fewer clicks, all
+  options visible up front, matches how the field is actually used —
+  most visitors have one preferred contact method and now see it
+  immediately instead of opening a dropdown to find out the options exist).
+- No other usability blocker turned up in this pass strong enough to act on
+  without a dedicated page-by-page review (`/services`, `/work`, `/knowledge`
+  weren't re-audited screen-by-screen here — flagged as a good candidate for
+  a focused Iteration 11 if the score doesn't move enough on this pass
+  alone).
+
+### T8 — Mobile Experience (7.0/10)
+
+- T3 explicitly carries a mobile-specific requirement (short labels, 44px+
+  touch targets) rather than treating mobile as an afterthought — see the
+  notes under T3.
+- T1's frosted-panel change should be re-verified at 320px the same way
+  Iteration 7 measured the original scrim there (that iteration's numbers —
+  918px hero height against a 700px viewport at 320px — are why the scroll
+  cue was removed rather than repositioned; the panel geometry itself is
+  unchanged here, only its fill, so this is a lighter re-check than a full
+  re-measure, but still a re-check).
+
+### Verification checklist before calling Iteration 10 done
+
+1. Contrast-check the H1 and subline against the new frosted panel at
+   320 / 768 / 1440px, same method as Iteration 7 Task 2 (measure, don't
+   eyeball).
+2. Confirm the CTA button under the hero copy is still fully clear of the
+   panel's blurred edge (re-run the same 8px-gap check Iteration 7 Task 2
+   used) — geometry is unchanged, but re-verify rather than assume.
+3. Tab through the contact form with a keyboard only: Name → segmented
+   control (arrow keys move the selection, Tab leaves the group as one
+   stop) → Email/Phone (whichever is visible) → Message → Send. No dead
+   stops, no doubled focus.
+4. Screen-reader spot check (VoiceOver or NVDA): the segmented control
+   announces as a radio group with three options and the current selection;
+   the submit button announces its live label ("Sending..." while
+   submitting).
+5. Submit a real test message through Formspree with each of the three
+   contact methods selected and confirm `contactMethod` arrives correctly
+   in the notification email for all three (this is exactly the field the
+   Translate bug broke before — worth a direct check, not an assumption).
+6. Re-run the site's own `/webcriticapp` audit after deploying and compare
+   against the 7.3 baseline (Trust Signals 4.5, CTA Effectiveness 5.5,
+   Content 6.0, UX/Usability 6.5, Mobile Experience 7.0) captured at the
+   start of this iteration.
+
+**Sources consulted for this iteration's external research (Aug 2026):**
+- [Segmented Control UI: A Visibility-First Component and How to Stop Misusing It](https://www.letsgroto.com/blog/segmented-control-ui)
+- [Design for Trust in 2026: UI Patterns That Build Credibility](https://www.maviklabs.com/blog/design-for-trust-2026/)
+- [Top Hero Section Examples for 2026: Boost Conversions](https://memorable.design/hero-section-examples/)
+- [14 Web Design Trends to Keep up with in 2026](https://uxpilot.ai/blogs/web-design-trends-2026)
+- [Best Practices for Dark Mode in Web Design 2026](https://natebal.com/best-practices-for-dark-mode/)
+
+### Iteration 10 — what actually shipped
+
+Files touched: `Hero.tsx`, `globals.css`, `CtaButton.tsx`, `ContactForm.tsx`,
+`FinalCta.tsx`, `contact/page.tsx`, plus a new `TrustStrip.tsx`.
+
+**T1 — SHIPPED as specified.** Panel is now
+`bg-[rgba(18,18,20,0.5)] backdrop-blur-2xl blur-[32px]`, and
+`.hero-text-shadow` is applied to the H1 and the subline. Verified applied in
+the live DOM: `background-color: rgba(18,18,20,0.5)`,
+`backdrop-filter: blur(40px)`, `filter: blur(32px)`, text-shadow on both.
+Checklist item 1 (contrast, measured not eyeballed): compositing the panel over
+the ambient glow AND the breathe wash both held at their **keyframe peaks**
+gives a worst-case surface of `rgb(34,27,24)`, against which the headline reads
+**15.56:1** and the subline **9.26:1** (AA floor 4.5:1). Identical at
+320/768/1440 because nothing in the calculation is breakpoint-dependent.
+Checklist item 2: the CTA clears the panel's bottom edge by 186px at 1440 and
+194px at 320 — the proof bar now sits between them, so the old 8px-gap concern
+is moot by a wide margin.
+
+Two things worth knowing, neither of which blocked the change:
+- **Could not be verified visually.** The screenshot tool failed again this
+  session (the recurring occluded-tab environment note), so T1 — the one
+  purely visual task in this iteration — was shipped on measurement alone.
+  The frosted effect is *confirmed applied*, not *confirmed good-looking*.
+  Worth an owner eyeball before anything else in this iteration is judged.
+- **`backdrop-filter` is the most expensive thing on this page's LCP viewport.**
+  It forces the compositor to read back and re-blur its region on every frame
+  the backdrop changes, and the backdrop here changes continuously by design
+  (`hero-breathe` 26s, `ambient-glow` 9s, plus the cursor glow). That is in
+  tension with this iteration's own Performance 9.0 guardrail, and Speed Index
+  is already this site's weakest metric across four prior recovery passes
+  (7.4, 7.5, Iteration 5). Not pre-emptively reverted, because the plan
+  specified it and the owner re-runs Lighthouse every iteration — but if mobile
+  Perf drops, **delete `backdrop-blur-2xl` first**. The alpha drop from 0.88 to
+  0.5 is what fixes the "dead flat rectangle" complaint on its own; the
+  backdrop blur only diffuses the glow further.
+
+**T2 — SHIPPED.** The bespoke `<button>` is gone; the form renders `CtaButton`
+in `submit` mode. Brackets removed ("Send message" / "Sending..."), and the
+button inherits the magnet follow, four-channel hover brighten and copper glow
+that were previously exclusive to `CtaButton` instances. One addition the plan
+did not anticipate: `className="w-full"` alone would NOT have worked, because
+the magnet wrapper is `inline-block` and shrink-wraps, so `w-full` on the
+button would resolve against a wrapper only as wide as the label. Added a
+`fullWidth` prop that sets both. Verified: button width 272px === form width
+272px at 320px.
+
+**T3 — SHIPPED, with one acceptance miss caught and fixed.** Native `<select>`
+replaced by a radiogroup-semantics segmented control. Verified by driving it
+in the live DOM: `aria-checked` tracks selection, roving `tabIndex` keeps the
+group to ONE tab stop, arrow keys move selection AND focus together and wrap
+in both directions, and the hidden `contactMethod` input submits
+`Email` / `Phone call` / `Video call` correctly. The downstream email/phone
+swap still works — with a call preferred, the email row goes hidden +
+disabled + not-required and the phone row shown + enabled + required. Full tab
+order confirmed: name → radiogroup → email → message → send → privacy link, no
+dead stops. **The miss:** the plan asserted `py-2.5` would clear the 44px touch
+target; measured, it computed to a **38px** row on 12px mono. Fixed with an
+explicit `min-h-11` (44px) plus flex centring, which also survives a future
+type-size change that padding arithmetic would not. Re-measured: 44px.
+
+**T4 — partially shipped.** New shared `TrustStrip.tsx` renders three checkable
+facts — "Fixed scope and price · Direct to the person who builds it · Reply
+within one business day" — each traceable to existing on-site prose (the
+pricing FAQ, ContactReasons' accountability item, and the /contact intro plus
+the form's success state respectively). Zero new claims; the change is
+packaging. Placed above the contact form (highest-intent moment; the rotating
+reasons card below it shows only one of three items at a time, which is fine
+for depth and useless as reassurance at the moment of decision) and below the
+homepage closing CTA. It sits outside FinalCta's `max-w-2xl` column: measured
+inside it the three facts came to ~681px against a 672px measure and wrapped
+with a single orphan on line two, so `max-w-3xl` gives them the ~9px they were
+short of. The lock icon shipped alongside the privacy line, and that line's
+colour moved from `text-foreground/50` to the solid `text-muted` token — /50 on
+graphite computes below the 4.5:1 AA floor, so the icon change doubled as a
+contrast fix.
+
+NOT shipped from T4: pulling `/work` outcome lines under the hero proof bar.
+Those are capability outcomes rather than delivered-work proof, and the hero's
+vertical sequence was rebalanced by measurement one iteration ago — adding a
+fourth text tier there reopens that work for a weaker version of what the
+TrustStrip already does next to both CTAs. Flagged rather than silently
+skipped; say the word if you want it there anyway.
+
+**T5 — the button-fill decision is NOT shipped, per the plan's own
+instruction** that it be "flagged as a decision rather than shipped outright."
+When you want it, it is one line: add `bg-accent/10` to the hero instance only
+via `className`, leaving the shared default untouched for the other six CTAs.
+T2 and T3 both landed here as the plan predicted.
+
+**T6 / T7 / T8** — carried by T3, T4 and T1 as the plan laid out; no separate
+work. T7's flagged page-by-page re-audit of `/services`, `/work` and
+`/knowledge` was not attempted and remains a candidate for Iteration 11.
+
+**Still owner-only, unchanged:** the `LOCATION` / KVK / LinkedIn call (a
+business-readiness decision, not a design one), a real case study for Content,
+checklist item 5 (Formspree end-to-end with all three contact methods — worth a
+direct check, since `contactMethod` is exactly the field the Translate bug
+broke before), and checklist item 6 (re-run `/webcriticapp` against the 7.3
+baseline).
+
+Build passes clean (`npm run build`, exit 0, 19 static pages). Type-check
+clean. Lint unchanged: the same two pre-existing `setState`-in-effect errors in
+`template.tsx` and `IntroCurtain.tsx`, no new ones. No horizontal overflow at
+320 / 768 / 1440 on `/` or `/contact`.

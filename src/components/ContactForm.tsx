@@ -1,14 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useForm, ValidationError } from "@formspree/react";
 import { useReducedMotion } from "framer-motion";
 // FIELD_CLASSES lives in lib/formStyles so /webcriticapp's form uses the
 // identical treatment instead of a second copy of the same class string.
-import { FIELD_CLASSES } from "@/lib/formStyles";
+import { FIELD_CLASSES, FIELD_LABEL_CLASSES } from "@/lib/formStyles";
+import { CtaButton } from "./CtaButton";
 
 const FORMSPREE_ID = "mjgnbdbg";
+
+// Iteration 10, Task 3. The three contact methods, and the short labels the
+// segmented control shows on phones.
+//
+// These are JS literals and the click handler sets state FROM the literal,
+// never from the button's rendered text. That is load-bearing for the same
+// reason the old <select> needed an explicit `value` on every <option>: an
+// option with no value takes its value from its own text, and Google Translate
+// rewrites visible text but not attributes, so under translation `method`
+// stopped equalling "Phone call" and the phone field silently refused to
+// appear. A button-based control is only safe from that failure if it keeps
+// the same discipline, so nothing below ever reads a label back out of the DOM.
+const CONTACT_METHODS = ["Email", "Phone call", "Video call"] as const;
+type ContactMethod = (typeof CONTACT_METHODS)[number];
+
+// Short forms for the sub-`sm` breakpoint only. Same technique the floating
+// nav already uses for "Start" vs "Start a conversation" — but no aria-label
+// is needed here, because the short label is still real readable text rather
+// than a truncation.
+const METHOD_SHORT: Record<ContactMethod, string> = {
+  Email: "Email",
+  "Phone call": "Call",
+  "Video call": "Video",
+};
 
 // Rotating placeholder hints for the message field (Task 5). This is a
 // hint only — the persistent, visible <label htmlFor="message"> below
@@ -44,8 +69,19 @@ export function ContactForm() {
   const hintIndex = useRotatingPlaceholder(MESSAGE_HINTS);
   // When the visitor prefers a call, the contact field asks for a phone number
   // instead of an email — you can't email-reply to someone who wants a call.
-  const [method, setMethod] = useState("Email");
+  const [method, setMethod] = useState<ContactMethod>("Email");
   const wantsPhone = method === "Phone call" || method === "Video call";
+  // Roving focus for the segmented control: an arrow key both moves the
+  // selection and moves DOM focus with it, which is what the radiogroup
+  // pattern requires. Without the focus move, focus would be stranded on a
+  // segment that just became tabIndex={-1}.
+  const segmentRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const selectMethodAt = (i: number) => {
+    const next = CONTACT_METHODS[(i + CONTACT_METHODS.length) % CONTACT_METHODS.length];
+    setMethod(next);
+    segmentRefs.current[CONTACT_METHODS.indexOf(next)]?.focus();
+  };
   // The rotating hint is a decorative overlay only; the visible <label> below
   // stays the field's accessible name. Hide the overlay once the field has
   // content or focus so it never sits over what the visitor is typing.
@@ -110,34 +146,65 @@ export function ContactForm() {
         />
       </div>
 
+      {/* Iteration 10, Task 3 — segmented control, not a dropdown. Three
+          options is squarely in the range where showing all of them beats
+          hiding two behind a click, and most visitors already know which one
+          they want. Keyboard support is hand-built because the native <select>
+          gave it away for free and dropping it would have traded a UX point
+          for an accessibility point: radiogroup semantics, aria-checked,
+          roving tabIndex so the group is ONE tab stop, and arrow keys that
+          move selection and focus together. */}
       <div>
-        <label
-          htmlFor="contactMethod"
-          className="mb-1.5 block font-mono text-xs tracking-wide text-foreground/60"
-        >
+        <span id="contactMethod-label" className={FIELD_LABEL_CLASSES}>
           Preferred contact method
-        </label>
-        {/* Each option carries an explicit value. This is load-bearing, not
-            tidiness: an <option> with no value attribute takes its value from
-            its own text, so when Chrome's translate rewrites the labels the
-            selected value becomes the translated string, `method` never again
-            equals "Phone call", and the field below silently refuses to switch
-            from email to phone. That was the owner-reported bug, and it only
-            ever appeared with translation on. Translate rewrites visible text
-            but not attributes, so an explicit value stays stable in every
-            language — and the submitted value stays consistent in the inbox
-            instead of arriving in whatever language the visitor was reading. */}
-        <select
-          id="contactMethod"
-          name="contactMethod"
-          value={method}
-          onChange={(e) => setMethod(e.target.value)}
-          className={FIELD_CLASSES}
+        </span>
+        <div
+          role="radiogroup"
+          aria-labelledby="contactMethod-label"
+          className="grid grid-cols-3 gap-1 rounded-lg border border-white/10 bg-surface p-1"
+          onKeyDown={(e) => {
+            const i = CONTACT_METHODS.indexOf(method);
+            if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+              e.preventDefault();
+              selectMethodAt(i + 1);
+            } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+              e.preventDefault();
+              selectMethodAt(i - 1);
+            }
+          }}
         >
-          <option value="Email">Email</option>
-          <option value="Phone call">Phone call</option>
-          <option value="Video call">Video call</option>
-        </select>
+          {CONTACT_METHODS.map((m, i) => (
+            <button
+              key={m}
+              ref={(el) => {
+                segmentRefs.current[i] = el;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={method === m}
+              tabIndex={method === m ? 0 : -1}
+              onClick={() => setMethod(m)}
+              // min-h-11 is 44px, the touch-target floor. Measured without it:
+              // py-2.5 on 12px mono computes to a 38px row on phones, so the
+              // padding alone did NOT clear the floor the way it looks like it
+              // should. An explicit min-height also survives a future type-size
+              // change, which padding arithmetic would not.
+              className={`flex min-h-11 items-center justify-center rounded-md px-2 py-2.5 font-mono text-xs tracking-wide transition-colors sm:text-sm ${
+                method === m
+                  ? "border border-accent/50 bg-accent/15 text-accent"
+                  : "border border-transparent text-foreground/60 hover:text-foreground/90"
+              }`}
+            >
+              <span className="sm:hidden">{METHOD_SHORT[m]}</span>
+              <span className="hidden sm:inline">{m}</span>
+            </button>
+          ))}
+        </div>
+        {/* The control above is presentational (the buttons carry no `name`).
+            This is what Formspree actually receives, under the same field name
+            the select submitted, so the notification email and any Formspree
+            rule keep working untouched. */}
+        <input type="hidden" name="contactMethod" value={method} />
       </div>
 
       {/* Email or phone, depending on the preferred contact method above. The
@@ -264,26 +331,54 @@ export function ContactForm() {
         />
       </div>
 
-      <button
-        type="submit"
+      {/* Iteration 10, Task 2. This used to be a hand-rolled <button> carrying
+          its own copy of the pill classes, which is why it still had the [ ]
+          motif long after Iteration 8 removed brackets from every other CTA —
+          it simply never received that change. Going through the shared
+          component removes the brackets, hands this button the magnet follow,
+          four-channel hover brighten and copper glow that were previously
+          exclusive to CtaButton instances, and means the next change to the
+          site's primary button reaches the highest-intent button on the site
+          for free instead of drifting away from it again. */}
+      <CtaButton
+        submit
+        size="lg"
+        fullWidth
+        label={state.submitting ? "Sending..." : "Send message"}
         disabled={state.submitting}
-        className="w-full rounded-full border border-accent/50 px-6 py-3 font-display text-sm font-semibold tracking-wide text-accent transition-colors hover:border-accent hover:bg-accent/10 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {state.submitting ? "[ Sending... ]" : "[ Send message ]"}
-      </button>
+      />
 
       <ValidationError
         errors={state.errors}
         className="block text-center text-xs text-accent"
       />
 
-      <p className="text-center text-xs leading-relaxed text-foreground/50">
-        Your details are used only to reply to your message. No newsletters,
-        no sharing with third parties. Read the{" "}
-        <Link href="/privacy" className="text-accent hover:opacity-80">
-          privacy policy
-        </Link>
-        .
+      {/* A visible security cue sits at the point of collection, next to copy
+          that was already correct (Iteration 10, Task 4). Contrast also lifted
+          from /50 to text-muted, which is the solid AA-safe token — /50 on
+          graphite computes below the 4.5:1 floor for normal text. */}
+      <p className="flex items-start justify-center gap-2 text-center text-xs leading-relaxed text-muted">
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="4" y="10.5" width="16" height="10" rx="2" />
+          <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+        </svg>
+        <span>
+          Your details are used only to reply to your message. No newsletters,
+          no sharing with third parties. Read the{" "}
+          <Link href="/privacy" className="text-accent hover:opacity-80">
+            privacy policy
+          </Link>
+          .
+        </span>
       </p>
     </form>
   );
