@@ -72,35 +72,14 @@ export function HowWeWork() {
         <SectionNumber number="03" title="How working together goes." />
       </Reveal>
 
-      {/* The step markers are threaded together (Iteration 6, Task 5) so this
-          section reads as a sequence, not as three independent panels like
-          section 01. The thread draws in on scroll via the same shared
-          observer the rest of the page uses — left-to-right on desktop,
-          top-to-bottom on mobile — and is purely decorative overlay: it is
-          absolutely positioned, so the grid itself is untouched and the
-          columns stay equal-height as fixed in an earlier iteration. */}
+      {/* Iteration 11 preview branch: the copper thread that used to run
+          through the three step markers (added Iteration 6, Task 5) is
+          removed. It was decorative overlay only (absolutely positioned), so
+          the grid, the equal-height columns and the per-step Reveal stagger
+          are all untouched by taking it out. */}
       <div className="relative grid gap-10 md:grid-cols-3 md:gap-8">
-        {/* Desktop: one continuous thread across the marker row. top-3 puts it
-            on the centre line of the h-6 icons. It fades out at both ends so
-            it reads as a thread passing through rather than a hard rule. */}
-        <div
-          aria-hidden="true"
-          data-reveal="rule"
-          className="pointer-events-none absolute inset-x-0 top-3 hidden h-px origin-left bg-gradient-to-r from-transparent via-accent/40 to-transparent md:block"
-        />
-
         {STEPS.map((step, i) => (
           <Reveal key={step.number} delay={i * 0.1} className="relative">
-            {/* Mobile: a vertical segment rising out of the previous step. It
-                lives entirely in the 40px grid gap (-top-10 h-10 matches
-                gap-10), so it never crosses the heading, body or image. */}
-            {i > 0 && (
-              <div
-                aria-hidden="true"
-                data-reveal="rule-y"
-                className="pointer-events-none absolute -top-10 left-3 h-10 w-px origin-top bg-gradient-to-b from-transparent to-accent/40 md:hidden"
-              />
-            )}
             <div className="flex h-full flex-col">
               <div className="flex items-center gap-3">
                 <step.Icon className="h-6 w-6 shrink-0 text-accent" />

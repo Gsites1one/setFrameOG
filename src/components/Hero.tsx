@@ -6,6 +6,7 @@ import { m, useReducedMotion } from "framer-motion";
 import { useAnimateAfterIdle } from "@/lib/useAnimateAfterIdle";
 import { CtaButton } from "./CtaButton";
 import { HeroVisual } from "./HeroVisual";
+import { usePreviewVariants } from "@/lib/previewVariants";
 
 // Content-first paint: the headline and CTA are visible and clickable from
 // first paint (no opacity/transform gate). Only decorative elements (the coded
@@ -15,6 +16,11 @@ import { HeroVisual } from "./HeroVisual";
 export function Hero() {
   const shouldReduceMotion = useReducedMotion();
   const animate = useAnimateAfterIdle();
+  // PREVIEW ONLY. "current" reproduces production exactly; both variants drop
+  // the scrim and the flanking clusters so the comparison isolates the
+  // legibility treatment as the single variable.
+  const { hero } = usePreviewVariants();
+  const isVariant = hero === "a" || hero === "b";
 
   return (
     <section
@@ -40,7 +46,20 @@ export function Hero() {
           }}
         />
       </div>
-      <HeroVisual />
+      {!isVariant && <HeroVisual />}
+
+      {/* PREVIEW — Variant A ground. Deliberately OUTSIDE the .anim-gate block
+          above, because both of these are completely static and there is
+          nothing to gate. Variant A's argument is that a quiet ground plus
+          type and shadow can replace an opaque panel; anything moving here
+          would be answering a different question. Grid first, then glow, so
+          the glow reads as light sitting on the texture rather than under it. */}
+      {hero === "a" && (
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div className="hero-a-grid absolute inset-0" />
+          <div className="hero-a-glow absolute inset-0" />
+        </div>
+      )}
 
       {/* Tighter on phones (Iteration 9, Task 5): the hero now carries the
           proof bar and two CTAs below the copy, so the space above the headline
@@ -133,12 +152,45 @@ export function Hero() {
             breathe wash both held at their keyframe peaks gives a worst-case
             surface of rgb(34,27,24), against which the headline reads 15.56:1
             and the subline 9.26:1. AA needs 4.5:1. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -inset-x-12 -top-10 -bottom-6 rounded-[48px] bg-[rgba(18,18,20,0.5)] backdrop-blur-2xl blur-[32px]"
-        />
+        {!isVariant && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-x-12 -top-10 -bottom-6 rounded-[48px] bg-[rgba(18,18,20,0.5)] backdrop-blur-2xl blur-[32px]"
+          />
+        )}
 
-        <h1 className="hero-text-shadow relative max-w-3xl text-center font-display text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
+        {/* PREVIEW — Variant B bracket frame. Corner brackets only, not a
+            closed box and not filled: same anatomy as the logo's own [ ],
+            scaled up and quiet. No glow or shadow on the bracket itself, per
+            the brief, so it frames without competing with the copy. It is
+            aria-hidden and pointer-events-none, and it is absolutely
+            positioned against this same wrapper the scrim used, so it tracks
+            the text block at every breakpoint with no fixed height. */}
+        {hero === "b" && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-x-6 -inset-y-8 sm:-inset-x-10"
+          >
+            <div className="absolute left-0 top-0 h-12 w-12 border-l border-t border-accent/30 sm:h-16 sm:w-16" />
+            <div className="absolute bottom-0 right-0 h-12 w-12 border-b border-r border-accent/30 sm:h-16 sm:w-16" />
+          </div>
+        )}
+
+        <h1
+          // PREVIEW — Variant A leans entirely on typography with nothing
+          // flanking it, so the headline goes up one Tailwind step. Measured
+          // first, and the phone breakpoint is deliberately NOT stepped up:
+          // at 320px text-5xl put the headline on 7 lines and grew the hero
+          // from 919px to 1114px, pushing the proof bar and CTA down far
+          // enough to undo Iteration 9 Task 5's mobile sequence. The variant
+          // should be judged on the treatment, not on a mobile regression
+          // that is incidental to it, so 320px keeps today's scale.
+          className={`hero-text-shadow relative max-w-3xl text-center font-display font-bold leading-tight ${
+            hero === "a"
+              ? "text-4xl sm:text-6xl md:text-7xl"
+              : "text-4xl sm:text-5xl md:text-6xl"
+          }`}
+        >
           Your business is losing money in places you never look.
         </h1>
 
