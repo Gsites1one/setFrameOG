@@ -35,8 +35,14 @@ type CtaButtonProps = {
 
 // One source of truth for the primary button's look. Both the link form and
 // the submit form render this identical string.
+//
+// The LABEL uses --color-accent-text, not the brand copper (Iteration 11): at
+// 14px it is normal text and needs 4.5:1, which brand copper cannot hold once
+// the aurora sits behind it. The BORDER and glow stay brand copper — they are
+// UI, judged at 3:1. Hover brightens one step further than the new resting
+// value so the four-channel hover still reads as brightening.
 const BUTTON_CLASSES =
-  "inline-flex items-center justify-center rounded-full border border-accent/50 font-display font-semibold tracking-wide text-accent transition-[color,background-color,border-color,box-shadow] duration-300 hover:border-accent hover:bg-accent/15 hover:text-[#e0a068] hover:shadow-[0_0_26px_-4px_rgba(199,123,63,0.6)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-accent/50 disabled:hover:bg-transparent disabled:hover:text-accent disabled:hover:shadow-none";
+  "inline-flex items-center justify-center rounded-full border border-accent/50 font-display font-semibold tracking-wide text-accent-text transition-[color,background-color,border-color,box-shadow] duration-300 hover:border-accent hover:bg-accent/15 hover:text-[#f2cfa8] hover:shadow-[0_0_26px_-4px_rgba(199,123,63,0.6)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-accent/50 disabled:hover:bg-transparent disabled:hover:text-accent-text disabled:hover:shadow-none";
 
 const SIZE_CLASSES: Record<NonNullable<CtaButtonProps["size"]>, string> = {
   sm: "px-4 py-1.5 text-xs",

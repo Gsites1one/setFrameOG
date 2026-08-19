@@ -11,6 +11,19 @@
   --color-muted: #8a8a89;
   /* Cool secondary glow: service graphics only, never UI chrome or text. */
   --color-cool: #4fb3c9;
+  /* Text-safe copper (Iteration 11). NOT a new hue — this is the value the
+     primary button already used for its hover state, promoted to a token.
+     Measured reason: #c77b3f has almost no contrast headroom on this
+     background. The maximum background luminance that still lets it reach
+     4.5:1 is 0.0204, and bare graphite is already 0.0061, so ANY warm glow
+     above the text eats the margin. Before the aurora landed, copper text on
+     the hero's own glow at peak measured 4.52:1 — passing by 0.02. The aurora
+     pushed the same measurement to 2.95:1.
+     So: --color-accent stays the brand copper and keeps every border, hairline,
+     glow, bracket and large-text use (those are UI or large-text, 3:1). Small
+     copper TEXT sitting directly on the background uses this instead, which
+     measures 5.40:1 against the same pessimistic stack. */
+  --color-accent-text: #e0a068;
 
   --font-display: var(--font-syne);
   --font-sans: var(--font-inter);
@@ -251,43 +264,6 @@ body {
   }
 }
 
-/* Coded hero visual (P7.2): traveling leak beads + rising movement dots.
-   Opacity-driven; a subtle transform only on the rising dots. */
-@keyframes hero-bead {
-  0%,
-  100% {
-    opacity: 0.12;
-  }
-  18% {
-    opacity: 1;
-  }
-  42% {
-    opacity: 0.12;
-  }
-}
-
-.hero-bead {
-  animation: hero-bead 3.4s ease-in-out infinite;
-}
-
-@keyframes hero-rise {
-  0% {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  30% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-}
-
-.hero-rise {
-  animation: hero-rise 3.8s ease-out infinite;
-}
-
 /* Very slow brightness drift across the whole hero (Iteration 7, Task 1).
    With the headline scrim occupying the centre and the flanking clusters
    hidden below lg, the hero could read as flat — this keeps it alive without
@@ -308,13 +284,14 @@ body {
   animation: hero-breathe 26s ease-in-out infinite;
 }
 
-/* Hero copy shadow (Iteration 10, Task 1). Second line of defense for
-   legibility, so it never depends on the scrim panel alone — which is what
-   lets the panel's alpha come down from 0.88 to 0.5 without putting the
-   headline at risk. Two shadows: a wide soft one that lifts the glyphs off
-   whatever the ambient glow is doing behind them, and a tight one that keeps
-   the letterforms crisp at small sizes. Costs nothing (no layer, no
-   animation, no layout) so it stays clear of the LCP path. */
+/* Hero copy shadow. Introduced in Iteration 10 as a second line of defense
+   behind the scrim; since Iteration 11 removed the scrim entirely it is now
+   the ONLY thing separating the headline from the ambient background, which
+   is why the contrast numbers in Hero.tsx were re-measured against the bare
+   background rather than carried over. Two shadows: a wide soft one that lifts
+   the glyphs off whatever the aurora is doing behind them, and a tight one
+   that keeps the letterforms crisp at small sizes. Costs nothing — no layer,
+   no animation, no layout — so it stays clear of the LCP path. */
 .hero-text-shadow {
   text-shadow:
     0 2px 28px rgba(10, 10, 11, 0.85),
@@ -375,18 +352,6 @@ body {
   .hero-breathe {
     animation: none !important;
     opacity: 0.5 !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-bead {
-    animation: none !important;
-    opacity: 0.5 !important;
-  }
-  .hero-rise {
-    animation: none !important;
-    opacity: 0.4 !important;
-    transform: none !important;
   }
 }
 
@@ -779,37 +744,12 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   PREVIEW ONLY — preview/hero-and-background branch.
-   Everything below this banner belongs to the hero/background comparison and
-   is removed once a direction is chosen. Nothing here is referenced by the
-   default (no-query-param) render path.
+   Iteration 11 — the shipped background. The hero/background comparison that
+   produced it is gone: both dev switchers, the query-param plumbing and the
+   losing hero variant's static-ground rules were removed with the decision.
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* Hero Variant A — the static soft glow behind the headline. Deliberately a
-   plain gradient with NO animation and NO pointer wiring: variant A's whole
-   argument is that legibility can come from type + shadow + a quiet ground
-   instead of an opaque panel, so anything moving here would be answering a
-   different question. Same copper/teal language as .ambient-glow. */
-.hero-a-glow {
-  background:
-    radial-gradient(38% 32% at 50% 42%, rgba(199, 123, 63, 0.1), transparent 72%),
-    radial-gradient(30% 26% at 50% 40%, rgba(79, 179, 201, 0.05), transparent 70%);
-}
-
-/* Hero Variant A — fully static dot grid across the hero. Same cell size and
-   colour as LifeBackground's always-on grid so the two read as one texture
-   rather than two grids at slightly different pitches. No cursor mask. */
-.hero-a-grid {
-  background-image: radial-gradient(
-    circle,
-    rgba(245, 245, 244, 0.4) 1px,
-    transparent 1px
-  );
-  background-size: 28px 28px;
-  opacity: 0.04;
-}
-
-/* ── Background variants: aurora blobs ──────────────────────────────────────
+/* ── Aurora blobs ──────────────────────────────────────
    Four large soft blobs, each on its own slow loop with a different duration
    and delay so they never resolve into a visible shared beat. transform only
    (translate + scale); opacity is fixed per blob via its own class below.

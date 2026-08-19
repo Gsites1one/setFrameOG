@@ -5,22 +5,27 @@ import Link from "next/link";
 import { m, useReducedMotion } from "framer-motion";
 import { useAnimateAfterIdle } from "@/lib/useAnimateAfterIdle";
 import { CtaButton } from "./CtaButton";
-import { HeroVisual } from "./HeroVisual";
-import { usePreviewVariants } from "@/lib/previewVariants";
 
 // Content-first paint: the headline and CTA are visible and clickable from
-// first paint (no opacity/transform gate). Only decorative elements (the coded
-// visual, glow) animate, and opacity fades never block interaction. No bracket
-// frame around the H1 — the [ ] motif is reserved for logo + buttons.
+// first paint (no opacity/transform gate). Only decorative elements animate,
+// and opacity fades never block interaction.
+//
+// Iteration 11 settled the hero after a side-by-side preview. The bracket
+// frame won, which is a deliberate reversal of the older "brackets are for
+// logo and buttons only" rule: the frame is structural here, at low stroke
+// opacity, sized off the copy block rather than applied to a control, so it
+// reads as the brand's own geometry rather than as a button that cannot be
+// clicked. The rule still holds everywhere else on the site.
+//
+// Gone with that decision: the opaque headline scrim (every generation of it,
+// through Iteration 10's frosted version) and HeroVisual's flanking node
+// clusters. The scrim existed only because the clusters passed behind the
+// copy; with the clusters gone it had nothing left to protect against, and
+// .hero-text-shadow carries legibility on its own — measured below.
 
 export function Hero() {
   const shouldReduceMotion = useReducedMotion();
   const animate = useAnimateAfterIdle();
-  // PREVIEW ONLY. "current" reproduces production exactly; both variants drop
-  // the scrim and the flanking clusters so the comparison isolates the
-  // legibility treatment as the single variable.
-  const { hero } = usePreviewVariants();
-  const isVariant = hero === "a" || hero === "b";
 
   return (
     <section
@@ -46,20 +51,6 @@ export function Hero() {
           }}
         />
       </div>
-      {!isVariant && <HeroVisual />}
-
-      {/* PREVIEW — Variant A ground. Deliberately OUTSIDE the .anim-gate block
-          above, because both of these are completely static and there is
-          nothing to gate. Variant A's argument is that a quiet ground plus
-          type and shadow can replace an opaque panel; anything moving here
-          would be answering a different question. Grid first, then glow, so
-          the glow reads as light sitting on the texture rather than under it. */}
-      {hero === "a" && (
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          <div className="hero-a-grid absolute inset-0" />
-          <div className="hero-a-glow absolute inset-0" />
-        </div>
-      )}
 
       {/* Tighter on phones (Iteration 9, Task 5): the hero now carries the
           proof bar and two CTAs below the copy, so the space above the headline
@@ -80,117 +71,41 @@ export function Hero() {
         />
       </div>
 
-      {/* Text block + its own scrim (Iteration 6, Task 3). The HeroVisual's
-          leak arc and travelling beads pass directly behind this copy and were
-          competing with it for attention. Rather than slowing, rerouting or
-          dimming the animation — which stays at full activity everywhere else
-          in the hero — a soft elliptical wash of the page background sits
-          between the animation and the text, so the type always has a stable
-          backing to sit on.
+      {/* Copy block. Four iterations of scrim history lived here (Iteration 6
+          introduced it as a blurred rounded rect after a radial ellipse
+          measured badly; 7 fixed it painting over the CTA's hover state; 9
+          pulled its bottom inset in; 10 traded opacity for backdrop-blur). All
+          of it is gone, and none of it needs re-litigating, because the thing
+          it defended against is gone too: the scrim existed to stop
+          HeroVisual's leak arc and travelling beads competing with the copy,
+          and those clusters were removed with the variant decision.
 
-          It is a static CSS gradient (no image, no animation, no filter), so
-          it costs nothing on the LCP path and cannot shift layout: it is
-          absolutely positioned and sized in percentages of this wrapper, so it
-          tracks the text at every breakpoint without a fixed height. DOM order
-          does the layering — the scrim is painted first, the copy after — so
-          no z-index juggling against the visual underneath. */}
+          What remains is z-10 on this wrapper and z-20 on the CTA below. That
+          stacking is kept deliberately even with no veil left to sit under —
+          it costs nothing and it is what stopped the Iteration 7 bug being
+          possible at widths nobody measured. */}
       <div className="relative z-10 flex flex-col items-center">
-        {/* A blurred rounded rectangle, deliberately NOT a radial gradient.
-            A radial ellipse was tried first and measured badly: a gradient
-            falls off by elliptical distance, so the widest line of a wide
-            3-line headline lands far out on the radius. Measured per rendered
-            line, the FIRST headline line sat at only 0.33 scrim alpha — the
-            most important text on the page was the least protected — and
-            sizing the ellipse to cover it would have swallowed ~90% of the
-            hero and killed the animation everywhere.
+        {/* Corner brackets only: not a closed box, not filled, no glow or
+            shadow on the bracket itself, so it frames the copy without
+            competing with it. Top-left and bottom-right rather than all four,
+            which is the logo's own [ ] anatomy scaled up.
 
-            A rounded rect matches the shape of a text block, so the copy sits
-            in a uniformly opaque core while the blur dissolves the edge within
-            ~32px of the boundary. The inset padding is larger than the blur
-            radius, which is what guarantees every line sits in the solid core
-            rather than in the falloff. Static, no animation; the hero already
-            uses a large blur for its ambient glow, so this is nothing new for
-            the compositor. */}
-        {/* Iteration 7, Task 2 — the scrim was bleeding onto the CTA.
-            Measured before the fix: the scrim's bottom edge sat 8px BELOW the
-            button's top edge, and with its 32px blur the veil covered 87% of
-            the button. Because this wrapper is z-10 and the button's wrapper
-            was z-auto, that veil painted OVER the button, so the button's
-            hover brightening happened underneath a 0.88-alpha dark layer and
-            read as going darker instead of brighter. It was never a hover-CSS
-            bug.
-
-            Two changes, so neither has to hold alone: the bottom inset is
-            pulled in (the top keeps its generous inset, since that is where
-            the headline needs cover) and the button is given a higher stacking
-            order below. Geometry keeps them apart; z-index guarantees it even
-            if the copy reflows at a width nobody measured. */}
-        {/* Iteration 9: the bottom inset is pulled in one more step (-bottom-8
-            -> -bottom-6). The mono commitment line used to be the last child of
-            this wrapper and needed cover; it has moved out into the proof bar
-            below, so the wrapper now ends at the subline and the veil no longer
-            needs to reach as far down. The top inset is untouched — that is
-            where the headline actually needs the backing. */}
-        {/* Iteration 10, Task 1 — opacity traded for depth. At 0.88 alpha on a
-            near-black fill this was functionally opaque: one dead, unmoving
-            rectangle sitting in the middle of a screen where the ambient glow
-            and hero-breathe wash visibly drift everywhere else. Note the
-            blur-[32px] never helped with that — it is a `filter`, so it
-            softens this box's OWN edges and does nothing to what is behind it.
-
-            Now the fill is translucent (0.5) and backdrop-blur-2xl diffuses the
-            glow through the panel, so the light keeps moving underneath rather
-            than being blocked. What is NOT reopened here: the rounded-rect
-            shape (a radial ellipse was measured and failed — first headline
-            line at 0.33 alpha, Iteration 6 Task 3), the insets, and the
-            z-10/z-20 stacking that keeps the CTA clear of the veil.
-
-            The alpha could only come down this far because .hero-text-shadow
-            below carries legibility independently. Measured after the change,
-            identical at 320/768/1440 because nothing here is breakpoint-
-            dependent: compositing the panel over the ambient glow AND the
-            breathe wash both held at their keyframe peaks gives a worst-case
-            surface of rgb(34,27,24), against which the headline reads 15.56:1
-            and the subline 9.26:1. AA needs 4.5:1. */}
-        {!isVariant && (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-x-12 -top-10 -bottom-6 rounded-[48px] bg-[rgba(18,18,20,0.5)] backdrop-blur-2xl blur-[32px]"
-          />
-        )}
-
-        {/* PREVIEW — Variant B bracket frame. Corner brackets only, not a
-            closed box and not filled: same anatomy as the logo's own [ ],
-            scaled up and quiet. No glow or shadow on the bracket itself, per
-            the brief, so it frames without competing with the copy. It is
-            aria-hidden and pointer-events-none, and it is absolutely
-            positioned against this same wrapper the scrim used, so it tracks
-            the text block at every breakpoint with no fixed height. */}
-        {hero === "b" && (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-x-6 -inset-y-8 sm:-inset-x-10"
-          >
-            <div className="absolute left-0 top-0 h-12 w-12 border-l border-t border-accent/30 sm:h-16 sm:w-16" />
-            <div className="absolute bottom-0 right-0 h-12 w-12 border-b border-r border-accent/30 sm:h-16 sm:w-16" />
-          </div>
-        )}
-
-        <h1
-          // PREVIEW — Variant A leans entirely on typography with nothing
-          // flanking it, so the headline goes up one Tailwind step. Measured
-          // first, and the phone breakpoint is deliberately NOT stepped up:
-          // at 320px text-5xl put the headline on 7 lines and grew the hero
-          // from 919px to 1114px, pushing the proof bar and CTA down far
-          // enough to undo Iteration 9 Task 5's mobile sequence. The variant
-          // should be judged on the treatment, not on a mobile regression
-          // that is incidental to it, so 320px keeps today's scale.
-          className={`hero-text-shadow relative max-w-3xl text-center font-display font-bold leading-tight ${
-            hero === "a"
-              ? "text-4xl sm:text-6xl md:text-7xl"
-              : "text-4xl sm:text-5xl md:text-6xl"
-          }`}
+            It occupies the same absolutely-positioned slot the scrim used, so
+            it tracks the copy block at every breakpoint with no fixed height,
+            and it is aria-hidden + pointer-events-none: it is pure decoration
+            and must never land in the accessibility tree or eat a click. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-x-6 -inset-y-8 sm:-inset-x-10"
         >
+          <div className="absolute left-0 top-0 h-12 w-12 border-l border-t border-accent/30 sm:h-16 sm:w-16" />
+          <div className="absolute bottom-0 right-0 h-12 w-12 border-b border-r border-accent/30 sm:h-16 sm:w-16" />
+        </div>
+
+        {/* Scale is unchanged from production. The headline step-up belonged
+            to the losing variant, which leaned entirely on typography; the
+            bracket does the framing here, so the type did not need to grow. */}
+        <h1 className="hero-text-shadow relative max-w-3xl text-center font-display text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
           Your business is losing money in places you never look.
         </h1>
 
@@ -286,7 +201,10 @@ export function Hero() {
           <span className="border-b border-transparent pb-0.5 transition-colors group-hover:border-accent">
             See recent builds
           </span>
-          <span aria-hidden="true" className="text-accent">
+          {/* accent-text, not brand copper: it is 14px and sits on the bare
+              background. aria-hidden, so strictly it is decoration — but a
+              glyph a sighted reader is meant to read is text in practice. */}
+          <span aria-hidden="true" className="text-accent-text">
             →
           </span>
         </Link>

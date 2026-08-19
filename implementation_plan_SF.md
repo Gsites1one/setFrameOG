@@ -1948,3 +1948,132 @@ Build passes clean (`npm run build`, exit 0, 19 static pages). Type-check
 clean. Lint unchanged: the same two pre-existing `setState`-in-effect errors in
 `template.tsx` and `IntroCurtain.tsx`, no new ones. No horizontal overflow at
 320 / 768 / 1440 on `/` or `/contact`.
+
+---
+
+## Iteration 11 — Hero bracket frame, aurora background, scroll coupling gated below the hero
+
+Closes the `preview/hero-and-background` comparison (see the separate
+`implementation_plan.md`, which was preview scaffolding and is not part of this
+file's history). Both variants were built on one branch behind query params so
+the combinations could be viewed together; this is the decision and the cleanup
+step 8 of that plan required.
+
+### Decision
+
+**Hero: variant B, the bracket frame.** Corner brackets top-left and
+bottom-right of the copy block, `border-accent/30`, not a closed box, not
+filled, no glow or shadow on the bracket itself. This is a deliberate,
+documented reversal of the Iteration 8 rule that reserved `[ ]` for the logo and
+buttons: the frame here is structural, sized off the copy block rather than
+applied to a control, so it reads as the brand's geometry instead of as a button
+that cannot be clicked. The rule still holds everywhere else on the site.
+
+**Background: the aurora base, permanently.** Four large soft copper/teal blobs
+on independent 43–88s transform loops with negative delays so no two share a
+phase, plus a twelve-dot particle field at fixed percentage positions. The
+always-on faint dot grid and the grain layer are untouched.
+
+### The one deliberate departure from the preview plan
+
+The preview's `bg=scroll` tied blob position and opacity to scroll progress from
+the top of the document. Shipped, that coupling is **gated to below the hero**.
+
+The boundary is the document scroll position at which `#hero`'s bottom edge
+reaches the TOP of the viewport — the hero completely off screen:
+
+```
+scrollY <  boundary  ->  --sp pinned to exactly 0   (blobs on their own loops only)
+scrollY >= boundary  ->  --sp ramps 0..1 across (documentMax - boundary)
+```
+
+Rationale: in the first seconds the visitor has one job, reading the headline,
+and movement that tracks their scrollbar competes for exactly that attention.
+The coupling arrives as the next section does, as a reward rather than a
+distraction.
+
+Two weaker boundaries were rejected by measurement. The hero's bottom crossing
+the viewport BOTTOM fires at ~57px, while the headline still fills the screen.
+Any "first section partially visible" test leaves the hero on screen for the
+whole window it covers. Measured, the shipped boundary is 956px at 1440×900,
+1031px at 768, 918px at 320. Because the ramp starts AT 0 and is linear,
+crossing it is continuous — there is no step to see. Verified: `--sp` reads
+0.0000 at scroll 0 / 478 / 936, 0.0001 at 956, and 1.0000 at the document end.
+
+Implemented as a scroll listener publishing `--sp` on `:root`, not
+`animation-timeline: scroll(root)`. The CSS-native route was built first per the
+plan and abandoned on evidence: every css-declared scroll/view timeline reported
+an inactive timeline in the verification environment while a JS-constructed
+`ScrollTimeline` on the same scroller read 20.04%, so it could not be verified
+at all. The JS route also reaches Safari and Firefox, which have no
+`animation-timeline` support, so the effect is what every visitor sees rather
+than Chromium users only. Throttled on a timestamp, not rAF — rAF is suspended
+in occluded tabs, the trap `FloatingNav`'s fallback already documents.
+
+### Removed
+
+- The headline scrim, in every generation: Iteration 6's blurred rounded rect,
+  7's z-index fix, 9's inset pull-in, 10's frosted `backdrop-blur` version. It
+  existed only to stop `HeroVisual`'s leak arc and travelling beads competing
+  with the copy, and those are gone, so it had nothing left to defend against.
+  `.hero-text-shadow` now carries legibility alone. As a side effect this also
+  removes the `backdrop-filter` that Iteration 10 flagged as a standing mobile
+  performance risk over two continuously animating layers.
+- `HeroVisual.tsx` (file deleted) and its `.hero-bead` / `.hero-rise` CSS.
+- The pointer-tracking glow and the cursor-revealed dot-grid mask, with both
+  `pointermove` listeners and the rAF tick. They were fine-pointer only, so half
+  the audience never saw them; the aurora does the same job for everyone with no
+  pointer and no per-frame JS.
+- Both dev switchers, the `?hero=` / `?bg=` plumbing, `PreviewSwitcher.tsx`,
+  `previewVariants.ts`, and the losing variant's `.hero-a-glow` / `.hero-a-grid`.
+- The copper thread through the `HowWeWork` step markers, desktop and mobile —
+  listed in the preview plan as already decided, independent of the comparison.
+  The five remaining `data-reveal="rule"` elements are `SectionNumber`
+  hairlines, a different feature that stays.
+
+### Contrast — a real regression caught and fixed
+
+Measured against a pessimistic composite: hero-breathe and the hero's ambient
+glow both at their keyframe peaks, plus the two brightest aurora blobs and the
+warm wash, all treated as co-located.
+
+Brand copper `#c77b3f` has almost no headroom on this background. The maximum
+background luminance that still lets it reach 4.5:1 is 0.0204 and bare graphite
+is already 0.0061, so any warm glow above the text eats the margin. Before the
+aurora, copper text measured **4.52:1** — passing by 0.02. With the aurora it
+fell to **2.95:1**, a genuine AA failure, and reducing the blob alphas alone only
+recovered it to 3.64:1.
+
+Two fixes together:
+
+1. Aurora blob and wash alphas moved to the lower half of the sanctioned
+   0.05–0.12 range (0.06 / 0.045 / 0.05 / 0.04, washes 0.05). On this site that
+   is a contrast requirement, not taste: these are full-viewport layers sitting
+   under the hero copy.
+2. New `--color-accent-text: #e0a068` for small copper TEXT on the background.
+   Not a new hue — it is the value the primary button already used for its hover
+   state, promoted to a token. `--color-accent` keeps every border, hairline,
+   glow, bracket and large-text use, which are UI or large text and judged at
+   3:1. The button's hover moves one step brighter (`#f2cfa8`) so the
+   four-channel hover still reads as brightening.
+
+Final, all nine hero text elements passing at the pessimistic composite:
+H1 11.07:1, subline 7.04:1, "built to order" 6.29:1, stat number 4.77:1 (on the
+strip's own surface), stat label 8.80:1, CTA label 5.40:1, CTA microcopy 6.29:1,
+"See recent builds" 6.29:1, its arrow 5.40:1.
+
+### Verification
+
+`/` renders clean at 320 / 768 / 1440 with no horizontal overflow and no console
+errors. CTA, proof bar and secondary link geometry is unchanged from production
+(at 1440: proof 611, CTA 736, secondary 837; at 320: 603 / 730 / 831), and hero
+focus order is still the two links in source order with `:focus-visible` intact.
+Every new animated class carries an explicit `prefers-reduced-motion` block
+verified against the served stylesheet text, and the scroll listener early-
+returns on reduced motion before attaching, leaving `--sp` unset so the CSS
+resolves through its own 0 fallback. The bracket is a static border with no
+animation to reduce. Build and type-check clean; lint unchanged at the same two
+pre-existing `setState`-in-effect errors.
+
+Not verified here: how any of it actually looks. The screenshot tool was
+unavailable for this entire pass, so every claim above is a measurement.

@@ -1,37 +1,45 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useAnimateAfterIdle } from "@/lib/useAnimateAfterIdle";
-import { usePreviewVariants } from "@/lib/previewVariants";
 
-// Site-wide background "life" package. Two layers:
-// 1. Default ambient layer (Task 6): a slow drifting/breathing copper glow
-//    plus a slow-pulsing mesh + grain, CSS-only, on for every device
-//    including touch. This is what keeps the background alive with no
-//    pointer at all.
-// 2. Cursor-reactive enhancement: a second copper glow that follows the
-//    pointer, plus a cursor-revealed dot grid. Fine-pointer devices only,
-//    layered on top of (never replacing) the default ambient layer.
-// All motion here is transform/opacity only, and the pointer-follow loop
-// runs through a single rAF tick. Fully static under reduced motion.
+// Site-wide background. Iteration 11 settled this after a side-by-side preview.
 //
-// P7.5: these full-viewport ambient animations are held paused until the
-// browser is idle after first paint (`.anim-gate`), so they don't keep the
-// early filmstrip "in motion" and inflate mobile Speed Index. They resume a
-// beat later — imperceptible against the graphite base.
+// The aurora base is now the background: large soft copper/teal blobs each on
+// its own slow transform loop, plus a drifting particle field, over the
+// unchanged always-on dot grid and grain.
+//
+// REMOVED with that decision: the cursor-following glow and the cursor-revealed
+// dot-grid mask, along with their pointermove listeners and the rAF tick that
+// drove them. They were a fine-pointer-only enhancement, so half the audience
+// never saw them at all, and the aurora carries the same job for everyone with
+// no pointer required and no per-frame JS.
+//
+// Scroll coupling is deliberately NOT global. See the SCROLL BOUNDARY note on
+// the effect below.
+//
+// All motion is transform/opacity only and stays behind .anim-gate, so it is
+// held paused until the browser is idle after first paint and never inflates
+// the mobile Speed Index window. Static under reduced motion.
 
 const GRAIN_DATA_URI = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
-// PREVIEW ONLY — aurora blobs. Fixed percentage positions, own colour and
+// Aurora blobs. Alphas sit in the lower half of the 0.05-0.12 range the
+// existing ambient layers use, and that is a contrast requirement rather than
+// taste: these are fixed full-viewport layers that sit UNDER the hero copy, so
+// every point of alpha here is subtracted from the headroom copper text has.
+// See --color-accent-text in globals.css for the measurements.
+//
+// Fixed percentage positions, own colour and
 // own keyframe class each, so no two share a period or a starting phase.
 const AURORA_BLOBS = [
-  { cls: "aurora-a", pos: "left-[-10%] top-[-5%] h-[46rem] w-[46rem]", tint: "rgba(199,123,63,0.12)" },
-  { cls: "aurora-b", pos: "right-[-14%] top-[18%] h-[40rem] w-[40rem]", tint: "rgba(79,179,201,0.09)" },
-  { cls: "aurora-c", pos: "left-[18%] bottom-[-18%] h-[44rem] w-[44rem]", tint: "rgba(199,123,63,0.08)" },
-  { cls: "aurora-d", pos: "right-[8%] bottom-[6%] h-[34rem] w-[34rem]", tint: "rgba(79,179,201,0.06)" },
+  { cls: "aurora-a", pos: "left-[-10%] top-[-5%] h-[46rem] w-[46rem]", tint: "rgba(199,123,63,0.06)" },
+  { cls: "aurora-b", pos: "right-[-14%] top-[18%] h-[40rem] w-[40rem]", tint: "rgba(79,179,201,0.045)" },
+  { cls: "aurora-c", pos: "left-[18%] bottom-[-18%] h-[44rem] w-[44rem]", tint: "rgba(199,123,63,0.05)" },
+  { cls: "aurora-d", pos: "right-[8%] bottom-[6%] h-[34rem] w-[34rem]", tint: "rgba(79,179,201,0.04)" },
 ];
 
-// PREVIEW ONLY — drifting particles. Decorative texture, deliberately NOT a
+// Drifting particles. Decorative texture, deliberately NOT a
 // path or a connector shape: that critique already landed on AboutPipe and
 // this is not a repeat of it. Positions are fixed percentages so they are
 // stable across renders (no Math.random, which would also break hydration).
@@ -51,87 +59,56 @@ const PARTICLES = [
 ];
 
 export function LifeBackground() {
-  const glowRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
   const animate = useAnimateAfterIdle();
-  // PREVIEW ONLY. "current" leaves the pointer-tracking path below fully
-  // intact and reachable; the two new variants replace it.
-  const { bg } = usePreviewVariants();
-  const isAurora = bg === "aurora" || bg === "scroll";
 
-  useEffect(() => {
-    // The pointer-tracking glow and the cursor-revealed grid mask are the two
-    // things the aurora variants replace, so their listeners and rAF tick must
-    // not be attached at all under those variants — leaving a rAF loop running
-    // against elements that are no longer rendered would make the comparison
-    // dishonest on the exact axis (cost) it is likely to be judged on.
-    if (isAurora) return;
-    const finePointer = window.matchMedia("(pointer: fine)").matches;
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    if (!finePointer || reducedMotion) return;
 
-    const glow = glowRef.current;
-    const grid = gridRef.current;
-    if (!glow || !grid) return;
-
-    glow.style.opacity = "1";
-
-    const target = { x: window.innerWidth / 2, y: window.innerHeight * 0.3 };
-    const current = { ...target };
-    let raf = 0;
-
-    const onMove = (e: PointerEvent) => {
-      target.x = e.clientX;
-      target.y = e.clientY;
-      grid.style.setProperty("--mx", `${e.clientX}px`);
-      grid.style.setProperty("--my", `${e.clientY}px`);
-    };
-
-    const tick = () => {
-      current.x += (target.x - current.x) * 0.06;
-      current.y += (target.y - current.y) * 0.06;
-      glow.style.transform = `translate3d(${current.x}px, ${current.y}px, 0) translate(-50%, -50%)`;
-      raf = requestAnimationFrame(tick);
-    };
-
-    window.addEventListener("pointermove", onMove, { passive: true });
-    raf = requestAnimationFrame(tick);
-
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      cancelAnimationFrame(raf);
-    };
-  }, [isAurora]);
-
-  // bg=scroll only: publish scroll progress as --sp on :root, 0 at the top of
-  // the document and 1 at the bottom. Everything that reacts to it is plain
-  // CSS reading the variable, so this writes ONE custom property per frame and
-  // never touches layout.
+  // SCROLL BOUNDARY — publishes scroll progress as --sp on :root.
   //
-  // Throttled on a TIMESTAMP, not requestAnimationFrame, matching the pattern
-  // FloatingNav's scroll fallback already documents: rAF is throttled or
-  // suspended outright in background/occluded tabs, which is exactly the case
-  // where this would be carrying the feature. An rAF version was written first
-  // and measured doing nothing — --sp held at 0.0000 across a full 5983px
-  // scroll because the frames never came. A plain clock check keeps one cheap
-  // write per frame-ish interval without depending on frames being produced.
+  // The boundary is the document scroll position at which #hero's bottom edge
+  // reaches the TOP of the viewport, i.e. the hero is completely off screen:
   //
-  // The listener is not attached at all unless this variant is active, and not
-  // under reduced motion, where --sp is left unset and the CSS resolves through
-  // its own 0 fallback to a calm top-of-page state.
+  //   scrollY <  boundary  ->  --sp pinned to exactly 0
+  //   scrollY >= boundary  ->  --sp ramps 0..1 across (documentMax - boundary)
+  //
+  // Above the boundary the blobs run ONLY their own 43-88s loops, so nothing in
+  // the hero is coupled to the scrollbar. In the first seconds the visitor has
+  // one job — read the headline — and movement that tracks their scroll competes
+  // for exactly that attention. The coupling arrives as the next section does.
+  //
+  // Two weaker boundaries were rejected: the hero's bottom crossing the viewport
+  // BOTTOM fires at ~57px, while the headline still fills the screen, and any
+  // "first section partially visible" test leaves the hero on screen for the
+  // whole window it covers. Measured, this boundary is ~957px at 1440x900 and
+  // ~919px at 320px, leaving a ~5025px ramp.
+  //
+  // Because the ramp starts AT 0 and is linear, crossing the boundary is
+  // continuous — there is no step to see.
+  //
+  // Throttled on a timestamp, not requestAnimationFrame: rAF is throttled or
+  // suspended in background/occluded tabs, which is the same trap FloatingNav's
+  // scroll fallback already documents. Recomputes the boundary on resize, since
+  // the hero's height is breakpoint-dependent.
   useEffect(() => {
-    if (bg !== "scroll") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const root = document.documentElement;
     let last = 0;
+    let boundary = 0;
+
+    const measure = () => {
+      const hero = document.getElementById("hero");
+      boundary = hero
+        ? hero.getBoundingClientRect().bottom + window.scrollY
+        : root.clientHeight;
+    };
 
     const write = () => {
       last = Date.now();
-      const max = root.scrollHeight - root.clientHeight;
-      const sp = max > 0 ? Math.min(1, Math.max(0, root.scrollTop / max)) : 0;
+      const span = root.scrollHeight - root.clientHeight - boundary;
+      const sp =
+        span > 0
+          ? Math.min(1, Math.max(0, (root.scrollTop - boundary) / span))
+          : 0;
       root.style.setProperty("--sp", sp.toFixed(4));
     };
 
@@ -140,15 +117,21 @@ export function LifeBackground() {
       write();
     };
 
+    const onResize = () => {
+      measure();
+      write();
+    };
+
+    measure();
     write();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
       root.style.removeProperty("--sp");
     };
-  }, [bg]);
+  }, []);
 
   return (
     <div
@@ -195,122 +178,81 @@ export function LifeBackground() {
         }}
       />
 
-      {/* PREVIEW — aurora + particles. Inside the same .anim-gate wrapper as
-          everything else here, so they stay paused until the browser is idle
-          after first paint and never inflate the mobile Speed Index window.
-          The always-on faint dot grid above and the grain below are untouched
-          in every variant, per the brief. */}
-      {isAurora && (
-        <>
-          {AURORA_BLOBS.map((b, i) => {
-            // The scroll transform goes on a WRAPPER, never on the blob: the
-            // blob's aurora keyframes already animate transform, and an
-            // animated transform always beats a declared one, so sharing an
-            // element would silently drop one of the two. Nesting composes
-            // them, so these blobs drift AND respond to scroll.
-            const scrollCls =
-              bg === "scroll" && i === 0
-                ? "scroll-lift"
-                : bg === "scroll" && i === 2
-                  ? "scroll-sink"
-                  : "";
-            const blob = (
-              <div
-                className={`${b.cls} ${scrollCls ? "absolute inset-0" : `${b.pos} absolute`} rounded-full blur-[130px]`}
-                style={{ backgroundColor: b.tint }}
-              />
-            );
-            return scrollCls ? (
-              <div key={b.cls} className={`${scrollCls} ${b.pos} absolute`}>
-                {blob}
-              </div>
-            ) : (
-              <div key={b.cls} className="contents">
-                {blob}
-              </div>
-            );
-          })}
+      {/* Aurora blobs. Blobs 0 and 2 additionally carry the scroll response;
+          the other two stay purely on their own loops so the layer never reads
+          as one synchronised sheet reacting to the scrollbar.
 
-          {/* Temperature shift, bg=scroll only. Two washes crossfading against
-              each other: copper at the top of the page, teal by the bottom.
-              This is the part that is actually felt — two blobs drifting across
-              a ~6900px page is close to invisible on its own, which is exactly
-              what the first version got wrong. Opacity only. */}
-          {bg === "scroll" && (
-            <>
-              <div
-                className="scroll-warm absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(75% 60% at 50% 8%, rgba(199,123,63,0.10), transparent 72%)",
-                }}
-              />
-              <div
-                className="scroll-cool absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(80% 65% at 50% 92%, rgba(79,179,201,0.10), transparent 74%)",
-                }}
-              />
-            </>
-          )}
-
-          <div className={bg === "scroll" ? "scroll-particles absolute inset-0" : "contents"}>
-          {PARTICLES.map((d) => (
-            <span
-              key={`${d.x}-${d.y}`}
-              className="particle absolute rounded-full"
-              style={
-                {
-                  left: d.x,
-                  top: d.y,
-                  height: d.size,
-                  width: d.size,
-                  backgroundColor: d.tint,
-                  boxShadow: `0 0 6px 1px ${d.tint}`,
-                  opacity: 0,
-                  "--particle-duration": d.dur,
-                  "--particle-delay": d.delay,
-                } as React.CSSProperties
-              }
-            />
-          ))}
+          The scroll transform sits on a WRAPPER, never on the blob itself: the
+          blob already carries an aurora keyframe animation, and an animated
+          transform always beats a declared one, so sharing an element would
+          silently drop one of the two. Nesting composes them, which is what
+          lets these blobs drift AND respond to scroll. */}
+      {AURORA_BLOBS.map((b, i) => {
+        const scrollCls =
+          i === 0 ? "scroll-lift" : i === 2 ? "scroll-sink" : "";
+        const blob = (
+          <div
+            className={`${b.cls} ${scrollCls ? "absolute inset-0" : `${b.pos} absolute`} rounded-full blur-[130px]`}
+            style={{ backgroundColor: b.tint }}
+          />
+        );
+        return scrollCls ? (
+          <div key={b.cls} className={`${scrollCls} ${b.pos} absolute`}>
+            {blob}
           </div>
-        </>
-      )}
+        ) : (
+          <div key={b.cls} className="contents">
+            {blob}
+          </div>
+        );
+      })}
 
-      {/* cursor-following copper glow; ENHANCEMENT only, layered on top of
-          the ambient glow above. Stays invisible on touch / reduced motion.
-          Not rendered under the aurora variants. */}
-      {!isAurora && (
-        <div
-          ref={glowRef}
-          className="absolute left-0 top-0 h-[44rem] w-[44rem] rounded-full bg-accent/10 blur-[140px] opacity-0 transition-opacity duration-700"
-        />
-      )}
+      {/* Temperature shift: copper at the top of the page, teal by the bottom.
+          Driven by the same --sp as the blobs, so it is gated by the same hero
+          boundary for free — inside the hero this holds at full copper and zero
+          teal rather than needing its own condition. Opacity only.
 
-      {/* dot grid revealed in a radius around the cursor. Not rendered under
-          the aurora variants; the always-on faint grid above stays either way. */}
-      {!isAurora && (
+          This is the part that is actually felt. Two blobs drifting across a
+          ~6000px ramp is close to invisible on its own, which is exactly what
+          the first attempt at this got wrong. */}
       <div
-        ref={gridRef}
-        className="absolute inset-0"
-        style={
-          {
-            "--mx": "-999px",
-            "--my": "-999px",
-            backgroundImage:
-              "radial-gradient(circle, rgba(245,245,244,0.4) 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-            maskImage:
-              "radial-gradient(260px circle at var(--mx) var(--my), black 0%, transparent 85%)",
-            WebkitMaskImage:
-              "radial-gradient(260px circle at var(--mx) var(--my), black 0%, transparent 85%)",
-            opacity: 0.5,
-          } as React.CSSProperties
-        }
+        className="scroll-warm absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(75% 60% at 50% 8%, rgba(199,123,63,0.05), transparent 72%)",
+        }}
       />
-      )}
+      <div
+        className="scroll-cool absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(80% 65% at 50% 92%, rgba(79,179,201,0.05), transparent 74%)",
+        }}
+      />
+
+      {/* Particle field counter-drifts against the blobs, which is what makes
+          the movement read as depth rather than the whole layer sliding. */}
+      <div className="scroll-particles absolute inset-0">
+        {PARTICLES.map((d) => (
+          <span
+            key={`${d.x}-${d.y}`}
+            className="particle absolute rounded-full"
+            style={
+              {
+                left: d.x,
+                top: d.y,
+                height: d.size,
+                width: d.size,
+                backgroundColor: d.tint,
+                boxShadow: `0 0 6px 1px ${d.tint}`,
+                opacity: 0,
+                "--particle-duration": d.dur,
+                "--particle-delay": d.delay,
+              } as React.CSSProperties
+            }
+          />
+        ))}
+      </div>
 
       {/* grain so the graphite reads as material, not void — slow, barely
           perceptible pulse, on a different period than the glow so nothing

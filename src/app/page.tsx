@@ -4,7 +4,6 @@ import { Faq } from "@/components/Faq";
 import { FinalCta } from "@/components/FinalCta";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
-import { PreviewSwitcher } from "@/components/PreviewSwitcher";
 import { HowWeWork } from "@/components/HowWeWork";
 import { CapabilityMarquee } from "@/components/CapabilityMarquee";
 import { Foundation } from "@/components/Foundation";
@@ -26,8 +25,6 @@ export default function Home() {
   return (
     <>
       <main>
-        {/* PREVIEW ONLY: dev-gated variant switcher, homepage only. */}
-        <PreviewSwitcher />
         <Hero />
         {/* 01 The foundation (three pillars) grounds the visitor before the
             breadth strip lists specifics; then the proof (Work). Iteration 4. */}
