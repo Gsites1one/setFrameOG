@@ -293,8 +293,17 @@ body {
    that keeps the letterforms crisp at small sizes. Costs nothing — no layer,
    no animation, no layout — so it stays clear of the LCP path. */
 .hero-text-shadow {
+  /* Iteration 12. The first value was 0 2px 28px rgba(10,10,11,0.85), and at
+     that blur and alpha it stopped reading as a shadow: a 28px smear at 85%
+     under every glyph of a 3-line headline merges into one continuous dark
+     mass, which is a scrim drawn with text-shadow rather than a div. That is
+     precisely the thing Iteration 11 removed, reintroduced by another route.
+
+     Softened to 14px at 0.55. The second, tight shadow is deliberately
+     untouched — it does crisp-edge work at the glyph boundary and contributes
+     nothing to the smear. */
   text-shadow:
-    0 2px 28px rgba(10, 10, 11, 0.85),
+    0 2px 14px rgba(10, 10, 11, 0.55),
     0 1px 3px rgba(10, 10, 11, 0.6);
 }
 
@@ -748,6 +757,65 @@ body {
    produced it is gone: both dev switchers, the query-param plumbing and the
    losing hero variant's static-ground rules were removed with the decision.
    ══════════════════════════════════════════════════════════════════════════ */
+
+/* Hero bracket draw-in (Iteration 12). Same stroke-dashoffset technique as
+   .pipe-flow and .score-ring-draw, so this is an established pattern here
+   rather than a new one.
+
+   Both paths carry pathLength="100", which normalises any path to 100 user
+   units regardless of its real geometry — that is what lets one dasharray
+   value drive both brackets and keeps working if the arm lengths change.
+
+   `both` fill mode matters: combined with the .anim-gate wrapper (which pauses
+   the animation until the browser is idle after first paint) it holds the path
+   at dashoffset 100, i.e. undrawn, rather than flashing the finished bracket
+   and then redrawing it. */
+@keyframes bracket-draw {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.bracket-draw {
+  stroke-dasharray: 100;
+  animation: bracket-draw 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* The bottom-right corner follows the top-left rather than racing it, so the
+   frame reads as one gesture closing around the copy. */
+.bracket-draw-delayed {
+  animation-delay: 0.22s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bracket-draw {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}
+
+/* aurora-a hero emphasis (Iteration 12). The blob's own tint is raised to
+   0.09 and this scales it back down by opacity, so it is brightest at the top
+   of the page and settles to the sitewide 0.06 by the hero boundary:
+
+     --hp 1 (top of hero)      -> opacity 1.00 -> 0.09 effective
+     --hp 0 (boundary onward)  -> opacity 0.66 -> 0.059 effective
+
+   Deliberately opacity on the blob itself, not a second transform: the element
+   already carries the aurora-a keyframes on transform, and an animated
+   transform beats a declared one. Its .scroll-lift wrapper also sets opacity,
+   from --sp; the two multiply, which is the intended composition.
+
+   Under reduced motion LifeBackground never attaches the scroll listener, so
+   --hp is never published and this resolves through its own 0 fallback — the
+   blob holds the sitewide default rather than the emphasised value. That is
+   the static state, not a skip. */
+.aurora-hero-emphasis {
+  opacity: calc(0.66 + 0.34 * var(--hp, 0));
+}
 
 /* ── Aurora blobs ──────────────────────────────────────
    Four large soft blobs, each on its own slow loop with a different duration

@@ -2077,3 +2077,146 @@ pre-existing `setState`-in-effect errors.
 
 Not verified here: how any of it actually looks. The screenshot tool was
 unavailable for this entire pass, so every claim above is a measurement.
+
+---
+
+## Iteration 12 — Hero: kill the "black patch", trust strip, bracket draw-in, blueprint proof bar, hero-weighted aurora
+
+Five confirmed fixes off an owner review of the shipped Iteration 11 hero, which
+read as "basic" — the same critique that landed on the first pass at the
+Foundation pillar graphics. None of them reopens the Variant A/B decision.
+Scope was `Hero.tsx`, `LifeBackground.tsx` and the `.hero-text-shadow` rule in
+`globals.css`; `git diff --name-only` confirms nothing else was touched.
+
+### T1 — the "black patch" behind the headline
+
+Diagnosis held up. `.hero-text-shadow`'s first value was
+`0 2px 28px rgba(10,10,11,0.85)`, and at that blur and alpha it stops behaving
+like a shadow: a 28px smear at 85% under every glyph of a three-line headline
+merges into one continuous dark mass. That is a scrim drawn with `text-shadow`
+instead of a `div` — the exact thing Iteration 11 removed, reintroduced by
+another route.
+
+Both prescribed fixes shipped. The shadow softened to
+`0 2px 14px rgba(10,10,11,0.55)`; the second tight shadow is untouched, since it
+does crisp-edge work at the glyph boundary and contributes nothing to the smear.
+And Hero.tsx's own `h-[36rem] blur-[120px]` copper blob, centred at
+`left-1/2 top-1/3` directly behind the headline, is gone — it predated the
+aurora rebuild, when the hero had to supply its own depth, and post-Iteration-11
+it was one of five soft copper layers stacked exactly where the headline needs
+to stay readable.
+
+`hero-breathe` was left in place as instructed, and contrast was re-measured
+rather than assumed — it did not need reducing.
+
+### T2 — TrustStrip in the hero
+
+Rendered inside the CTA block, under the microcopy and **above** the secondary
+link, so the hero still ends on an onward path for anyone not ready to book
+rather than on a fact list. No new copy: the same three `FACTS` already used by
+the closing band and `/contact`.
+
+Kept alongside "A conversation, not a pitch — no obligation." rather than
+replacing it. The two are not the same reassurance — the microcopy is about the
+call the CTA books, the strip is about the engagement that follows — so dropping
+either would lose a distinct objection rather than de-duplicate one.
+
+Height budget, the check the brief asked for. At 320×700 **nothing that was
+above the fold moved**: wordmark 64, h1 163, subline 408, "built to order" 552,
+proof bar 603 with its bottom edge back at 698, CTA 730, microcopy 787 — every
+one identical to the Iteration 9/11 figures. The strip adds 84px, and the only
+element it displaces is the secondary link (831 → 915), which was already well
+below the fold. Hero height 918 → 1002 at 320, 957 → 992 at 1440. The strip
+wraps to three lines at 320, two at 768, one at 1440.
+
+One regression caught in that measurement and fixed: wrapping each numeral in
+`inline-block` to host its glow added baseline descender space, growing the
+proof bar 95 → 99px and pushing its bottom edge 2px below the 320px fold.
+Changed to `block`, which restores 95px exactly.
+
+### T3 — bracket draw-in
+
+The two corner brackets are now inline SVG paths instead of bordered divs, at
+the same size, position and `accent/30`. Each animates `stroke-dashoffset` once
+on mount, the same technique as `.pipe-flow` and `.score-ring-draw`.
+
+Two details that are load-bearing rather than decorative. `pathLength="100"`
+normalises each path to 100 units regardless of real geometry, so one
+dasharray/dashoffset pair drives both brackets and keeps working if the arm
+lengths change. `vector-effect="non-scaling-stroke"` holds the stroke at exactly
+1px at both sizes — without it the 48-unit viewBox scaled to 64px at `sm` would
+render a 1.33px stroke and stop matching the 1px border it replaces.
+
+Gated on the same `.anim-gate` / `data-animate` flag the ambient layer uses, so
+it cannot run inside the Speed Index window; `animation-fill-mode: both` means
+the gate holds it undrawn rather than flashing the finished bracket and
+redrawing it. The bottom-right corner is delayed 0.22s so the frame reads as one
+gesture closing around the copy. Under reduced motion the rule resolves to
+`animation: none; stroke-dashoffset: 0` — fully drawn, static.
+
+### T4 — blueprint styling on the proof bar
+
+Corner tick marks at `border-white/10`, inset **inside** the card so they read
+as registration marks on a technical drawing rather than as a second border
+competing with the real one, plus a small radial copper glow behind each numeral
+specifically rather than the whole card.
+
+The glow shipped at `/10`, not the `/15` first tried, on measurement: a glow
+behind text raises the local background luminance, and these numerals are the
+tightest copper on the page. Measured against the real rendered elements, `/15`
+left the numeral at 3.89:1 against the 3:1 large-text floor where `/10` holds
+4.21:1 (4.81:1 with no glow at all), for a difference the eye barely reads.
+
+**Premise correction worth recording.** The brief's stated goal was to echo a
+"blueprint tick mark" motif the Foundation pillars had "just got". No such motif
+exists in this tree — `Foundation.tsx` is three photographic `ArtFrame` panels
+with no ticks, no glow and no numerals, and the only "blueprint" strings in
+`src/` are alt text on two `/about` images. The brief's own description of the
+treatment was self-contained, so that is what was built, but the "one system"
+goal cannot be verified until the pillar redesign actually lands, and whoever
+does it should reconcile the two rather than assume they already match.
+
+### T5 — hero-weighted aurora-a
+
+`aurora-a` alone is brighter inside the hero and settles to the sitewide value
+by the hero boundary. `aurora-b`, `aurora-c` and `aurora-d` are untouched,
+confirmed in the DOM.
+
+This could not be driven off `--sp`. `--sp` is pinned to exactly 0 for the whole
+hero by Iteration 11's design, so anything reading it alone would step at the
+boundary instead of ramping across the hero. The scroll effect now publishes a
+second derived value, `--hp`: the same boundary read from the other side, 1 at
+the top of the page and 0 once the hero is fully gone. Same listener, same
+throttle, same boundary calculation, one extra number — not a second mechanism.
+
+The blob carries the bright tint (`0.09`) and `.aurora-hero-emphasis` scales it
+back by opacity, deliberately not by a second transform, since the element
+already animates `transform` via the aurora keyframes and an animated transform
+beats a declared one. Measured ramp: `--hp` 1.0000 → effective tint 0.0900 at
+the top, 0.7497 → 0.0824, 0.4986 → 0.0747, 0.2491 → 0.0670, and 0.0000 →
+0.0594 at the boundary (995px), holding there for the rest of the document.
+
+Reduced motion, answering the brief's "confirm which": it **holds a static
+value** rather than skipping. `LifeBackground` never attaches the listener under
+reduced motion, so `--hp` is never published and the calc resolves through its
+own `0` fallback to opacity 0.66 → 0.0594 effective, i.e. the sitewide default.
+
+### Verification
+
+Contrast re-measured with the corrected layer stack — `ambient-glow-drift`, the
+static mesh, `gradient-shift`, `aurora-a` at its **emphasised** 0.09, `aurora-b`,
+`hero-breathe` at peak and the warm wash, all treated as co-located, giving a
+brightest-point background of `rgb(64,50,38)`. All ten hero text elements pass
+at both the bright and dark extremes: H1 11.39:1, subline 7.22, "built to order"
+6.46, numeral 4.21 (3:1 floor), stat label 8.77, CTA 5.56, microcopy 6.46,
+TrustStrip fact 6.46, "See recent builds" 6.46, arrow 5.56.
+
+Clean at 320 / 768 / 1440 with no horizontal overflow and no console errors.
+Hero focus order unchanged (`/contact` then `/work`) with `:focus-visible`
+intact. Build and type-check clean; lint unchanged at the same two pre-existing
+`setState`-in-effect errors in `template.tsx` and `IntroCurtain.tsx`.
+
+Not verified: how any of it looks. The screenshot tool has been unavailable for
+several passes now, so every claim above is a measurement, and the two changes
+whose whole point is visual — the softened shadow and the bracket draw-in —
+need an owner eyeball.

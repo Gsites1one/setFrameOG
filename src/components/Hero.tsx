@@ -5,6 +5,7 @@ import Link from "next/link";
 import { m, useReducedMotion } from "framer-motion";
 import { useAnimateAfterIdle } from "@/lib/useAnimateAfterIdle";
 import { CtaButton } from "./CtaButton";
+import { TrustStrip } from "./TrustStrip";
 
 // Content-first paint: the headline and CTA are visible and clickable from
 // first paint (no opacity/transform gate). Only decorative elements animate,
@@ -32,17 +33,29 @@ export function Hero() {
       id="hero"
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-16 sm:py-24"
     >
-      {/* Idle-gated so the glow's opacity pulse doesn't run inside the Speed
-          Index window (P7.5). */}
+      {/* Idle-gated so the opacity pulse doesn't run inside the Speed Index
+          window (P7.5).
+
+          Iteration 12 removed this layer's own 36rem blur-[120px] copper blob,
+          which sat centred at left-1/2 top-1/3 — directly behind the headline.
+          It dated from before the aurora rebuild, when the hero had to supply
+          its own depth. Post-Iteration-11 it was the second of five soft copper
+          layers stacked in exactly the region the headline needs to stay
+          readable in (this blob, LifeBackground's ambient-glow-drift, the four
+          aurora blobs, gradient-shift, and the breathe wash below), and it was
+          the only one that was both redundant and aimed at the copy.
+
+          The breathe wash below STAYS: it is already an order of magnitude
+          fainter (0.05-0.07 against the blob's full bg-accent), and contrast
+          was re-measured after removing the blob rather than assumed. */}
       <div
         aria-hidden="true"
         data-animate={animate ? "on" : "off"}
         className="anim-gate pointer-events-none absolute inset-0"
       >
-        <div className="ambient-glow absolute left-1/2 top-1/3 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent blur-[120px]" />
         {/* Slow breathing wash across the full hero (Iteration 7, Task 1).
-            Brightness only — nothing travels — so the hero stops reading as
-            flat behind the scrim without pulling the eye off the headline. */}
+            Brightness only — nothing travels — so the hero keeps some life
+            without pulling the eye off the headline. */}
         <div
           className="hero-breathe absolute inset-0"
           style={{
@@ -96,10 +109,53 @@ export function Hero() {
             and must never land in the accessibility tree or eat a click. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -inset-x-6 -inset-y-8 sm:-inset-x-10"
+          data-animate={animate ? "on" : "off"}
+          className="anim-gate pointer-events-none absolute -inset-x-6 -inset-y-8 sm:-inset-x-10"
         >
-          <div className="absolute left-0 top-0 h-12 w-12 border-l border-t border-accent/30 sm:h-16 sm:w-16" />
-          <div className="absolute bottom-0 right-0 h-12 w-12 border-b border-r border-accent/30 sm:h-16 sm:w-16" />
+          {/* Iteration 12: the same two corners, now SVG paths that draw
+              themselves in once on mount instead of appearing fully formed.
+
+              pathLength="100" normalises each path to 100 units regardless of
+              its real geometry, so one dasharray/dashoffset pair in CSS drives
+              both brackets and keeps working if the arm lengths ever change.
+              vectorEffect="non-scaling-stroke" holds the stroke at exactly 1px
+              at BOTH sizes — without it the 48-unit viewBox scaled up to 64px
+              at sm would render a 1.33px stroke and stop matching the 1px
+              border it replaces.
+
+              Same stroke-dashoffset technique as .pipe-flow and
+              .score-ring-draw already in globals.css, not a new pattern.
+              Wrapped in .anim-gate on the same data-animate flag the ambient
+              layer above uses, so it cannot run inside the Speed Index
+              window. */}
+          <svg
+            viewBox="0 0 48 48"
+            fill="none"
+            className="absolute left-0 top-0 h-12 w-12 sm:h-16 sm:w-16"
+          >
+            <path
+              d="M0.5 48 L0.5 0.5 L48 0.5"
+              pathLength="100"
+              stroke="currentColor"
+              strokeWidth="1"
+              vectorEffect="non-scaling-stroke"
+              className="bracket-draw text-accent/30"
+            />
+          </svg>
+          <svg
+            viewBox="0 0 48 48"
+            fill="none"
+            className="absolute bottom-0 right-0 h-12 w-12 sm:h-16 sm:w-16"
+          >
+            <path
+              d="M47.5 0 L47.5 47.5 L0 47.5"
+              pathLength="100"
+              stroke="currentColor"
+              strokeWidth="1"
+              vectorEffect="non-scaling-stroke"
+              className="bracket-draw bracket-draw-delayed text-accent/30"
+            />
+          </svg>
         </div>
 
         {/* Scale is unchanged from production. The headline step-up belonged
@@ -146,22 +202,62 @@ export function Hero() {
           Websites and business systems, built to order.
         </p>
 
-        <div className="mt-3 grid grid-cols-2 divide-x divide-white/10 rounded-2xl border border-white/10 bg-surface/70 py-4 sm:mt-4">
-          <div className="px-3 text-center sm:px-4">
-            <span className="block font-mono text-xl font-bold leading-none text-accent sm:text-2xl">
-              7 days
-            </span>
-            <span className="mt-2 block text-xs leading-snug text-foreground/75 sm:text-sm">
-              to a working version
-            </span>
+        {/* Iteration 12 — blueprint treatment, so this card stops reading as a
+            generic bordered box. Two additions only, both deliberately quiet
+            because this sits centimetres from body copy rather than inside a
+            standalone piece of art:
+
+            1. Corner tick marks, inset INSIDE the card rather than outside, so
+               they read as registration marks on a technical drawing rather
+               than as a second border competing with the real one. Same
+               border-white/10 weight as the card edge.
+            2. A small radial copper glow behind each NUMERAL, not behind the
+               whole card. Kept at /10 rather than /15 on measurement: a
+               glow behind text raises the local background luminance, and /15
+               left the numeral at 3.89:1 against the 3:1 large-text floor
+               where /10 holds 4.20:1 for a difference the eye barely reads. Contrast was re-measured after adding it, because a
+               glow behind text raises the local background luminance and these
+               numerals are already the tightest copper on the page. */}
+        <div className="relative mt-3 sm:mt-4">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-2 z-10"
+          >
+            <div className="absolute left-0 top-0 h-2.5 w-2.5 border-l border-t border-white/10" />
+            <div className="absolute right-0 top-0 h-2.5 w-2.5 border-r border-t border-white/10" />
+            <div className="absolute bottom-0 left-0 h-2.5 w-2.5 border-b border-l border-white/10" />
+            <div className="absolute bottom-0 right-0 h-2.5 w-2.5 border-b border-r border-white/10" />
           </div>
-          <div className="px-3 text-center sm:px-4">
-            <span className="block font-mono text-xl font-bold leading-none text-accent sm:text-2xl">
-              30 days
-            </span>
-            <span className="mt-2 block text-xs leading-snug text-foreground/75 sm:text-sm">
-              to full rollout
-            </span>
+
+          <div className="grid grid-cols-2 divide-x divide-white/10 rounded-2xl border border-white/10 bg-surface/70 py-4">
+            <div className="px-3 text-center sm:px-4">
+              <span className="relative block">
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-1/2 top-1/2 h-10 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-[14px]"
+                />
+                <span className="relative block font-mono text-xl font-bold leading-none text-accent sm:text-2xl">
+                  7 days
+                </span>
+              </span>
+              <span className="mt-2 block text-xs leading-snug text-foreground/75 sm:text-sm">
+                to a working version
+              </span>
+            </div>
+            <div className="px-3 text-center sm:px-4">
+              <span className="relative block">
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-1/2 top-1/2 h-10 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-[14px]"
+                />
+                <span className="relative block font-mono text-xl font-bold leading-none text-accent sm:text-2xl">
+                  30 days
+                </span>
+              </span>
+              <span className="mt-2 block text-xs leading-snug text-foreground/75 sm:text-sm">
+                to full rollout
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -188,6 +284,18 @@ export function Hero() {
         <p className="mt-3 text-center text-[13px] text-foreground/70">
           A conversation, not a pitch — no obligation.
         </p>
+
+        {/* Iteration 12. Kept ALONGSIDE the line above rather than replacing
+            it, because the two are not the same reassurance: the microcopy is
+            about the call itself (the CTA books one), the strip is about the
+            engagement that follows it. Dropping either would lose a distinct
+            objection rather than de-duplicate one.
+
+            It sits above the secondary link on purpose, so the hero still ENDS
+            on an onward path for anyone not ready to book, rather than on a
+            fact list. Same three FACTS already defined in TrustStrip — no new
+            copy, and the same wording the closing band and /contact use. */}
+        <TrustStrip className="mt-5 max-w-sm sm:max-w-none" />
 
         {/* Colder visitors get a way through that is not "talk to someone".
             Same arrow-link anatomy as "Discover the process →" — Syne label,

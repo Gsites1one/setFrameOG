@@ -33,7 +33,10 @@ const GRAIN_DATA_URI = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 // Fixed percentage positions, own colour and
 // own keyframe class each, so no two share a period or a starting phase.
 const AURORA_BLOBS = [
-  { cls: "aurora-a", pos: "left-[-10%] top-[-5%] h-[46rem] w-[46rem]", tint: "rgba(199,123,63,0.06)" },
+  // aurora-a alone carries the hero emphasis (Iteration 12): its tint is the
+  // BRIGHT value and .aurora-hero-emphasis scales it back down by opacity once
+  // past the hero. b, c and d are untouched and keep the sitewide scheme.
+  { cls: "aurora-a aurora-hero-emphasis", pos: "left-[-10%] top-[-5%] h-[46rem] w-[46rem]", tint: "rgba(199,123,63,0.09)" },
   { cls: "aurora-b", pos: "right-[-14%] top-[18%] h-[40rem] w-[40rem]", tint: "rgba(79,179,201,0.045)" },
   { cls: "aurora-c", pos: "left-[18%] bottom-[-18%] h-[44rem] w-[44rem]", tint: "rgba(199,123,63,0.05)" },
   { cls: "aurora-d", pos: "right-[8%] bottom-[6%] h-[34rem] w-[34rem]", tint: "rgba(79,179,201,0.04)" },
@@ -110,6 +113,20 @@ export function LifeBackground() {
           ? Math.min(1, Math.max(0, (root.scrollTop - boundary) / span))
           : 0;
       root.style.setProperty("--sp", sp.toFixed(4));
+
+      // --hp is the SAME boundary read from the other side: 1 at the top of the
+      // page, 0 once the hero is fully gone, and 0 for the rest of the
+      // document. It exists because --sp cannot express this — --sp is pinned
+      // to exactly 0 for the whole hero by design, so anything driven off it
+      // alone would step at the boundary instead of ramping across the hero.
+      //
+      // This is not a second mechanism: same listener, same throttle, same
+      // boundary value, one extra derived number. Only aurora-a reads it.
+      const hp =
+        boundary > 0
+          ? Math.min(1, Math.max(0, 1 - root.scrollTop / boundary))
+          : 0;
+      root.style.setProperty("--hp", hp.toFixed(4));
     };
 
     const onScroll = () => {
@@ -130,6 +147,7 @@ export function LifeBackground() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       root.style.removeProperty("--sp");
+      root.style.removeProperty("--hp");
     };
   }, []);
 
