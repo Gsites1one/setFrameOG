@@ -27,8 +27,8 @@ import { SectionNumber } from "./SectionNumber";
 const PILLARS = [
   {
     slug: "movement",
-    image: "/pillars/movementv2.webp",
-    alt: "A hand placing a chess knight under a warm lamp, a glowing copper trail marking the square it moved from.",
+    image: "/pillars/movementv3.webp",
+    alt: "A hand placing a black chess knight onto a board, a warm lamp glowing softly in the dark behind it.",
     heading: "Movement, not technology.",
     body: [
       "What matters is never what gets installed. It is what changes once it does, and every build is measured by that move alone.",
@@ -37,8 +37,8 @@ const PILLARS = [
   },
   {
     slug: "tailored",
-    image: "/pillars/tailored.webp",
-    alt: "A tailor measuring a client beside a bespoke suit on a stand, a rack of identical off-the-peg suits behind them, a copper thread of light running from the workbench to the suit.",
+    image: "/pillars/tailoredv2.webp",
+    alt: "A tailor measuring a bespoke jacket on a mannequin while the client watches, a rack of ready-made suits in the background.",
     heading: "Built for your business, not from a template.",
     body: [
       "It starts with a conversation, not a pitch, and every project is shaped around one specific business.",
@@ -47,8 +47,8 @@ const PILLARS = [
   },
   {
     slug: "preview",
-    image: "/pillars/preview.webp",
-    alt: "A glowing dashboard screen behind a sealed, unsigned envelope and a fountain pen resting on red velvet.",
+    image: "/pillars/previewv2.webp",
+    alt: "A hand reaching for a wax-sealed envelope on a desk, a glowing dashboard screen visible on the monitor behind it.",
     heading: "See it working before you commit.",
     body: [
       "A working preview exists before anything is signed, so you judge the result with your own eyes instead of a promise.",
